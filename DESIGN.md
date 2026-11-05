@@ -2,24 +2,24 @@
 name: Cambridge Revision
 description: A precise, calm academic workspace for real paper evidence.
 colors:
-  action: "#24272b"
-  on-action: "#ffffff"
-  canvas: "#f6f6f4"
-  surface: "#ffffff"
-  sidebar: "#f0f0ee"
-  ink: "#24272b"
-  text: "#42474d"
-  muted: "#61666d"
-  divider: "#dfe1e3"
+  action: "#24272c"
+  on-action: "#f7f7f8"
+  canvas: "#edeef0"
+  surface: "#f7f7f8"
+  sidebar: "#e5e7ea"
+  ink: "#24272c"
+  text: "#424b55"
+  muted: "#626b75"
+  divider: "#d9dde2"
   silver: "#c7ccd1"
-  soft: "#eaecee"
-  hover: "#eeefef"
-  input-line: "#b8bdc3"
-  focus: "#667d8d"
-  selection: "#dce3e7"
-  chart-line: "#667d8d"
-  chart-slate: "#a8bac7"
-  nav-active: "#e3e5e5"
+  soft: "#e2e6ea"
+  hover: "#dde2e7"
+  input-line: "#7c8996"
+  focus: "#5e7385"
+  selection: "#ccd7e0"
+  chart-line: "#5e7385"
+  chart-slate: "#6e8497"
+  nav-active: "#d3d9df"
   feature-muted: "#d4d6d9"
   dark-canvas: "#191a1c"
   dark-surface: "#24272b"
@@ -27,6 +27,8 @@ colors:
   dark-ink: "#f5f5f3"
   dark-muted: "#bbc0c5"
   dark-feature: "#303337"
+  elevated: "#ffffff"
+  accent: "#8197aa"
 typography:
   headline:
     fontFamily: "Manrope, Segoe UI, sans-serif"
@@ -103,7 +105,7 @@ components:
 
 A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. The interface uses one coherent sans-serif family, open alignment and a small number of distinct surface treatments.
 
-Light mode is the primary identity. White analytical surfaces sit on warm off-white; charcoal provides text, actions and intentional feature areas. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.
+Light mode is the primary identity. Off-white analytical surfaces sit on a soft-silver canvas, with a slightly deeper silver sidebar. Charcoal provides text, actions and intentional feature areas. Pure white is reserved for elevated dialogs. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.
 
 **Key Characteristics:**
 
@@ -124,7 +126,7 @@ Neutral reading surfaces dominate; slate is reserved for analytical and focus ro
 
 ### Neutral
 
-- **Warm canvas / white surface:** the uninterrupted page and elevated reading areas.
+- **Soft-silver canvas / off-white surface:** the uninterrupted page and primary reading areas; a darker silver sidebar separates navigation.
 - **Quiet sidebar / selected navigation:** a slightly denser navigation plane with an explicit selected row.
 - **Charcoal ink / body text / muted text:** distinct reading roles; muted text remains readable metadata.
 - **Silver:** the appearance swatch outline; normal record separators use the lighter divider token.
@@ -154,9 +156,9 @@ Forms group existing fields under score, time, question counts and reflection he
 
 ## Elevation & Depth
 
-Most surfaces are flat and borderless. White surfaces against the warm canvas provide tonal depth. Analytical and library surfaces use a small downward soft shadow; the examination feature relies on charcoal contrast. Row separators and input outlines communicate structure, not decoration.
+Most surfaces are flat and borderless. Off-white surfaces against the soft-silver canvas provide tonal depth; analytical and library surfaces have no shadow in the neutral light theme. The examination feature retains its charcoal contrast. Row separators and input outlines communicate structure, not decoration.
 
-The analytical surface shadow is `0 5px 22px rgba(24,28,32,.035)`. Subject selectors use `0 2px 5px rgba(24,28,32,.04)`. Modal dialogs retain their stronger `0 20px 65px rgba(15,25,40,.2)` shadow and a subdued backdrop.
+Neutral-light analytical and library surfaces are flat. Subject selectors retain `0 2px 5px rgba(24,28,32,.04)`. Elevated light dialogs use pure white with `0 18px 60px rgba(36,39,44,.14)` and a neutral backdrop. Dark-mode elevation is unchanged.
 
 **The Purposeful Depth Rule.** Elevate a reading surface or an interruption; keep ordinary records visually open.
 
@@ -172,15 +174,15 @@ Primary buttons use the action/on-action roles, compact control geometry and a 3
 
 ### Fields
 
-White reading surfaces, input-line outlines and the control radius make fields distinguishable without heavy frames. Desktop text is 14px; mobile text is 16px. Labels remain close to their fields. Error text retains the existing danger role and recovery wording. Do not reinterpret validation through visual styling.
+Off-white reading surfaces, input-line outlines and the control radius make fields distinguishable without heavy frames. Desktop text is 14px; mobile text is 16px. Labels remain close to their fields. Error text retains the existing danger role and recovery wording. Do not reinterpret validation through visual styling.
 
 ### Navigation and selectors
 
-Five labelled primary destinations remain visible; Study tools groups secondary destinations. The selected row uses a neutral tonal fill and stronger weight. Icons share the existing authored SVG stroke language. The subject selector uses a sideways arrow and the existing drawer; level selection uses a quiet segmented control with a white selected segment in light mode.
+Five labelled primary destinations remain visible; Study tools groups secondary destinations. The selected row uses a neutral tonal fill and stronger weight. Icons share the existing authored SVG stroke language. The subject selector uses a sideways arrow and the existing drawer; level selection uses a quiet segmented control with an off-white selected segment in light mode.
 
 ### Analytical surfaces and feature panels
 
-Analytical surfaces are borderless, softly elevated and internally spacious. The intentional charcoal feature uses pale supporting text and no decorative imagery. Empty charts explain the actual next action without generating sample scores. The scrollable mobile chart includes a visible scrolling hint and a focusable region.
+Analytical surfaces are borderless, tonally separated and internally spacious. The intentional charcoal feature uses pale supporting text and no decorative imagery. Empty charts explain the actual next action without generating sample scores. The scrollable mobile chart includes a visible scrolling hint and a focusable region.
 
 ### Document and subject records
 

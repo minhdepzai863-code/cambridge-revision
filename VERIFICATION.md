@@ -80,3 +80,13 @@ No student marks, timetable, official grade-threshold library, or carry-forward 
 Deployment packaging: added .vercelignore to exclude local verification artifacts and environment files. The Vercel local builder encountered Windows symlink permissions; production release uses the validated dist files packaged as Build Output API v3 static output, with the same response headers as vercel.json. No runtime or data change is involved.
 
 Final release confirmed READY: dpl_3W6c7zRCHjBeRomTL7kPVmFqYmfy, assigned to https://cambridge-revision.vercel.app. Live browser verified new Overview, compact subject rows, Papers empty state and existing attachment-upload step. Production computed palette: #F6F6F4, Manrope, no background grid; no horizontal document overflow at990px. Deployed workspace.css SHA256 matches local exactly:07a32e12233015e443c6692e16a112f942e460c235e897dc34902a793155c3c7. Screenshot outputs/art-review/live-overview.jpg. Browser session was Local; no signed-in cloud writes or new live records were used for this check. Abandoned source-build and direct-release attempts were cancelled; final static release is ready.
+
+
+## 6 November 2026 — soft-silver light-theme refinement
+
+Only neutral-light colour roles, scoped surface contrast, secondary-button borders, dialog elevation and browser theme colour changed. Typography, layout, dark styles, application code and data logic are unchanged.
+
+- Browser inspection: populated Overview, document library and attempt form at1440×900; mobile Overview at390×844. No page overflow. Canvas rgb237,238,240; sidebar229,231,234; primary surface247,247,248.
+- Before/after dark-mode sampling matched exactly for nine representative regions/controls, including backgrounds, colours, borders, shadows, fonts, padding and dimensions.
+- Secondary text contrast4.66:1 on canvas /5.06:1 on panels; chart line4.60:1; control boundaries3.08:1 on canvas. The starting accent is retained as a soft accent, with darker related shades for meaningful chart strokes and focus.
+- Existing35 tests and syntax checks pass. No new behavioural tests were added for this colour-only refinement. Ignored evidence is under outputs/silver-review.

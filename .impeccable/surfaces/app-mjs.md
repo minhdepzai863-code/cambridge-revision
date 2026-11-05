@@ -13,7 +13,7 @@ Mode: Operate. The user's 6 November second-pass rejection supersedes the prior 
 
 THESIS: Performance, recent work and exam preparation lead. Subject management is a compact supporting register, never a decorative library. No promotional hero or card wall.
 
-OWN-WORLD: Warm off-white #F6F6F4 canvas, white surfaces, charcoal #24272B ink/feature, silver #C7CCD1 and restrained slate-blue #A8BAC7. Neutral charcoal dark mode. One self-hosted Manrope family, deliberate numeric scale and quiet labelled navigation. Zero grid background and no cover imagery in the UI.
+OWN-WORLD: Soft-silver #EDEEF0 canvas, #E5E7EA sidebar, off-white #F7F7F8 primary surfaces and rare white elevated dialogs; charcoal #24272C text and restrained #8197AA accent with stronger contrast partners for charts and focus. Neutral charcoal dark mode. One self-hosted Manrope family, deliberate numeric scale and quiet labelled navigation. Zero grid background and no cover imagery in the UI.
 
 STORY: Read the average and score history, see the next exam and due corrections, open a recent attempt, or reach an existing subject syllabus. All controls retain existing routes and data behavior.
 

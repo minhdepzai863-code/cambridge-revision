@@ -1,134 +1,53 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-05T18:02:00.688Z",
+  "generatedAt": "2026-11-05T23:07:38.021Z",
   "title": "Design System: Cambridge Revision",
   "extensions": {
     "colorMeta": {
       "action": {
         "role": "primary",
         "displayName": "Action",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#24272c"
       },
       "on-action": {
         "role": "neutral",
         "displayName": "On Action",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#f7f7f8"
       },
       "canvas": {
         "role": "neutral",
         "displayName": "Canvas",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#edeef0"
       },
       "surface": {
         "role": "neutral",
         "displayName": "Surface",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#f7f7f8"
       },
       "sidebar": {
         "role": "neutral",
         "displayName": "Sidebar",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#e5e7ea"
       },
       "ink": {
         "role": "neutral",
         "displayName": "Ink",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#24272c"
       },
       "text": {
         "role": "neutral",
         "displayName": "Text",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#424b55"
       },
       "muted": {
         "role": "neutral",
         "displayName": "Muted",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#626b75"
       },
       "divider": {
         "role": "neutral",
         "displayName": "Divider",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#d9dde2"
       },
       "silver": {
         "role": "neutral",
@@ -147,114 +66,42 @@
       "soft": {
         "role": "neutral",
         "displayName": "Soft",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#e2e6ea"
       },
       "hover": {
         "role": "neutral",
         "displayName": "Hover",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#dde2e7"
       },
       "input-line": {
         "role": "neutral",
         "displayName": "Input Line",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#7c8996"
       },
       "focus": {
         "role": "neutral",
         "displayName": "Focus",
-        "tonalRamp": [
-          "oklch(15% .025 240)",
-          "oklch(26% .025 240)",
-          "oklch(37% .025 240)",
-          "oklch(48% .025 240)",
-          "oklch(59% .025 240)",
-          "oklch(70% .025 240)",
-          "oklch(82% .025 240)",
-          "oklch(95% .025 240)"
-        ]
+        "canonical": "#5e7385"
       },
       "selection": {
         "role": "neutral",
         "displayName": "Selection",
-        "tonalRamp": [
-          "oklch(15% .025 240)",
-          "oklch(26% .025 240)",
-          "oklch(37% .025 240)",
-          "oklch(48% .025 240)",
-          "oklch(59% .025 240)",
-          "oklch(70% .025 240)",
-          "oklch(82% .025 240)",
-          "oklch(95% .025 240)"
-        ]
+        "canonical": "#ccd7e0"
       },
       "chart-line": {
         "role": "neutral",
         "displayName": "Chart Line",
-        "tonalRamp": [
-          "oklch(15% .025 240)",
-          "oklch(26% .025 240)",
-          "oklch(37% .025 240)",
-          "oklch(48% .025 240)",
-          "oklch(59% .025 240)",
-          "oklch(70% .025 240)",
-          "oklch(82% .025 240)",
-          "oklch(95% .025 240)"
-        ]
+        "canonical": "#5e7385"
       },
       "chart-slate": {
         "role": "neutral",
         "displayName": "Chart Slate",
-        "tonalRamp": [
-          "oklch(15% .025 240)",
-          "oklch(26% .025 240)",
-          "oklch(37% .025 240)",
-          "oklch(48% .025 240)",
-          "oklch(59% .025 240)",
-          "oklch(70% .025 240)",
-          "oklch(82% .025 240)",
-          "oklch(95% .025 240)"
-        ]
+        "canonical": "#6e8497"
       },
       "nav-active": {
         "role": "neutral",
         "displayName": "Nav Active",
-        "tonalRamp": [
-          "oklch(15% .005 250)",
-          "oklch(26% .005 250)",
-          "oklch(37% .005 250)",
-          "oklch(48% .005 250)",
-          "oklch(59% .005 250)",
-          "oklch(70% .005 250)",
-          "oklch(82% .005 250)",
-          "oklch(95% .005 250)"
-        ]
+        "canonical": "#d3d9df"
       },
       "feature-muted": {
         "role": "neutral",
@@ -353,6 +200,16 @@
           "oklch(82% .005 250)",
           "oklch(95% .005 250)"
         ]
+      },
+      "elevated": {
+        "role": "neutral",
+        "displayName": "elevated",
+        "canonical": "#ffffff"
+      },
+      "accent": {
+        "role": "neutral",
+        "displayName": "accent",
+        "canonical": "#8197aa"
       }
     },
     "typographyMeta": {
@@ -392,6 +249,11 @@
         "name": "dialog",
         "value": "0 20px 65px rgba(15,25,40,.2)",
         "purpose": "An interruption above the workspace."
+      },
+      {
+        "name": "light-modal",
+        "value": "0 18px 60px rgba(36,39,44,.14)",
+        "purpose": "Rare elevated neutral-light dialog; large reading surfaces remain flat."
       }
     ],
     "motion": [
@@ -470,7 +332,7 @@
       "kind": "card",
       "description": "A reading surface whose depth comes from white space and soft elevation.",
       "html": "<section class=\"ds-analysis\"><h2>Performance over time</h2><p>Your completed papers, by component</p></section>",
-      "css": ".ds-analysis{padding:23px 24px 16px;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 5px 22px rgba(24,28,32,.035);font-family:Manrope,Segoe UI,sans-serif}.ds-analysis h2{font-size:17px;font-weight:650;letter-spacing:-.5px;margin:0 0 5px}.ds-analysis p{font-size:11px;color:var(--muted);margin:0}"
+      "css": ".ds-analysis{padding:23px 24px 16px;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:none;font-family:Manrope,Segoe UI,sans-serif}.ds-analysis h2{font-size:17px;font-weight:650;letter-spacing:-.5px;margin:0 0 5px}.ds-analysis p{font-size:11px;color:var(--muted);margin:0}"
     },
     {
       "name": "Examination feature",
@@ -490,7 +352,7 @@
   ],
   "narrative": {
     "northStar": "The Academic Workspace",
-    "overview": "A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. The interface uses one coherent sans-serif family, open alignment and a small number of distinct surface treatments.\n\nLight mode is the primary identity. White analytical surfaces sit on warm off-white; charcoal provides text, actions and intentional feature areas. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.",
+    "overview": "A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. The interface uses one coherent sans-serif family, open alignment and a small number of distinct surface treatments.\n\nLight mode is the primary identity. Off-white analytical surfaces sit on a soft-silver canvas, with a deeper silver sidebar and pure white reserved for elevated dialogs. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.",
     "keyCharacteristics": [
       "Open reading areas and compact, aligned records.",
       "Deliberate numerical hierarchy with tabular data.",
