@@ -65,3 +65,14 @@ No student marks, timetable, official grade-threshold library, or carry-forward 
 - The existing generic settings payload handles subject selections; no database schema or access policy change is required. No student cloud records were modified during this subject test.
 
 - Subject management follow-up: sideways selector arrow; every selected subject has a remove control. Removal saves an explicit selection and retains paper/file/progress records. Removed subjects are excluded from filters and statistics until re-added. Empty selections route creation actions to Add subject; legacy settings retain the original defaults. Automated coverage now totals 35 tests.
+
+
+## 6 November 2026 — second visual design pass
+
+- Presentation-only restructuring: performance-first Overview, compact subject register, document-library Papers, separate attempt history and grouped Performance form. Existing event actions, routes, record types, Auth and Storage integration remain intact.
+- Light canvas #F6F6F4 / white / charcoal; neutral charcoal dark mode. No grid paint or decorative cover shelf.
+- npm run check and all 35 existing tests passed. Production static build passed.
+- Browser checked at 1280×800, actual 990×884 and 390×844 using clearly isolated local fixtures. Confirmed overview values, recent-paper links, two attachment controls, separate attempts and existing repeat-attempt wizard fields. PDF preview iframe is present, but embedded PDF raster rendering was not assessed from screenshots.
+- Current direction review packet: outputs/art-review/manifest.json (ignored development evidence). Detector source scan returned no findings. Reviewer confirmed composition, palette, paper library and form grouping; requested larger metadata. Important metadata now at least 11px. Actual-width chart axes render approximately 12.19px; mobile chart scroll is intentionally contained.
+- Confirmation review found one mobile confidence caption overflow after text enlargement. Corrected wrapping without reducing 11px type. Targeted browser measurement: 64px column, 64px scroll width, 35.19px wrapped height. Mobile document width remains390px. No additional polish loop.
+- No cloud records, private files, database schema or authentication settings were modified.

@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T18:02:00.688Z",
+  "title": "Design System: Cambridge Revision",
+  "extensions": {
+    "colorMeta": {
+      "action": {
+        "role": "primary",
+        "displayName": "Action",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "on-action": {
+        "role": "neutral",
+        "displayName": "On Action",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "sidebar": {
+        "role": "neutral",
+        "displayName": "Sidebar",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Text",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Divider",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "silver": {
+        "role": "neutral",
+        "displayName": "Silver",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Soft",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Hover",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "input-line": {
+        "role": "neutral",
+        "displayName": "Input Line",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus",
+        "tonalRamp": [
+          "oklch(15% .025 240)",
+          "oklch(26% .025 240)",
+          "oklch(37% .025 240)",
+          "oklch(48% .025 240)",
+          "oklch(59% .025 240)",
+          "oklch(70% .025 240)",
+          "oklch(82% .025 240)",
+          "oklch(95% .025 240)"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Selection",
+        "tonalRamp": [
+          "oklch(15% .025 240)",
+          "oklch(26% .025 240)",
+          "oklch(37% .025 240)",
+          "oklch(48% .025 240)",
+          "oklch(59% .025 240)",
+          "oklch(70% .025 240)",
+          "oklch(82% .025 240)",
+          "oklch(95% .025 240)"
+        ]
+      },
+      "chart-line": {
+        "role": "neutral",
+        "displayName": "Chart Line",
+        "tonalRamp": [
+          "oklch(15% .025 240)",
+          "oklch(26% .025 240)",
+          "oklch(37% .025 240)",
+          "oklch(48% .025 240)",
+          "oklch(59% .025 240)",
+          "oklch(70% .025 240)",
+          "oklch(82% .025 240)",
+          "oklch(95% .025 240)"
+        ]
+      },
+      "chart-slate": {
+        "role": "neutral",
+        "displayName": "Chart Slate",
+        "tonalRamp": [
+          "oklch(15% .025 240)",
+          "oklch(26% .025 240)",
+          "oklch(37% .025 240)",
+          "oklch(48% .025 240)",
+          "oklch(59% .025 240)",
+          "oklch(70% .025 240)",
+          "oklch(82% .025 240)",
+          "oklch(95% .025 240)"
+        ]
+      },
+      "nav-active": {
+        "role": "neutral",
+        "displayName": "Nav Active",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "feature-muted": {
+        "role": "neutral",
+        "displayName": "Feature Muted",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-canvas": {
+        "role": "neutral",
+        "displayName": "Dark Canvas",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "Dark Surface",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-sidebar": {
+        "role": "neutral",
+        "displayName": "Dark Sidebar",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-ink": {
+        "role": "neutral",
+        "displayName": "Dark Ink",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      },
+      "dark-feature": {
+        "role": "neutral",
+        "displayName": "Dark Feature",
+        "tonalRamp": [
+          "oklch(15% .005 250)",
+          "oklch(26% .005 250)",
+          "oklch(37% .005 250)",
+          "oklch(48% .005 250)",
+          "oklch(59% .005 250)",
+          "oklch(70% .005 250)",
+          "oklch(82% .005 250)",
+          "oklch(95% .005 250)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page headline",
+        "purpose": "A clear page identity without a promotional hero."
+      },
+      "title": {
+        "displayName": "Section title",
+        "purpose": "The next reading level."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "One shared family for readable interface content."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Quiet, explicit actions."
+      },
+      "primary-measure": {
+        "displayName": "Primary measure",
+        "purpose": "The strongest result in a related group."
+      }
+    },
+    "shadows": [
+      {
+        "name": "analytical-surface",
+        "value": "0 5px 22px rgba(24,28,32,.035)",
+        "purpose": "Subtle separation of white analytical and library surfaces."
+      },
+      {
+        "name": "selector",
+        "value": "0 2px 5px rgba(24,28,32,.04)",
+        "purpose": "A small lift for the subject selector."
+      },
+      {
+        "name": "dialog",
+        "value": "0 20px 65px rgba(15,25,40,.2)",
+        "purpose": "An interruption above the workspace."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": ".16s ease",
+        "purpose": "Colour, border and shadow changes."
+      },
+      {
+        "name": "dialog-entrance",
+        "value": ".16s ease-out",
+        "purpose": "Short vertical dialog entrance; disabled with reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1199px"
+      },
+      {
+        "name": "narrow-workspace",
+        "value": "959px"
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "760px"
+      },
+      {
+        "name": "single-column-forms",
+        "value": "430px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The principal existing action.",
+      "html": "<button class=\"ds-control ds-primary\">Log paper</button>",
+      "css": ".ds-control{font-family:Manrope,Segoe UI,sans-serif;font-size:12px;font-weight:550;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-primary{background:var(--action);color:var(--on-action);border:1px solid transparent}.ds-primary:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Quiet button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "A supporting action with no persistent frame.",
+      "html": "<button class=\"ds-control ds-quiet\">View history</button>",
+      "css": ".ds-control{font-family:Manrope,Segoe UI,sans-serif;font-size:12px;font-weight:550;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-quiet{background:transparent;color:var(--text);border:1px solid transparent}.ds-quiet:hover{background:var(--hover)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Readable data entry with a clear outline.",
+      "html": "<label class=\"ds-field\"><span>Date attempted</span><input class=\"ds-control ds-input\" type=\"text\" placeholder=\"Choose a date\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;font:500 12px Manrope,Segoe UI,sans-serif;color:var(--text)}.ds-input{font:400 14px/1.5 Manrope,Segoe UI,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--input-line);border-radius:7px;padding:10px 12px;min-height:42px}.ds-input:hover{border-color:var(--input-hover)}.ds-input::placeholder{color:var(--muted);opacity:1}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Labelled navigation",
+      "kind": "nav",
+      "refersTo": "nav-selected",
+      "description": "Neutral selection with a retained label.",
+      "html": "<button class=\"ds-control ds-nav\" aria-current=\"page\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8\"/></svg>Overview</button>",
+      "css": ".ds-nav{display:flex;gap:12px;align-items:center;min-height:40px;padding:9px 13px;background:var(--nav-active);color:var(--nav-on-active);border:0;border-radius:7px;font:650 13px Manrope,Segoe UI,sans-serif;cursor:pointer}.ds-nav:hover{background:var(--nav-active)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Attachment chip",
+      "kind": "chip",
+      "description": "A compact document action.",
+      "html": "<button class=\"ds-control ds-chip\">Question paper</button>",
+      "css": ".ds-chip{font:550 11px Manrope,Segoe UI,sans-serif;min-height:27px;padding:4px 7px;border:0;border-radius:5px;background:var(--soft);color:var(--text);cursor:pointer}.ds-chip:hover{background:var(--hover)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Analytical surface",
+      "kind": "card",
+      "description": "A reading surface whose depth comes from white space and soft elevation.",
+      "html": "<section class=\"ds-analysis\"><h2>Performance over time</h2><p>Your completed papers, by component</p></section>",
+      "css": ".ds-analysis{padding:23px 24px 16px;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 5px 22px rgba(24,28,32,.035);font-family:Manrope,Segoe UI,sans-serif}.ds-analysis h2{font-size:17px;font-weight:650;letter-spacing:-.5px;margin:0 0 5px}.ds-analysis p{font-size:11px;color:var(--muted);margin:0}"
+    },
+    {
+      "name": "Examination feature",
+      "kind": "card",
+      "refersTo": "feature-panel",
+      "description": "The intentional dark feature plane.",
+      "html": "<section class=\"ds-feature\"><h2>Next examination</h2><p>Add your confirmed examination date.</p><button class=\"ds-control ds-feature-action\">View exam plan</button></section>",
+      "css": ".ds-feature{background:var(--feature);color:var(--feature-ink);border-radius:12px;padding:24px;font-family:Manrope,Segoe UI,sans-serif}.ds-feature h2{font-size:13px;font-weight:500;color:var(--feature-muted);margin:0 0 22px}.ds-feature p{font-size:11px;line-height:1.8;color:var(--feature-muted)}.ds-feature-action{font:500 11px Manrope,Segoe UI,sans-serif;background:transparent;color:var(--feature-ink);border:0;padding:0;cursor:pointer}.ds-feature-action:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Compact subject record",
+      "kind": "custom",
+      "description": "An open row with separate identity, measures and existing action.",
+      "html": "<article class=\"ds-record\"><div><h3>Mathematics</h3><p>Cambridge 9709</p></div><button class=\"ds-control ds-syllabus\">Syllabus <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button></article>",
+      "css": ".ds-record{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 3px;border-bottom:1px solid var(--line);font-family:Manrope,Segoe UI,sans-serif;color:var(--ink)}.ds-record h3{font-size:13px;font-weight:600;line-height:1.6;margin:0 0 1px}.ds-record p{font-size:11px;color:var(--muted);margin:0}.ds-syllabus{font:600 11px Manrope,Segoe UI,sans-serif;color:var(--ink);border:0;background:transparent;cursor:pointer}.ds-syllabus:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Academic Workspace",
+    "overview": "A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. The interface uses one coherent sans-serif family, open alignment and a small number of distinct surface treatments.\n\nLight mode is the primary identity. White analytical surfaces sit on warm off-white; charcoal provides text, actions and intentional feature areas. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.",
+    "keyCharacteristics": [
+      "Open reading areas and compact, aligned records.",
+      "Deliberate numerical hierarchy with tabular data.",
+      "Quiet neutral controls with restrained slate-blue chart roles.",
+      "Short state transitions and full reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Role Consistency Rule",
+        "body": "Assign colour through shared reading, action, focus and analytical roles so controls remain legible across themes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Evidence Scale Rule",
+        "body": "A result earns size through importance. Marks, time and counts use tabular numerals; labels explain each measure without competing with it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Open Record Rule",
+        "body": "Use alignment and quiet separators to organize repeated work instead of turning every item into a bordered card.",
+        "section": "layout"
+      },
+      {
+        "name": "The Purposeful Depth Rule",
+        "body": "Elevate a reading surface or an interruption; keep ordinary records visually open.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do give saved evidence and useful actions a clear reading order.",
+      "Do keep labelled navigation, explicit focus states and readable supporting text.",
+      "Do vary open lists, analytical surfaces and intentional feature areas according to their purpose.",
+      "Do preserve existing data, routes and controls when extending this visual system."
+    ],
+    "donts": [
+      "Don't restore the notebook grid or decorative cover shelf to this approved workspace.",
+      "Don't wash all surfaces in blue or rely on faint text for hierarchy.",
+      "Don't turn every record into an identical bordered card.",
+      "Don't invent scores, dates or chart data to fill empty states."
+    ]
+  }
+}

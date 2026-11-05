@@ -7,7 +7,7 @@
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check app.mjs && node --check theme.js && node --check store.mjs && node --check backup.mjs && node --check domain.mjs && node --check syllabus.mjs && node --check charts.mjs",
+    "check": "node --check app.mjs && node --check theme.js && node --check store.mjs && node --check backup.mjs && node --check domain.mjs && node --check syllabus.mjs && node --check charts.mjs && node --check workspace-view.mjs",
     "build": "node build.mjs"
   },
   "engines": {
