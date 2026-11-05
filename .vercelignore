@@ -1,0 +1,9 @@
+outputs/
+.impeccable/
+.git/
+.vercel/
+node_modules/
+dist/
+.env*
+!.env.example
+CONTINUE_IN_CODEX.md
