@@ -28,3 +28,9 @@ test('Unavailable browser storage does not prevent appearance controls working',
   const {context}=setup({},false,true);context.window.revisionAppearance.set('black');
   assert.equal(context.document.documentElement.dataset.theme,'black');
 });
+test('New workspaces start with the readable blue palette',()=>{
+  assert.equal(setup().context.document.documentElement.dataset.theme,'blue');
+});
+test('Blue and Paper choices persist across page loads',()=>{
+  for(const theme of ['blue','paper'])assert.equal(setup({'ct-theme':theme}).context.document.documentElement.dataset.theme,theme);
+});

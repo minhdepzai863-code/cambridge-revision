@@ -15,7 +15,7 @@ Vercel uses the build command and output directory in vercel.json.
 
 ## Appearance
 
-Settings & backup offers the original green theme, white, dark, or the device theme. Dark uses a softer forest-charcoal palette. A quiet notebook grid is enabled by default and can be turned off. Appearance is saved per browser; the sidebar provides a quick dark-mode switch.
+Settings & backup offers Blue, Paper, Sage (the original green), White, Dark, or the device theme. Dark uses a softer forest-charcoal palette. A quiet notebook grid is enabled by default and can be turned off. Appearance is saved per browser; the sidebar provides a quick dark-mode switch.
 
 ## Data
 
@@ -24,3 +24,13 @@ Local work uses IndexedDB and remains separate from the signed-in Supabase works
 config.mjs contains a public publishable key. Authorization is enforced by database and storage policies. Never commit a service-role key, private token, or .env file.
 
 Thresholds require supplied evidence or a labelled manual estimate. Partial attempts do not receive full-paper grades. This is an independent revision tool, not affiliated with Cambridge International Education.
+
+## Setup and verification
+
+- Auth Site URL: https://cambridge-revision.vercel.app
+- Auth redirect allowlist: https://cambridge-revision.vercel.app/**
+- Existing schema reference: supabase/schema.sql (review before running)
+- Checklist evidence and remaining limitations: VERIFICATION.md
+- Syllabus edition and assessment audit: SYLLABUS_AUDIT.md
+
+Core navigation is Overview, Papers, Mistakes, Review, and Progress. Expand Study tools for the syllabus, exam plan, question bank, practice studio, thresholds, and full paper history.

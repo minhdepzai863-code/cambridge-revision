@@ -24,3 +24,7 @@ Four usable screenshots (20261105180810, 14, 18, 21); two other PNGs contain onl
 
 ## Product Principles
 Persistence before decoration. Measurements before confidence. Correct provenance before a grade. Next actions before clutter.
+
+## Current appearance and complexity guidance
+
+User asked to keep the dashboard format and reduce overwhelm. Five core navigation entries stay visible; secondary capabilities live under Study tools. Home avoids repeated empty metrics and prompts. Default palette is white/blue, with Paper (cream/navy), Sage (the original), White, Dark and device preference options. Preserve notebook grid as a subtle optional layer. Labels and selected controls must remain readable in every palette. The supplied diary screenshot is a toolbar, contrast and navigation reference, not a request to rebuild the layout.

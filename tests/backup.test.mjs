@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateBackup} from '../backup.mjs';
+const id='f180ec1f-658c-4d37-9779-41db8f8ac21a',fileId='e56cf185-c584-417b-87cd-af30c7aa7820';
+const backup=()=>({app:'cambridge-revision',version:1,records:[{id,kind:'attempt',subject:'9709',paper:'11',series:'s',year:2024,level:'AS',date:'2026-11-05',scope:'full',marks:67,max:75,minutes:94,difficulty:5,files:[{id:fileId}]}],files:[{id:fileId,name:'paper.pdf',type:'application/pdf',data:'dGVzdA=='}]});
+test('Complete backups are accepted without losing record IDs',()=>assert.equal(validateBackup(backup()).records[0].id,id));
+test('Missing attachments are rejected before restoration starts',()=>{const b=backup();b.files=[];assert.throws(()=>validateBackup(b),/missing/);});
+test('Duplicate records and files are rejected',()=>{const b=backup();b.records.push({...b.records[0]});assert.throws(()=>validateBackup(b),/duplicate/);const f=backup();f.files.push({...f.files[0]});assert.throws(()=>validateBackup(f),/duplicate/);});
+test('Malformed attachment bytes and unsafe MIME types are rejected',()=>{const b=backup();b.files[0].data='not base64';assert.throws(()=>validateBackup(b),/attachment/);b.files[0].data='dGVzdA==';b.files[0].type='text/html';assert.throws(()=>validateBackup(b),/attachment/);});
+test('Impossible marks and invalid identifiers are rejected',()=>{const b=backup();b.records[0].marks=76;assert.throws(()=>validateBackup(b),/marks/);b.records[0].marks=60;b.records[0].id='invalid';assert.throws(()=>validateBackup(b),/record/);});
+test('Paper identity and revision history cannot inject markup',()=>{const b=backup();b.records[0].paper='<img src=x>';assert.throws(()=>validateBackup(b),/paper/);b.records[0].paper='11';b.records[0].revisions=[{marks:'<img>',max:75,minutes:94}];assert.throws(()=>validateBackup(b),/history/);});

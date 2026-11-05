@@ -1,4 +1,4 @@
-export const SUBJECTS = {'9709':{name:'Mathematics',short:'Maths',color:'#9c83c8',tint:'#efebf8',icon:'math'},'9702':{name:'Physics',short:'Physics',color:'#b67b3e',tint:'#fbefdf',icon:'atom'},'9618':{name:'Computer Science',short:'CS',color:'#718b65',tint:'#e9f0e3',icon:'chip'}};
+export const SUBJECTS = {'9709':{name:'Mathematics',short:'Maths',color:'var(--math-ink)',tint:'var(--math-bg)',icon:'math'},'9702':{name:'Physics',short:'Physics',color:'var(--physics-ink)',tint:'var(--physics-bg)',icon:'atom'},'9618':{name:'Computer Science',short:'CS',color:'var(--cs-ink)',tint:'var(--cs-bg)',icon:'chip'}};
 export const SERIES = {'m':'February/March','s':'May/June','w':'October/November'};
 export const CATEGORIES = ['Conceptual misunderstanding','Calculation error','Algebra/sign error','Incorrect formula','Misreading the question','Missing Cambridge mark-scheme keywords','Incomplete working or explanation','Time-management problem','Weak problem-solving/application skills'];
 export const COMPONENTS = {
@@ -66,6 +66,7 @@ export function localDate(d=new Date()) {return `${d.getFullYear()}-${String(d.g
 export function countdown(date,now=Date.now()) {const diff=new Date(date).getTime()-now;return {past:diff<0,days:Math.max(0,Math.floor(diff/86400000)),hours:Math.max(0,Math.floor(diff/3600000)%24),minutes:Math.max(0,Math.floor(diff/60000)%60)};}
 export function weightedTotal(subject,parts) {return sum(parts.map(p=>(+p.marks||0)*(subject==='9702'&&+p.component===3?0.75:1)));}
 export function validateThreshold(t) {
+ if(t.sourceUrl&&!/^https?:\/\//i.test(t.sourceUrl))return 'Use an http or https source URL.';
  if(!SUBJECTS[t.subject]||!t.year||!SERIES[t.series]||t.max<=0) return 'Check subject, year, series and maximum marks.';
  if(t.scope==='component'&&(!/^\d{2}$/.test(t.paper)||!COMPONENTS[t.subject]?.[t.paper[0]]))return 'Enter the exact component and variant, e.g. 12.';
  const order=t.scope==='qualification'&&t.level==='A Level'?['A*','A','B','C','D','E']:['a','b','c','d','e'];let last=Infinity;

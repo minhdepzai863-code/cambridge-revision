@@ -1,7 +1,9 @@
 # Cambridge Revision appearance
 
-Preserve the existing DM Sans typography, green identity, subject accents, and dashboard layout. Use square notebook paper as the single new background treatment: a quiet 24px grid under opaque reading and input surfaces. Content stays left aligned, with the existing responsive sidebar and reading widths.
+Keep the existing dashboard, paper wizard, tables and subject cards. Reduce simultaneous choices through five core navigation entries and a native Study tools disclosure. Suppress empty home metrics and the duplicate first-paper card. Detail appears when student records exist.
 
-Current palette: paper #f6f7f1, surface #ffffff, forest ink #203e34, body #344b41, muted #68766d, rule #dfe5da. White mode uses neutral black text on white paper. Dark mode follows the incumbent green palette with #202923 paper, #29342d surfaces, #edf3e7 headings, #dce5d8 body text, #bac9b6 secondary text, and #4c5d4d rules. The grid stays at 4.5% opacity so it recedes behind text. Subjects retain lavender, ochre, and sage cues with separate dark surface values.
+DM Sans remains the shared type family. Primary filters and navigation use 12–13px text, normal body copy 13–14px, clear 29px headings, and explicit active/focus states. Content stays left aligned, with the existing responsive sidebar and reading widths.
 
-Semantic CSS roles cover forms, dialogs, navigation, charts, notices, tables, and buttons. Action text has its own contrast token. Theme and grid are browser preferences, separate from student records. Apply preferences before styles paint; device mode follows OS changes. The grid is on by default and optional in Settings & backup.
+Blue: paper #f7faff, surface #ffffff, sidebar #edf3fa, navy ink #19334d, body #2c4359, muted #52677b, action #315f8e. Paper: ground #faf5e9, surface #fffdf7, sidebar #f1eadb, navy ink #15314a, body #31465b, muted #57667a, action #17364f. Sage preserves the original green palette; White is neutral. Dark uses forest-charcoal paper #202923, surfaces #29342d, headings #edf3e7, body #dce5d8 and muted #bac9b6. Subject accents have separate dark values.
+
+The notebook grid is a quiet 24px layer below opaque reading surfaces. Theme and grid are browser preferences separate from records, applied before paint. The segmented AS/A2 toolbar uses action/on-action tokens in every theme; it never inherits a fixed pale fill. Shared palette roles cover forms, dialogs, navigation, charts, notices, tables and controls.
