@@ -123,3 +123,5 @@ dialog.subject-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(360px,1
 .subject-options{display:grid;gap:10px;margin-top:24px}.subject-option{display:flex;gap:6px;align-items:stretch;min-width:0}.subject-option>.btn:first-child{flex:1;min-width:0;justify-content:flex-start;text-align:left;padding:13px;gap:12px}.subject-option>.icon-button{flex:none;width:36px;align-self:center}.subject-options .btn>span{flex:1}.subject-options small{display:block;font-size:10px;margin-top:4px;opacity:.85}.subject-options .btn.primary small{color:inherit}
 @keyframes subject-slide-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){dialog.subject-drawer{animation:none}}
+
+.syllabus-component{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:14px 20px;background:var(--soft);color:var(--ink);border-bottom:1px solid var(--line);font-size:13px;font-weight:600}.syllabus-component span{font-size:11px;font-weight:400;white-space:nowrap}
