@@ -1,4 +1,5 @@
 import {SOURCE_LINKS} from './domain.mjs';
+import {addStemTopics} from './stem-syllabuses.mjs';
 const rows=[];
 function group(subject,component,level,parent,items){items.forEach((title,i)=>rows.push({id:`${subject}:${parent}.${i+1}`,subject,component,level,code:`${parent}.${i+1}`,group:parent,title}));}
 const maths={1:['Quadratics','Functions','Coordinate geometry','Circular measure','Trigonometry','Series','Differentiation','Integration'],2:['Algebra','Logarithmic and exponential functions','Trigonometry','Differentiation','Integration','Numerical solution of equations'],3:['Algebra','Logarithmic and exponential functions','Trigonometry','Differentiation','Integration','Numerical solution of equations','Vectors','Differential equations','Complex numbers'],4:['Forces and equilibrium','Kinematics of motion in a straight line','Momentum','Newton’s laws of motion','Energy, work and power'],5:['Representation of data','Permutations and combinations','Probability','Discrete random variables','The normal distribution'],6:['The Poisson distribution','Linear combinations of random variables','Continuous random variables','Sampling and estimation','Hypothesis tests']};
@@ -17,6 +18,7 @@ group('9702',3,'AS','P3.2',['Table of results','Recording of data, observations 
 group('9702',3,'AS','P3.3',['Interpretation of graph','Drawing conclusions','Estimating uncertainties','Identifying limitations','Suggesting improvements']);
 group('9702',5,'A2','P5.1',['Defining the problem','Methods of data collection','Method of analysis','Additional detail including safety considerations']);
 group('9702',5,'A2','P5.2',['Data analysis','Table of results','Graph','Conclusion','Treatment of uncertainties']);
+addStemTopics(group);
 for(const t of rows)if(String(t.group).startsWith('P'))t.code='Practical';
 for(const t of rows)t.components=t.subject==='9618'&&Number(t.group)>=19?[3,4]:[t.component];
 export const TOPICS=rows;

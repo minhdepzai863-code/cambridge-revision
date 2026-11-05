@@ -114,3 +114,12 @@ footer{font-size:11px}
 }
 
 summary:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+/* The subject selector expands into a drawer as the STEM catalogue grows. */
+.subject-9231{--subject-color:var(--math-ink);--subject-tint:var(--math-bg)}
+.subject-9701{--subject-color:var(--physics-ink);--subject-tint:var(--physics-bg)}
+.subject-9700{--subject-color:var(--cs-ink);--subject-tint:var(--cs-bg)}
+dialog.subject-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(360px,100vw);height:100dvh;max-height:100dvh;border-radius:14px 0 0 14px;padding:26px;animation:subject-slide-in .18s ease-out}
+.subject-options{display:grid;gap:10px;margin-top:24px}.subject-options>.btn{justify-content:flex-start;text-align:left;padding:13px;gap:12px}.subject-options .btn>span{flex:1}.subject-options small{display:block;font-size:10px;margin-top:4px;opacity:.85}.subject-options .btn.primary small{color:inherit}
+@keyframes subject-slide-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){dialog.subject-drawer{animation:none}}

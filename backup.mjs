@@ -21,6 +21,7 @@ function validateRecord(r){
   if(r.kind==='threshold'&&(!['component','qualification'].includes(r.scope)||!object(r.values)||validateThreshold(r)))throw Error('The backup contains invalid thresholds or source links.');
   if(r.kind==='exam'&&(!/^\d{2}$/.test(r.paper)||!COMPONENTS[r.subject]?.[r.paper[0]]||!numeric(r.duration,1)||!Number.isFinite(Date.parse(r.datetime))))throw Error('The backup contains an invalid examination date or component.');
   if(r.kind==='settings'){
+    if(r.subjects!==undefined&&(!Array.isArray(r.subjects)||r.subjects.some(s=>!Object.hasOwn(SUBJECTS,s))))throw Error('The backup contains an invalid subject selection.');
     if(r.year!==undefined&&![2026,2027].includes(+r.year))throw Error('The backup contains an unsupported syllabus year.');
     if(r.routes!==undefined&&(!object(r.routes)||Object.entries(r.routes).some(([s,route])=>!SUBJECTS[s]||!Object.hasOwn(ROUTES[s],route))))throw Error('The backup contains an invalid examination route.');
   }
@@ -39,7 +40,7 @@ export function validateBackup(data){
     validateRecord(r);
     if(r.files!==undefined&&!Array.isArray(r.files))throw Error('The backup contains an invalid attachment list.');
     for(const f of r.files||[])if(!object(f)||!fileIds.has(f.id))throw Error('The backup is missing a referenced attachment.');
-    if(['attempt','session'].includes(r.kind)&&(!['9709','9702','9618'].includes(r.subject)||!Number.isFinite(+r.max)||!Number.isFinite(+r.marks)||r.max<=0||r.marks<0||+r.marks>+r.max))throw Error('The backup contains invalid marks.');
+    if(['attempt','session'].includes(r.kind)&&(!Object.hasOwn(SUBJECTS,r.subject)||!Number.isFinite(+r.max)||!Number.isFinite(+r.marks)||r.max<=0||r.marks<0||+r.marks>+r.max))throw Error('The backup contains invalid marks.');
   }
   return data;
 }

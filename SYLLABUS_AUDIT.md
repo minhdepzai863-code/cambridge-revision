@@ -15,3 +15,11 @@ Official June 2024 Mathematics resources used only in isolated local verificatio
 - [Grade thresholds](https://www.cambridgeinternational.org/Images/715960-mathematics-9709-june-2024-grade-threshold-table.pdf)
 
 No downloaded examination PDF or fabricated student result is shipped with the production site.
+
+## Optional STEM subjects
+
+- [Further Mathematics 9231, 2026–2027](https://www.cambridgeinternational.org/Images/697357-2026-2027-syllabus.pdf): all 24 numbered headings. AS routes P1+P3 or P1+P4; A Level P1–P4. P1/P2: 75 marks, 120 minutes; P3/P4: 50 marks, 90 minutes. P3 and P4 can be studied at either AS or A2.
+- [Chemistry 9701, 2025–2027](https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf): 90 numbered theory headings (sections 1–22 AS, 23–37 A2), plus 19 practical headings and skill breakdowns for P3/P5.
+- [Biology 9700, 2025–2027](https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf): 44 numbered theory headings (sections 1–11 AS, 12–19 A2), plus 18 practical headings and skill breakdowns for P3/P5.
+
+Both sciences use P1/P2/P3 for AS and P1–P5 for A Level. Raw component maxima/durations match Physics; practical P3 is weighted by 0.75 for qualification estimates. Existing three subject defaults and topic IDs remain unchanged. Optional subjects are added to the workspace settings record and included in backups; records from an added subject also keep that subject visible when restoring older preferences.

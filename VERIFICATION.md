@@ -56,3 +56,10 @@ A non-empty local-to-cloud preference copy passed twice without duplicate record
 The two verification-only PDF objects are retained in private Storage at the user’s explicit request. The local copy test retains the same genuine preference values in the separate local workspace. No paper marks or examination dates were added to the cloud. A large real-paper local-to-cloud migration was not run against the student’s data.
 
 No student marks, timetable, official grade-threshold library, or carry-forward eligibility is invented or preloaded. Synthetic paper results stayed in browser-local QA workspaces, outside production data and repository assets. The two explicitly retained cloud verification PDFs contain official examination materials, not student results.
+
+## Optional STEM catalogue and subject drawer
+
+- 34 Node tests pass with syntax checks and a static production build. New coverage checks default subject compatibility, saved selections, restored subject records, all 24 Further Mathematics topics, science topic stages, practical headings, qualification weighting, paper recognition and backup validation.
+- Isolated local browser check: added Further Mathematics, Chemistry and Biology; all persisted after refresh. Further Mathematics AS P1+P4 route showed exactly 12 headings. Saved completion/confidence persisted and the dashboard showed 1/24 topics confident. Paper identification offers all six selected subjects. Existing marks and preferences remained available.
+- Subject toolbar now opens a sliding panel with selected state and Add subject. Checked desktop and 390 px mobile layouts, selection, Escape dismissal, and browser console errors. Selected subject text and syllabus code use the action foreground colour.
+- The existing generic settings payload handles subject selections; no database schema or access policy change is required. No student cloud records were modified during this subject test.

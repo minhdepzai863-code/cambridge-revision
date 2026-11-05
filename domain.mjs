@@ -1,5 +1,9 @@
 export const SUBJECTS = {'9709':{name:'Mathematics',short:'Maths',color:'var(--math-ink)',tint:'var(--math-bg)',icon:'math'},'9702':{name:'Physics',short:'Physics',color:'var(--physics-ink)',tint:'var(--physics-bg)',icon:'atom'},'9618':{name:'Computer Science',short:'CS',color:'var(--cs-ink)',tint:'var(--cs-bg)',icon:'chip'}};
 export const SERIES = {'m':'February/March','s':'May/June','w':'October/November'};
+// Optional STEM subjects share the existing subject colours and controls.
+Object.assign(SUBJECTS,{'9231':{name:'Further Mathematics',short:'Further Maths',color:'var(--math-ink)',tint:'var(--math-bg)',icon:'math'},'9701':{name:'Chemistry',short:'Chemistry',color:'var(--physics-ink)',tint:'var(--physics-bg)',icon:'atom'},'9700':{name:'Biology',short:'Biology',color:'var(--cs-ink)',tint:'var(--cs-bg)',icon:'book'}});
+export const DEFAULT_SUBJECTS=['9618','9709','9702'];
+export function workspaceSubjects(records=[]){const settings=records.find(r=>r.kind==='settings');return [...new Set([...DEFAULT_SUBJECTS,...(settings?.subjects||[]),...records.map(r=>r.subject)].filter(s=>Object.hasOwn(SUBJECTS,s)))];}
 export const CATEGORIES = ['Conceptual misunderstanding','Calculation error','Algebra/sign error','Incorrect formula','Misreading the question','Missing Cambridge mark-scheme keywords','Incomplete working or explanation','Time-management problem','Weak problem-solving/application skills'];
 export const COMPONENTS = {
  '9709':{1:['Pure Mathematics 1',75,110,'AS'],2:['Pure Mathematics 2',50,75,'AS'],3:['Pure Mathematics 3',75,110,'A2'],4:['Mechanics',50,75,'AS/A2'],5:['Probability & Statistics 1',50,75,'AS/A2'],6:['Probability & Statistics 2',50,75,'A2']},
@@ -11,9 +15,13 @@ export const ROUTES = {
  '9702': {'AS: P1 + P2 + P3':[1,2,3],'A Level: P1–P5':[1,2,3,4,5]},
  '9618': {'AS: P1 + P2':[1,2],'A Level: P1–P4':[1,2,3,4]}
 };
+COMPONENTS['9231']={1:['Further Pure Mathematics 1',75,120,'AS'],2:['Further Pure Mathematics 2',75,120,'A2'],3:['Further Mechanics',50,90,'AS/A2'],4:['Further Probability & Statistics',50,90,'AS/A2']};
+ROUTES['9231']={'AS: P1 + P3':[1,3],'AS: P1 + P4':[1,4],'A Level: P1–P4':[1,2,3,4]};
+for(const subject of ['9701','9700']){COMPONENTS[subject]=structuredClone(COMPONENTS['9702']);ROUTES[subject]=structuredClone(ROUTES['9702']);}
 export const SOURCE_LINKS = {'9709':'https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf','9702':'https://www.cambridgeinternational.org/Images/664565-2025-2027-syllabus.pdf','9618-2026':'https://www.cambridgeinternational.org/Images/697372-2026-syllabus.pdf','9618-2027':'https://www.cambridgeinternational.org/Images/721397-2027-2029-syllabus.pdf'};
+Object.assign(SOURCE_LINKS,{'9231':'https://www.cambridgeinternational.org/Images/697357-2026-2027-syllabus.pdf','9701':'https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf','9700':'https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf'});
 export function identifyFilename(name) {
- const m = name.match(/(9709|9702|9618)[_ -]([msw])(\d{2})[_ -](qp|ms|er|gt)[_ -]?(\d{2})?/i);
+ const m = name.match(new RegExp(`(${Object.keys(SUBJECTS).join('|')})[_ -]([msw])(\\d{2})[_ -](qp|ms|er|gt)[_ -]?(\\d{2})?`,'i'));
  if(!m) return null;
  return {subject:m[1],series:m[2].toLowerCase(),year:2000+Number(m[3]),paper:m[5]||'',role:{qp:'Question paper',ms:'Mark scheme',er:'Examiner report',gt:'Grade thresholds'}[m[4].toLowerCase()]};
 }
@@ -64,7 +72,7 @@ export function timerValues(t,now=Date.now()) {return {activeMs:(t.activeMs||0)+
 export function nextReview(m,rating,today=new Date()) {const step=rating==='again'?0:Math.min((m.reviewStep??-1)+1,3),days=rating==='again'?1:[1,3,7,14][step],d=new Date(today);d.setDate(d.getDate()+days);return {...m,reviewStep:step,retryDate:localDate(d),corrected:rating==='easy',reviewHistory:[...(m.reviewHistory||[]),{date:today.toISOString(),rating}]};}
 export function localDate(d=new Date()) {return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 export function countdown(date,now=Date.now()) {const diff=new Date(date).getTime()-now;return {past:diff<0,days:Math.max(0,Math.floor(diff/86400000)),hours:Math.max(0,Math.floor(diff/3600000)%24),minutes:Math.max(0,Math.floor(diff/60000)%60)};}
-export function weightedTotal(subject,parts) {return sum(parts.map(p=>(+p.marks||0)*(subject==='9702'&&+p.component===3?0.75:1)));}
+export function weightedTotal(subject,parts) {return sum(parts.map(p=>(+p.marks||0)*(['9702','9701','9700'].includes(subject)&&+p.component===3?0.75:1)));}
 export function validateThreshold(t) {
  if(t.sourceUrl&&!/^https?:\/\//i.test(t.sourceUrl))return 'Use an http or https source URL.';
  if(!SUBJECTS[t.subject]||!t.year||!SERIES[t.series]||t.max<=0) return 'Check subject, year, series and maximum marks.';
