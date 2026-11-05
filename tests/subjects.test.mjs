@@ -7,9 +7,22 @@ import {validateBackup} from '../backup.mjs';
 test('Existing workspaces retain three defaults and add saved STEM subjects without duplicates',()=>{
  assert.deepEqual(workspaceSubjects(),DEFAULT_SUBJECTS);
  const settings={kind:'settings',subjects:['9231','9231','invalid'],routes:{'9709':'AS: P1 + P2'},year:2026};
- assert.deepEqual(workspaceSubjects([settings,{kind:'attempt',subject:'9701'}]),[...DEFAULT_SUBJECTS,'9231','9701']);
+ assert.deepEqual(workspaceSubjects([settings,{kind:'attempt',subject:'9701'}]),['9231']);
+ assert.deepEqual(workspaceSubjects([{kind:'attempt',subject:'9701'}]),[...DEFAULT_SUBJECTS,'9701']);
  assert.equal(settings.year,2026);
  assert.equal(settings.routes['9709'],'AS: P1 + P2');
+});
+test('Removing subjects, including every default, preserves saved work for later re-adding',()=>{
+ const paper={kind:'attempt',subject:'9709',marks:60,max:75};
+ const topic={kind:'topic',subject:'9709',topicId:'9709:1.1',confidence:4};
+ const records=[{kind:'settings',subjects:['9702']},paper,topic];
+ assert.deepEqual(workspaceSubjects(records),['9702']);
+ records[0].subjects=[];
+ assert.deepEqual(workspaceSubjects(records),[]);
+ records[0].subjects=['9709'];
+ assert.deepEqual(workspaceSubjects(records),['9709']);
+ assert.equal(records[1],paper);
+ assert.equal(records[2].confidence,4);
 });
 test('Further Mathematics covers every numbered heading and permitted AS/A Level route',()=>{
  assert.equal(topicsFor('9231').length,24);

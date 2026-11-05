@@ -3,7 +3,7 @@ export const SERIES = {'m':'February/March','s':'May/June','w':'October/November
 // Optional STEM subjects share the existing subject colours and controls.
 Object.assign(SUBJECTS,{'9231':{name:'Further Mathematics',short:'Further Maths',color:'var(--math-ink)',tint:'var(--math-bg)',icon:'math'},'9701':{name:'Chemistry',short:'Chemistry',color:'var(--physics-ink)',tint:'var(--physics-bg)',icon:'atom'},'9700':{name:'Biology',short:'Biology',color:'var(--cs-ink)',tint:'var(--cs-bg)',icon:'book'}});
 export const DEFAULT_SUBJECTS=['9618','9709','9702'];
-export function workspaceSubjects(records=[]){const settings=records.find(r=>r.kind==='settings');return [...new Set([...DEFAULT_SUBJECTS,...(settings?.subjects||[]),...records.map(r=>r.subject)].filter(s=>Object.hasOwn(SUBJECTS,s)))];}
+export function workspaceSubjects(records=[]){const settings=records.find(r=>r.kind==='settings'),selected=Array.isArray(settings?.subjects)?settings.subjects:[...DEFAULT_SUBJECTS,...records.map(r=>r.subject)];return [...new Set(selected.filter(s=>Object.hasOwn(SUBJECTS,s)))];}
 export const CATEGORIES = ['Conceptual misunderstanding','Calculation error','Algebra/sign error','Incorrect formula','Misreading the question','Missing Cambridge mark-scheme keywords','Incomplete working or explanation','Time-management problem','Weak problem-solving/application skills'];
 export const COMPONENTS = {
  '9709':{1:['Pure Mathematics 1',75,110,'AS'],2:['Pure Mathematics 2',50,75,'AS'],3:['Pure Mathematics 3',75,110,'A2'],4:['Mechanics',50,75,'AS/A2'],5:['Probability & Statistics 1',50,75,'AS/A2'],6:['Probability & Statistics 2',50,75,'A2']},
