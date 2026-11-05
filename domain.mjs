@@ -58,7 +58,7 @@ export function stats(attempts,mistakes=[],sessions=[]) {
 }
 export function topicStats(id,attempts,mistakes,sessions) {
  const qs=attempts.flatMap(a=>(a.questions||[]).filter(q=>q.topic===id).map(q=>({...q,date:a.date}))), practice=sessions.filter(s=>s.topic===id), ms=mistakes.filter(m=>m.topic===id), max=sum(qs.map(q=>q.max))+sum(practice.map(s=>s.max));
- return {attempted:qs.length+practice.length,accuracy:max?100*(sum(qs.map(q=>q.marks))+sum(practice.map(s=>s.marks)))/max:null,lost:sum(qs.map(q=>q.max-q.marks)),repeated:ms.length,last:[...qs.map(q=>q.date),...practice.map(s=>s.date)].sort().at(-1),next:ms.filter(m=>!m.corrected).map(m=>m.retryDate).sort()[0]};
+ return {attempted:qs.length+practice.length,accuracy:max?100*(sum(qs.map(q=>q.marks))+sum(practice.map(s=>s.marks)))/max:null,lost:sum(qs.map(q=>q.max-q.marks))+sum(practice.map(s=>s.max-s.marks)),repeated:ms.length,last:[...qs.map(q=>q.date),...practice.map(s=>s.date)].sort().at(-1),next:ms.filter(m=>!m.corrected).map(m=>m.retryDate).sort()[0]};
 }
 export function timerValues(t,now=Date.now()) {return {activeMs:(t.activeMs||0)+(t.running?Math.max(0,now-t.resumedAt):0),elapsedMs:Math.max(0,(t.finishedAt||now)-t.startedAt)};}
 export function nextReview(m,rating,today=new Date()) {const step=rating==='again'?0:Math.min((m.reviewStep??-1)+1,3),days=rating==='again'?1:[1,3,7,14][step],d=new Date(today);d.setDate(d.getDate()+days);return {...m,reviewStep:step,retryDate:localDate(d),corrected:rating==='easy',reviewHistory:[...(m.reviewHistory||[]),{date:today.toISOString(),rating}]};}
@@ -71,6 +71,6 @@ export function validateThreshold(t) {
  if(t.scope==='component'&&(!/^\d{2}$/.test(t.paper)||!COMPONENTS[t.subject]?.[t.paper[0]]))return 'Enter the exact component and variant, e.g. 12.';
  const order=t.scope==='qualification'&&t.level==='A Level'?['A*','A','B','C','D','E']:['a','b','c','d','e'];let last=Infinity;
  for(const g of order) {const v=t.values[g];if(v===undefined||!Number.isFinite(v)||v<0||v>t.max||v>last)return 'Enter all boundaries in descending order, within the maximum.';last=v;}
- if(t.official&&!(t.sourceUrl?.startsWith('https://www.cambridgeinternational.org/')||t.files?.length))return 'An official threshold needs a Cambridge source URL or attached threshold PDF.';
+ if(t.official&&!(t.sourceUrl?.startsWith('https://www.cambridgeinternational.org/')||t.files?.some(f=>f.type==='application/pdf')))return 'An official threshold needs a Cambridge source URL or attached threshold PDF.';
  return null;
 }

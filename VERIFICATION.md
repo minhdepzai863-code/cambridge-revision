@@ -27,10 +27,10 @@ Repository: https://github.com/minhdepzai863-code/cambridge-revision
 
 ## Additional checks and fixes
 
-- 25 Node tests pass, plus syntax checks and a static production build.
+- 30 Node tests pass, plus syntax checks and a static production build.
 - Fixed blank optional elapsed-time validation, numeric question counts, direct #log entry, timer pause on navigation, PDF-only question-paper validation, and stale question-total feedback.
 - Backups validate records, file references, MIME/base64/size limits, numeric fields, paper identities, source URLs, and revision history before writing. A real exported backup passes the stronger validator. Restoring into the existing local workspace kept two attempts and reused both attachments.
-- Repeated cloud-copy/restore code preserves attachment IDs and reuses matching contents; conflicts fail explicitly. Authenticated cloud file-copy behavior still needs the dedicated check below.
+- Repeated cloud-copy/restore code preserves attachment IDs and reuses matching contents; conflicts fail explicitly. A signed-in isolated cloud check separately verified private PDF bytes, repeated cloud restore/reuse, and non-empty preference copying.
 - Retry screens use the question/task rather than displaying the previous wrong answer first. Correction edits retain earlier correction snapshots.
 - Calculator browser check: 200/250 displayed as a hypothetical estimate, with no grade for an unmatched entry option and an explicit unconfirmed carry-forward warning. Route/weighting checks are automated; a centre must determine actual eligibility.
 - Syllabus audit corrected missing Physics 11.2, preserved the legacy power/efficiency ID as a supplementary focus within 5.1, expanded practical skills, and mapped advanced CS algorithms/programming to both Papers 3 and 4. See SYLLABUS_AUDIT.md.
@@ -47,8 +47,12 @@ Repository: https://github.com/minhdepzai863-code/cambridge-revision
 - Latest security advisor: one warning, leaked-password protection disabled. [Supabase remediation](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No billing/plan or Auth security setting was changed automatically.
 - Performance advisor: one informational unused-index notice on a new, initially empty project; the useful owner/kind index was retained.
 
-## Remaining verification limits
+## Authenticated cloud verification
 
-Successful sign-in occurred in the user's browser session; the automation browser remained in local mode. A real authenticated preference record was confirmed after the user saved it. Private attachment upload/download/isolation over the Storage API, refresh-token expiry, and non-empty local-to-cloud copy must not be described as fully browser-verified yet. Local PDF persistence and byte-complete backup/restore, database RLS isolation, and authenticated record save have separate evidence above.
+The signed-in session was subsequently located on the localhost test origin. An ignored local test page imported the same store.mjs module and verified private upload/download of both official PDFs with exact byte equality, cloud export plus repeated restore/reuse, and reloading the saved preference record. It restored the original preference values and created no paper attempts.
 
-No student marks, timetable, official grade-threshold library, or carry-forward eligibility is invented or preloaded. Downloaded official PDFs and all synthetic verification results stayed in ignored local outputs / browser-local QA workspaces, outside production data and repository assets.
+A non-empty local-to-cloud preference copy passed twice without duplicate records. Forced client-cache expiry followed by concurrent reads successfully refreshed the real session. Added automated checks cover single-flight refresh, sibling-tab session adoption, account changes, and sign-out. Storage RLS testing exposed the two verification objects to their owner and zero to a different authenticated claim, with the SQL transaction rolled back. This tests database policy isolation; a second real-account browser login was not used.
+
+The two verification-only PDF objects are retained in private Storage at the user’s explicit request. The local copy test retains the same genuine preference values in the separate local workspace. No paper marks or examination dates were added to the cloud. A large real-paper local-to-cloud migration was not run against the student’s data.
+
+No student marks, timetable, official grade-threshold library, or carry-forward eligibility is invented or preloaded. Synthetic paper results stayed in browser-local QA workspaces, outside production data and repository assets. The two explicitly retained cloud verification PDFs contain official examination materials, not student results.

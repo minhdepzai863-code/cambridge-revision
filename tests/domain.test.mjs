@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {identifyFilename,gradeFor,validateAttempt,validateThreshold,stats,timerValues,nextReview,weightedTotal} from '../domain.mjs';
+import {identifyFilename,gradeFor,validateAttempt,validateThreshold,stats,timerValues,nextReview,weightedTotal,topicStats} from '../domain.mjs';
 
 const attempt={subject:'9709',paper:'12',year:2026,series:'s',level:'AS',date:'2026-11-05',scope:'full',marks:60,max:75,minutes:90,elapsedMinutes:100,difficulty:5,correct:3,partialCorrect:1,questionsAttempted:4,questions:[]};
 const threshold={scope:'component',subject:'9709',paper:'12',year:2026,series:'s',max:75,official:false,values:{a:60,b:50,c:40,d:30,e:20}};
@@ -48,4 +48,9 @@ test('Physics practical component receives its syllabus weight',()=>{
 test('Form values accept optional elapsed time and add question counts numerically',()=>{
  assert.deepEqual(validateAttempt({...attempt,elapsedMinutes:'',correct:'3',partialCorrect:'1',questionsAttempted:'4'}),[]);
  assert.ok(validateAttempt({...attempt,correct:'3',partialCorrect:'2',questionsAttempted:'4'}).some(e=>e.includes('questions attempted')));
+});
+
+test('Topic losses and accuracy include separately recorded practice marks',()=>{
+ const value=topicStats('9709:1.1',[{date:'2026-11-05',questions:[{topic:'9709:1.1',marks:1,max:2}]}],[],[{topic:'9709:1.1',marks:3,max:4,date:'2026-11-05'}]);
+ assert.equal(value.lost,2);assert.equal(value.attempted,2);assert.ok(Math.abs(value.accuracy-100*4/6)<.001);
 });

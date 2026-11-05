@@ -11,7 +11,18 @@ function storedSession(){try{return JSON.parse(localStorage.getItem('ct-session'
 export const store={mode:localStorage.getItem('ct-mode')||'local',session:storedSession(),records:[],ready:false};
 function saveSession(s){store.session=s;if(s)localStorage.setItem('ct-session',JSON.stringify(s));else localStorage.removeItem('ct-session');}
 async function authRequest(path,body){const r=await fetch(`${config.supabaseUrl}/auth/v1/${path}`,{method:'POST',headers:{apikey:config.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.msg||data.error_description||data.message||'Sign-in failed. Please try again.');return data;}
-async function token(){let s=store.session;if(!s)throw new Error('Sign in to your cloud workspace first.');if((s.expires_at||0)*1000<Date.now()+60000){s=await authRequest('token?grant_type=refresh_token',{refresh_token:s.refresh_token});s.expires_at=Math.floor(Date.now()/1000)+s.expires_in;saveSession(s);}return s.access_token;}
+let refreshInFlight;
+async function token(){
+ let s=store.session,latest=storedSession();
+ if(!s||!latest)throw new Error('Sign in to your cloud workspace first.');
+ if(s.user?.id!==latest.user?.id)throw new Error('Your cloud account changed in another tab. Reload before continuing.');
+ if(latest.access_token!==s.access_token&&latest.expires_at>=s.expires_at){s=latest;store.session=latest;}
+ if((s.expires_at||0)*1000<Date.now()+60000){
+  if(!refreshInFlight)refreshInFlight=(async()=>{const next=await authRequest('token?grant_type=refresh_token',{refresh_token:s.refresh_token});next.expires_at=Math.floor(Date.now()/1000)+next.expires_in;saveSession(next);return next;})().finally(()=>{refreshInFlight=null;});
+  s=await refreshInFlight;
+ }
+ return s.access_token;
+}
 async function cloud(path,options={}){const t=await token();const r=await fetch(config.supabaseUrl+path,{...options,headers:{apikey:config.supabaseKey,Authorization:`Bearer ${t}`,...options.headers}});if(!r.ok){let message=await r.text(),code;try{const j=JSON.parse(message);code=j.code||j.error;message=j.message||j.error_description||j.error||message;}catch{}const error=new Error(message||`Cloud request failed (${r.status}).`);error.status=r.status;error.code=code;throw error;}return r;}
 export async function signIn(email,password){const s=await authRequest('token?grant_type=password',{email,password});s.expires_at=Math.floor(Date.now()/1000)+s.expires_in;saveSession(s);await switchMode('cloud');}
 export async function signUp(email,password){const s=await authRequest('signup?redirect_to='+encodeURIComponent(location.origin+'/' ),{email,password});if(s.access_token){s.expires_at=Math.floor(Date.now()/1000)+s.expires_in;saveSession(s);await switchMode('cloud');return true;}return false;}
