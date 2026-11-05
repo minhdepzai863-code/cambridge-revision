@@ -1,0 +1,12 @@
+.env*
+!.env.example
+node_modules/
+dist/
+.vercel/
+.impeccable/review/
+outputs/
+
+.vercel
+.env*
+
+CONTINUE_IN_CODEX.md
