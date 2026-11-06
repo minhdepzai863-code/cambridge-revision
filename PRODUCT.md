@@ -28,3 +28,11 @@ Persistence before decoration. Measurements before confidence. Correct provenanc
 ## Current appearance and complexity guidance
 
 Performance, exam preparation and recent work lead the Overview. Subjects use compact management rows beneath them. Papers read as a document library with attachment controls and separate attempt history. Remove the notebook grid and decorative subject-cover shelf from the interface. Existing theme choices remain available; Light is the primary neutral identity. Secondary capabilities remain under Study tools. No new search, workflow, persistence or backend feature is part of this redesign.
+
+## Academic collection presentation
+
+Paper records are visually grouped by subject into folder-tab collections. Existing attachments and separate attempts remain library items with direct existing actions. Compact subject rows use charcoal/black symbol backplates. Grey folder geometry is an organisational cue for real paper/document collections; no filesystem, new Resources route or folder-upload mode was introduced. Preserve the performance-first Overview and practical labelled navigation.
+
+## Academic editorial typography
+
+The latest user direction supersedes the earlier Manrope-only constraint. Use Newsreader for major page and editorial section headings, and Open Sans for body text, navigation, controls, inputs, tables, scores, codes and analytics. The pairing evokes academic publishing while the tracker remains an independent tool; do not copy the University's logo, arms or official wordmark or imply affiliation. Six subject glyphs are distinct, monochrome and shown on the approved charcoal/black backplates.

@@ -18,3 +18,8 @@ Generated with the built-in image generation tool for the first presentation-onl
 - 9700: forest green, leaf veins.
 
 The old welcome illustrations remain in source history but are not included in the new production build. The first pass used DM Sans. The second pass uses the self-hosted Manrope variable font from the official Google Fonts repository, with its license in assets/fonts/Manrope-OFL.txt. Manrope is used consistently across interface text and numerical measures.
+
+
+## Academic editorial fonts
+
+The latest user-approved pairing uses Newsreader for editorial headings and Open Sans for functional UI and evidence. Both normal variable faces are self-hosted from the official Google Fonts repository (ofl/newsreader and ofl/opensans), with their unmodified SIL Open Font License files beside them. Only the two used faces are loaded; no university font files or identity artwork are included. Previous Manrope/DM Sans files remain source history and are excluded from the new production build.

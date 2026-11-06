@@ -90,3 +90,20 @@ Only neutral-light colour roles, scoped surface contrast, secondary-button borde
 - Before/after dark-mode sampling matched exactly for nine representative regions/controls, including backgrounds, colours, borders, shadows, fonts, padding and dimensions.
 - Secondary text contrast4.66:1 on canvas /5.06:1 on panels; chart line4.60:1; control boundaries3.08:1 on canvas. The starting accent is retained as a soft accent, with darker related shades for meaningful chart strokes and focus.
 - Existing35 tests and syntax checks pass. No new behavioural tests were added for this colour-only refinement. Ignored evidence is under outputs/silver-review.
+
+
+## 6 November 2026 — academic folder-library presentation
+
+- Existing papers are grouped visually by subject. All attachment IDs, open/preview actions, attempt records, latest/best score calculations and retry/edit routes remain. Native grey folder geometry and connected collection tabs organise actual paper/documents. Subject symbols use charcoal/black backplates. No storage, Auth, database, grading, syllabus or backup code changed.
+- Populated browser fixtures:2paper groups,3attempts,2local PDF attachments. Verified existing blob preview iframe, retry flow, Back to upload with role selectors, Open and Detach controls. No live/cloud records created by this verification.
+- Desktop1440, laptop990 and mobile390 captures; final complete library captures at1440×1100 to include the footnote/footer without the browser full-page stitching issue. Mobile document roles visible; attachment tab/body gap0. No horizontal page overflow.
+- Light, Paper, Sage, White, Dark and Device sampled with the same Manrope family, same weights and normal-text opacity1. Device resolved toDark on the test system. Metadata/canvas contrast: Light 4.66:1, Paper 5.38:1, Sage 5.07:1, White 4.66:1, Dark 9.5:1, Device 9.5:1. Sage secondary text was adjusted to5.07:1; subject-picker metadata opacity restored to1. Disabled/loading opacity remains intentional.
+- Independent finish review:SHIP across17validcaptures; no material issues in the reviewed extension. Review and palette evidence under ignored outputs/folder-review. Existing35tests and syntax checks pass; static production build includes folder-library.css.
+
+
+## 6 November 2026 — academic typography, subject symbols and chart spacing
+
+- Newsreader now handles editorial headings; self-hosted Open Sans handles navigation, controls, codes, scores and analytics. Font licences are included. The independent revision-tool identity remains explicit. Six distinct STEM subject glyphs share charcoal backplates.
+- Overview chart retains its full 0–100 scale and existing results. Geometry now uses a 900×340 viewBox with 96/44px side gutters and a 56px bottom gutter. Rendered ticks measured approximately 13.81px desktop, 11.67px laptop and 12.4px mobile; narrow screens retain internal chart scrolling without document overflow. Progress calculations and partial-attempt exclusion are unchanged.
+- Reviewed 20 captures across desktop, laptop, mobile, populated/empty states and all six appearance choices. Heading/UI roles, opacity, six distinct subject glyphs and chart data verified. Metadata contrast remains at least 4.66:1 in sampled palettes. The Open Sans detector advisory is a narrow exception for the user’s explicit font choice.
+- Independent final review: SHIP. The sole persistence finding was resolved in DESIGN.md and its sidecar; no UI finding remains. Ignored evidence: outputs/academic-type. All 35 existing tests and the static build pass after the final typography/chart changes. No cloud data or backend configuration changed.

@@ -1,0 +1,125 @@
+/* Academic collections: actual subject and paper groupings, using the shared palette. */
+.academic-library{min-width:0}
+.library-collection{margin:0 0 30px;min-width:0}
+.collection-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin:0;min-width:0}
+.collection-title{position:relative;min-width:0;background:var(--surface);border-radius:12px 12px 0 0;padding:15px 24px 13px}
+.collection-title h2{display:flex;align-items:center;gap:11px;margin:0;font-size:16px;font-weight:650;letter-spacing:-.25px;line-height:1.5;color:var(--ink)}
+.collection-title h2>.icon{width:20px;height:20px;flex-shrink:0;color:var(--muted)}
+.collection-title p{font-size:11px;color:var(--muted);margin:5px 0 0 31px}
+.collection-count{padding:0 3px 12px;font-size:11px;color:var(--muted);text-align:right;line-height:1.6;flex-shrink:0}
+.collection-count>span{margin:0 7px;color:var(--input-line)}
+.academic-library .document-library{border:0;border-radius:0 12px 12px 12px;box-shadow:none;overflow:hidden}
+.academic-library .library-columns,.academic-library .library-record{grid-template-columns:minmax(220px,1fr) 110px 110px 128px;gap:22px;padding:18px 24px}
+.academic-library .library-columns{padding-top:12px;padding-bottom:12px;background:var(--surface);color:var(--muted);font-size:11px}
+.academic-library .library-columns>span:last-child{display:block}
+.academic-library .library-record{align-items:center;padding-top:23px;padding-bottom:23px;transition:background-color .16s ease}
+.academic-library .library-record:hover{background:color-mix(in srgb,var(--hover) 55%,var(--surface))}
+.academic-library .library-identity{grid-column:auto;gap:14px}
+.academic-library .library-identity>.document-mark{width:28px;height:37px;background:transparent;color:var(--muted)}
+.academic-library .library-identity>.document-mark .icon{width:23px;height:27px;stroke-width:1.4}
+.academic-library .library-identity h3{margin:0 0 5px;font-size:14px;line-height:1.5}
+.academic-library .library-identity .record-link{font-size:14px;font-weight:650}
+.academic-library .library-identity p{font-size:12px;line-height:1.6}
+.academic-library .document-chips{gap:7px;margin-top:14px}
+.academic-library .document-chip{white-space:normal;text-align:left;justify-content:flex-start;font-size:11px;line-height:1.5;min-height:30px;padding:5px 8px;border-radius:5px}
+.academic-library .document-chip .icon{flex-shrink:0}
+.academic-library .library-latest strong,.academic-library .library-best strong{font-size:21px}
+.academic-library .library-latest small,.academic-library .library-best small{font-size:11px;line-height:1.6}
+.academic-library .library-actions{grid-column:auto;flex-direction:column;gap:7px;align-items:stretch;border:0;padding:0;margin:0}
+.academic-library .library-actions .btn{font-size:12px;min-height:35px}
+.academic-library .mobile-label{display:none}
+.academic-library .library-footnote{margin-top:0;line-height:1.8}
+.academic-library .library-onboarding{display:flex;align-items:flex-start;gap:24px;padding:36px;border:0;border-radius:0 12px 12px 12px;background:var(--surface);box-shadow:none;text-align:left}
+.empty-collection-mark{display:flex;align-items:center;justify-content:center;width:58px;height:52px;background:var(--soft);color:var(--muted);border-radius:9px;flex-shrink:0}
+.empty-collection-mark .icon{width:30px;height:30px;stroke-width:1.3}
+.academic-library .library-onboarding h3{font-size:22px;font-weight:600;letter-spacing:-.5px;line-height:1.4;margin:0 0 10px;color:var(--ink)}
+.academic-library .library-onboarding p{max-width:54ch;font-size:14px;color:var(--muted);line-height:1.8;margin:0 0 24px}
+.academic-library .supported-files{margin-top:24px;font-size:11px;gap:18px}
+.subject-register{background:var(--surface);border:0;border-radius:12px;padding:0 22px}
+.subject-register .subject-entry{padding:18px 0}
+.subject-register .subject-entry:last-child{border-bottom:0}
+.subject-register .register-icon{position:relative;width:27px;height:25px;padding:4px;background:var(--soft);border-radius:0 5px 5px 5px;color:var(--muted)}
+.subject-register .register-icon::before{content:'';position:absolute;left:0;top:-4px;width:12px;height:5px;border-radius:3px 3px 0 0;background:var(--soft)}
+.subject-register .register-icon .icon{width:19px;height:19px}
+.paper-attachments{margin:0 0 24px;min-width:0}
+.paper-attachments .collection-body{background:var(--surface);border-radius:0 12px 12px 12px;padding:0 24px 22px}
+.paper-attachments .collection-actions{border-top:1px solid var(--line);padding-top:18px;display:flex;gap:12px;flex-wrap:wrap}
+.paper-attachments .collection-empty-note{font-size:14px;line-height:1.8;color:var(--muted);padding:22px 0 4px;margin:0}
+.file-list .file-row{gap:14px;border-bottom:1px solid var(--line);padding:19px 0;align-items:center}
+.file-list .file-row:last-child{border-bottom:0}
+.file-list .file-row>.icon{display:block;width:21px;height:25px;flex-shrink:0;color:var(--muted);stroke-width:1.4}
+.file-list .file-row>div{min-width:0}
+.file-list .file-row strong{font-size:13px;font-weight:600;line-height:1.6;overflow-wrap:anywhere}
+.file-list .file-row small{font-size:11px;line-height:1.7;color:var(--muted);margin-top:3px}
+.file-list .file-row select{flex:0 1 190px;min-width:145px;max-width:220px}
+.file-list .file-row .pill{font-size:11px;white-space:normal}
+.wizard-panel .file-list:not(:empty){margin:6px 0 20px}
+.sidebar .nav-item{border-radius:10px}
+.sidebar .icon{stroke-width:1.5}
+:root:is([data-theme="blue"],[data-theme="white"]) .sidebar .nav-item.active{background:var(--surface);box-shadow:0 1px 3px rgba(36,39,44,.035)}
+@media(max-width:1100px){
+ .academic-library .library-columns,.academic-library .library-record{grid-template-columns:minmax(190px,1fr) 100px 100px;gap:18px}
+ .academic-library .library-columns>span:last-child{display:none}
+ .academic-library .library-identity{grid-column:1;grid-row:1/3}
+ .academic-library .library-latest{grid-column:2;grid-row:1}
+ .academic-library .library-best{grid-column:3;grid-row:1}
+ .academic-library .library-actions{grid-column:2/4;grid-row:2;flex-direction:row;justify-content:flex-start;gap:18px}
+ .academic-library .library-actions .btn{font-size:11px}
+ .paper-attachments .file-row{flex-wrap:wrap}
+ .paper-attachments .file-row>.pill{margin-left:35px}
+}
+@media(max-width:760px){
+ .library-collection{margin-bottom:25px}
+ .collection-heading{gap:10px}
+ .collection-title{padding:13px 18px 12px;max-width:calc(100% - 90px)}
+ .collection-title h2{font-size:14px;gap:9px;align-items:flex-start}
+ .collection-title h2>.icon{width:18px;height:20px;margin-top:1px}
+ .collection-title p{margin-left:27px;font-size:11px}
+ .collection-count{font-size:11px;max-width:80px;flex-shrink:0;padding-bottom:11px}
+ .collection-count>span{margin:0 3px}
+ .academic-library .library-columns{display:none}
+ .academic-library .library-record{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:19px;padding:22px 19px}
+ .academic-library .library-identity{grid-column:1/-1;grid-row:auto;gap:12px}
+ .academic-library .library-identity .record-link{font-size:15px}
+ .academic-library .library-identity p{font-size:12px}
+ .academic-library .library-latest{grid-column:1;grid-row:auto}
+ .academic-library .library-best{grid-column:2;grid-row:auto}
+ .academic-library .library-latest strong,.academic-library .library-best strong{font-size:24px}
+ .academic-library .mobile-label{display:block;font-size:11px;margin-bottom:3px}
+ .academic-library .library-actions{grid-column:1/-1;grid-row:auto;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px;gap:12px}
+ .academic-library .library-actions .btn{font-size:12px;min-height:38px}
+ .academic-library .library-onboarding{padding:25px 20px;gap:18px;display:block}
+ .empty-collection-mark{margin-bottom:22px;width:46px;height:42px}
+ .empty-collection-mark .icon{width:25px;height:25px}
+ .academic-library .library-onboarding h3{font-size:21px}
+ .academic-library .library-onboarding p{font-size:14px}
+ .academic-library .supported-files{flex-wrap:wrap;gap:8px 14px;line-height:1.7}
+ .subject-register{padding:0 16px}
+ .subject-register .subject-entry{padding:19px 0;column-gap:13px}
+ .subject-register .register-icon{width:24px;height:23px;padding:3px}
+ .paper-attachments .collection-title{max-width:calc(100% - 55px)}
+ .paper-attachments .collection-body{padding:0 18px 20px}
+ .paper-attachments .file-list .file-row,.file-list .file-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:9px 10px;padding:20px 0}
+ .file-list .file-row>.icon{grid-column:1;grid-row:1;width:18px;height:23px}
+ .file-list .file-row>div{grid-column:2;grid-row:1}
+ .file-list .file-row>.pill,.file-list .file-row>select{grid-column:2;grid-row:2;justify-self:start;margin-left:0;min-width:0;max-width:100%}
+ .file-list .file-row>[data-action="file"]{grid-column:3;grid-row:1;align-self:start;font-size:12px}
+ .file-list .file-row>[data-action="detach"]{grid-column:3;grid-row:2;justify-self:end}
+ .file-list .file-row strong{font-size:13px}
+ .file-list .file-row select{font-size:16px;width:100%}
+}
+@media(prefers-reduced-motion:reduce){.academic-library .library-record{transition:none}}
+
+/* Confirmed document identity and the user-requested grey folder / charcoal subject marks. */
+:root{--folder-back:#b7c0c9;--folder-front:#d4dbe1;--folder-edge:#8996a2;--folder-page:#f7f7f8}
+:root[data-theme="black"]{--folder-back:#4e5963;--folder-front:#717e89;--folder-edge:#9aa7b2;--folder-page:#d0d6dc}
+.collection-title h2>.folder-mark{width:44px;height:35px;flex-shrink:0}
+.collection-title p{margin-left:55px}
+.paper-attachments .collection-body>.file-list{margin:0}
+.file-list .file-row>.pill{display:inline-block}
+.subject-register .register-icon{background:#24272c;color:#f7f7f8;border-radius:7px;height:27px}
+.subject-register .register-icon::before{display:none}
+:root[data-theme="black"] .subject-register .register-icon{background:#111315}
+.subject-option>.btn>.icon{background:#24272c;color:#f7f7f8;border-radius:6px;width:28px;height:28px;padding:5px;flex-shrink:0}
+.subject-options small{opacity:1}
+@media(max-width:760px){.collection-title h2>.folder-mark{width:36px;height:29px;margin-top:0}.collection-title p{margin-left:45px}.file-list .file-row>.pill{display:inline-block}.subject-register .register-icon{height:25px}}

@@ -1,0 +1,74 @@
+/* Academic editorial type: independent identity, functional evidence stays sans-serif. */
+@font-face{font-family:'Open Sans';font-style:normal;font-weight:300 800;font-display:swap;src:url('/assets/fonts/open-sans.ttf') format('truetype')}
+@font-face{font-family:Newsreader;font-style:normal;font-weight:200 800;font-display:swap;src:url('/assets/fonts/newsreader.ttf') format('truetype')}
+:root{--font-ui:'Open Sans',Arial,sans-serif;--font-editorial:Newsreader,Georgia,serif;--type-page:36px;--type-section:24px;--type-collection:22px;--type-body:15px;--type-control:13px;--type-meta:12px;font-family:var(--font-ui);font-optical-sizing:auto;font-synthesis:none}
+body{font-family:var(--font-ui);font-size:var(--type-body);font-weight:400;line-height:1.65;letter-spacing:normal}
+button,input,select,textarea,table,svg text{font-family:var(--font-ui)}
+h1,h2{font-family:var(--font-editorial);font-weight:450;letter-spacing:-.015em;font-optical-sizing:auto}
+.page-heading h1{font-family:var(--font-editorial);font-size:var(--type-page);font-weight:450;line-height:1.18;letter-spacing:-.02em;margin-bottom:10px}
+.page-heading p{font-size:var(--type-body);line-height:1.65;max-width:68ch}
+.page-heading h1.paper-code-title{font-family:var(--font-ui);font-size:30px;font-weight:600;line-height:1.3;letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+.section-heading h2,.performance-module .section-heading h2,.review-module .section-heading h2,.subject-management .section-heading h2,.chart-grid .panel>h2,.settings-grid .panel h2,.panel>h2{font-family:var(--font-editorial);font-size:var(--type-section);font-weight:450;line-height:1.25;letter-spacing:-.015em}
+.preparation-module .section-heading h2{font-family:var(--font-editorial);font-size:22px;font-weight:450;line-height:1.25;letter-spacing:0}
+.preparation-module h3{font-family:var(--font-editorial);font-size:27px;font-weight:450;line-height:1.3;letter-spacing:-.01em}
+.collection-title h2,.paper-attachments .collection-title h2{font-family:var(--font-editorial);font-size:var(--type-collection);font-weight:450;line-height:1.3;letter-spacing:-.01em;overflow-wrap:anywhere}
+.collection-title p{font-family:var(--font-ui);font-size:var(--type-meta)}
+.academic-library .library-onboarding h3,.performance-empty h3{font-family:var(--font-editorial);font-size:24px;font-weight:450;line-height:1.3;letter-spacing:-.01em}
+.dialog-heading h2{font-family:var(--font-editorial);font-size:28px;font-weight:450;line-height:1.2;letter-spacing:-.01em}
+.brand>span{font-family:var(--font-editorial);font-size:22px;font-weight:500;letter-spacing:-.02em;line-height:1.1}
+.brand small{font-family:var(--font-ui);font-size:11px;line-height:1.65;letter-spacing:0;font-weight:400;margin-top:5px}
+.sidebar .nav-item,.nav-tools summary{font-family:var(--font-ui);font-size:13px;font-weight:500;line-height:1.5}
+.sidebar .nav-item.active,.sidebar .nav-item.active:hover{font-weight:600}
+.btn,.text-link{font-family:var(--font-ui);font-size:var(--type-control);font-weight:500;letter-spacing:0}
+.btn.primary{font-weight:600}
+.top-actions>.btn{font-size:12px}
+.subject-tabs>.subject-tab{font-size:13px;font-weight:500}
+.level-tabs button{font-family:var(--font-ui);font-size:12px;font-weight:500}
+.field>span,.checkbox{font-family:var(--font-ui);font-size:13px;font-weight:500;line-height:1.6}
+input,select,textarea{font-family:var(--font-ui);font-size:14px;line-height:1.6;letter-spacing:0}
+.form-section>h3{font-family:var(--font-ui);font-size:15px;font-weight:600;line-height:1.5;letter-spacing:0}
+.subject-entry h3,.academic-library .library-identity h3,.academic-library .library-identity .record-link,.activity-row .record-link{font-family:var(--font-ui);font-size:14px;font-weight:600;line-height:1.6;letter-spacing:0}
+.file-list .file-row strong{font-family:var(--font-ui);font-size:13px;font-weight:600;line-height:1.65}
+.preparation-summary strong,.activity-score strong,.library-latest strong,.library-best strong,.metric strong,.countdown,.grade-result,.timer-panel strong,.live-score strong{font-family:var(--font-ui);font-variant-numeric:tabular-nums lining-nums;font-weight:600}
+.preparation-summary .primary-measure strong{font-family:var(--font-ui);font-size:42px;font-weight:600;line-height:1.2;letter-spacing:-.025em}
+.preparation-module .countdown{font-family:var(--font-ui);letter-spacing:-.02em;line-height:1.35;white-space:normal}
+.section-heading p,.preparation-summary span,.preparation-summary small,.subject-entry p,.subject-entry small,.subject-management .section-heading p,.file-list .file-row small,.file-list .file-row>.pill,.collection-count,.library-summary,.academic-library .library-columns,.academic-library .library-latest small,.academic-library .library-best small,.activity-row p,.activity-row .activity-score small,.chart-caption,.review-count span,.preparation-module .preparation-date{font-family:var(--font-ui);font-size:var(--type-meta);font-weight:400;line-height:1.65;opacity:1;letter-spacing:0}
+.subject-badge{font-family:var(--font-ui);font-size:12px!important;font-weight:400}
+.academic-library .document-chip{font-family:var(--font-ui);font-size:12px;line-height:1.5;font-weight:400}
+.academic-library .library-identity p{font-family:var(--font-ui);font-size:12px;line-height:1.65}
+.performance-empty p,.review-module>p,.recent-empty p,.academic-library .library-onboarding p,.paper-attachments .collection-empty-note{font-family:var(--font-ui);font-size:15px;font-weight:400;line-height:1.65;max-width:58ch}
+.library-footnote{font-family:var(--font-ui);font-size:12px;line-height:1.75;max-width:68ch}
+.subject-register .register-icon .icon,.subject-option>.btn>.icon{stroke-width:1.5}
+@media(max-width:1199px){.page-heading h1{font-size:34px}.performance-module .section-heading h2,.review-module .section-heading h2{font-size:22px}.preparation-module .section-heading h2{font-size:21px}}
+@media(max-width:760px){
+ :root{--type-page:32px;--type-section:23px;--type-collection:21px}
+ .page-heading h1{font-size:var(--type-page);line-height:1.2}
+ .page-heading h1.paper-code-title{font-family:var(--font-ui);font-size:27px;line-height:1.35}
+ .page-heading p{font-size:14px;line-height:1.75}
+ .collection-title h2,.paper-attachments .collection-title h2{font-size:var(--type-collection);line-height:1.3;gap:9px}
+ .collection-title{max-width:calc(100% - 90px)}
+ .paper-attachments .collection-title{max-width:calc(100% - 55px)}
+ .performance-module .section-heading h2,.review-module .section-heading h2{font-size:23px}
+ .preparation-module .section-heading h2{font-size:22px}
+ .preparation-summary .primary-measure strong{font-size:38px}
+ .field input,.field select,.field textarea,.file-list .file-row select{font-size:16px}
+ .subject-entry h3,.academic-library .library-identity .record-link{font-size:14px}
+ .subject-entry-score small{display:block;margin-left:0}
+ .subject-entry-confidence small{white-space:normal}
+ .activity-row p,.activity-row .activity-score small,.academic-library .library-latest small,.academic-library .library-best small{font-size:12px}
+ .btn,.text-link{font-size:13px}
+}
+
+/* Overview chart: stable data with smaller, separated axis labels and real gutters. */
+.performance-module{padding:25px 28px 22px}
+.performance-module>.section-heading{margin-bottom:22px}
+.performance-plot{container-type:inline-size}
+.performance-plot>.line-chart{width:100%;height:auto;min-height:0;min-width:0;aspect-ratio:900/340;display:block}
+.performance-plot>.line-chart text{font-family:var(--font-ui);font-size:24px;font-weight:400;letter-spacing:0;font-variant-numeric:tabular-nums lining-nums}
+.performance-plot .chart-y-tick{transform:none;text-anchor:end}
+.performance-module .chart-caption{margin-top:16px;line-height:1.7}
+@container(min-width:600px){.performance-plot>.line-chart text{font-size:18px}}
+@container(min-width:480px) and (max-width:599px){.performance-plot>.line-chart text{font-size:22px}}
+@container(max-width:479px){.performance-plot>.line-chart text{font-size:26px}}
+@media(max-width:959px){.performance-module{padding:23px 22px 20px}.performance-plot>.line-chart{min-width:620px;height:auto;min-height:0}.performance-plot>.line-chart text{font-size:18px}.chart-scroll-hint{display:block}}
+@media(max-width:760px){.performance-module{padding:23px 20px 20px}.performance-module>.section-heading{margin-bottom:22px}.performance-module .section-heading .text-link{font-size:12px}.performance-plot>.line-chart{min-width:620px}.performance-plot>.line-chart text{font-size:18px}}

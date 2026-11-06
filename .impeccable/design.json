@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-05T23:07:38.021Z",
+  "generatedAt": "2026-11-06T00:08:23.228Z",
   "title": "Design System: Cambridge Revision",
   "extensions": {
     "colorMeta": {
@@ -210,35 +210,201 @@
         "role": "neutral",
         "displayName": "accent",
         "canonical": "#8197aa"
+      },
+      "sage-muted": {
+        "role": "neutral",
+        "displayName": "Sage Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0239 156.29)",
+          "oklch(26% 0.0239 156.29)",
+          "oklch(37% 0.0239 156.29)",
+          "oklch(48% 0.0239 156.29)",
+          "oklch(59% 0.0239 156.29)",
+          "oklch(70% 0.0239 156.29)",
+          "oklch(82% 0.0239 156.29)",
+          "oklch(95% 0.0239 156.29)"
+        ]
+      },
+      "folder-back": {
+        "role": "neutral",
+        "displayName": "Folder Back",
+        "tonalRamp": [
+          "oklch(15% 0.0162 248.03)",
+          "oklch(26% 0.0162 248.03)",
+          "oklch(37% 0.0162 248.03)",
+          "oklch(48% 0.0162 248.03)",
+          "oklch(59% 0.0162 248.03)",
+          "oklch(70% 0.0162 248.03)",
+          "oklch(82% 0.0162 248.03)",
+          "oklch(95% 0.0162 248.03)"
+        ]
+      },
+      "folder-front": {
+        "role": "neutral",
+        "displayName": "Folder Front",
+        "tonalRamp": [
+          "oklch(15% 0.0112 243.67)",
+          "oklch(26% 0.0112 243.67)",
+          "oklch(37% 0.0112 243.67)",
+          "oklch(48% 0.0112 243.67)",
+          "oklch(59% 0.0112 243.67)",
+          "oklch(70% 0.0112 243.67)",
+          "oklch(82% 0.0112 243.67)",
+          "oklch(95% 0.0112 243.67)"
+        ]
+      },
+      "folder-edge": {
+        "role": "neutral",
+        "displayName": "Folder Edge",
+        "tonalRamp": [
+          "oklch(15% 0.0233 246.00)",
+          "oklch(26% 0.0233 246.00)",
+          "oklch(37% 0.0233 246.00)",
+          "oklch(48% 0.0233 246.00)",
+          "oklch(59% 0.0233 246.00)",
+          "oklch(70% 0.0233 246.00)",
+          "oklch(82% 0.0233 246.00)",
+          "oklch(95% 0.0233 246.00)"
+        ]
+      },
+      "folder-page": {
+        "role": "neutral",
+        "displayName": "Folder Page",
+        "tonalRamp": [
+          "oklch(15% 0.0013 286.38)",
+          "oklch(26% 0.0013 286.38)",
+          "oklch(37% 0.0013 286.38)",
+          "oklch(48% 0.0013 286.38)",
+          "oklch(59% 0.0013 286.38)",
+          "oklch(70% 0.0013 286.38)",
+          "oklch(82% 0.0013 286.38)",
+          "oklch(95% 0.0013 286.38)"
+        ]
+      },
+      "dark-folder-back": {
+        "role": "neutral",
+        "displayName": "Dark Folder Back",
+        "tonalRamp": [
+          "oklch(15% 0.0214 245.72)",
+          "oklch(26% 0.0214 245.72)",
+          "oklch(37% 0.0214 245.72)",
+          "oklch(48% 0.0214 245.72)",
+          "oklch(59% 0.0214 245.72)",
+          "oklch(70% 0.0214 245.72)",
+          "oklch(82% 0.0214 245.72)",
+          "oklch(95% 0.0214 245.72)"
+        ]
+      },
+      "dark-folder-front": {
+        "role": "neutral",
+        "displayName": "Dark Folder Front",
+        "tonalRamp": [
+          "oklch(15% 0.0229 243.65)",
+          "oklch(26% 0.0229 243.65)",
+          "oklch(37% 0.0229 243.65)",
+          "oklch(48% 0.0229 243.65)",
+          "oklch(59% 0.0229 243.65)",
+          "oklch(70% 0.0229 243.65)",
+          "oklch(82% 0.0229 243.65)",
+          "oklch(95% 0.0229 243.65)"
+        ]
+      },
+      "dark-folder-edge": {
+        "role": "neutral",
+        "displayName": "Dark Folder Edge",
+        "tonalRamp": [
+          "oklch(15% 0.0217 243.53)",
+          "oklch(26% 0.0217 243.53)",
+          "oklch(37% 0.0217 243.53)",
+          "oklch(48% 0.0217 243.53)",
+          "oklch(59% 0.0217 243.53)",
+          "oklch(70% 0.0217 243.53)",
+          "oklch(82% 0.0217 243.53)",
+          "oklch(95% 0.0217 243.53)"
+        ]
+      },
+      "dark-folder-page": {
+        "role": "neutral",
+        "displayName": "Dark Folder Page",
+        "tonalRamp": [
+          "oklch(15% 0.0105 247.95)",
+          "oklch(26% 0.0105 247.95)",
+          "oklch(37% 0.0105 247.95)",
+          "oklch(48% 0.0105 247.95)",
+          "oklch(59% 0.0105 247.95)",
+          "oklch(70% 0.0105 247.95)",
+          "oklch(82% 0.0105 247.95)",
+          "oklch(95% 0.0105 247.95)"
+        ]
+      },
+      "subject-backplate": {
+        "role": "neutral",
+        "displayName": "Subject Backplate",
+        "tonalRamp": [
+          "oklch(15% 0.0102 260.70)",
+          "oklch(26% 0.0102 260.70)",
+          "oklch(37% 0.0102 260.70)",
+          "oklch(48% 0.0102 260.70)",
+          "oklch(59% 0.0102 260.70)",
+          "oklch(70% 0.0102 260.70)",
+          "oklch(82% 0.0102 260.70)",
+          "oklch(95% 0.0102 260.70)"
+        ]
+      },
+      "dark-subject-backplate": {
+        "role": "neutral",
+        "displayName": "Dark Subject Backplate",
+        "tonalRamp": [
+          "oklch(15% 0.0052 248.11)",
+          "oklch(26% 0.0052 248.11)",
+          "oklch(37% 0.0052 248.11)",
+          "oklch(48% 0.0052 248.11)",
+          "oklch(59% 0.0052 248.11)",
+          "oklch(70% 0.0052 248.11)",
+          "oklch(82% 0.0052 248.11)",
+          "oklch(95% 0.0052 248.11)"
+        ]
       }
     },
     "typographyMeta": {
       "headline": {
         "displayName": "Page headline",
-        "purpose": "A clear page identity without a promotional hero."
+        "purpose": "Editorial page identity; paper-code detail titles use the separate functional role."
       },
       "title": {
         "displayName": "Section title",
-        "purpose": "The next reading level."
+        "purpose": "Editorial section headings with restrained weight."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "One shared family for readable interface content."
+        "purpose": "Open Sans for functional content, fields, tables and readable body text."
       },
       "label": {
         "displayName": "Control label",
-        "purpose": "Quiet, explicit actions."
+        "purpose": "Explicit functional control labels; primary and selected states use weight 600."
       },
       "primary-measure": {
         "displayName": "Primary measure",
         "purpose": "The strongest result in a related group."
+      },
+      "collection": {
+        "displayName": "Collection heading",
+        "purpose": "Newsreader headings on joined subject and attachment tabs."
+      },
+      "metadata": {
+        "displayName": "Supporting metadata",
+        "purpose": "Fully opaque Open Sans labels and record details."
+      },
+      "paper-code": {
+        "displayName": "Paper identifier",
+        "purpose": "A functional sans-serif heading for exact paper identity."
       }
     },
     "shadows": [
       {
         "name": "analytical-surface",
         "value": "0 5px 22px rgba(24,28,32,.035)",
-        "purpose": "Subtle separation of white analytical and library surfaces."
+        "purpose": "Existing analytical depth in alternate palettes; Light and White analytical and library surfaces override it with no shadow."
       },
       {
         "name": "selector",
@@ -254,6 +420,11 @@
         "name": "light-modal",
         "value": "0 18px 60px rgba(36,39,44,.14)",
         "purpose": "Rare elevated neutral-light dialog; large reading surfaces remain flat."
+      },
+      {
+        "name": "light-navigation",
+        "value": "0 1px 3px rgba(36,39,44,.035)",
+        "purpose": "Very slight separation of the selected sidebar row in Light and White."
       }
     ],
     "motion": [
@@ -284,6 +455,10 @@
       {
         "name": "single-column-forms",
         "value": "430px"
+      },
+      {
+        "name": "collection-actions-wrap",
+        "value": "1100px"
       }
     ]
   },
@@ -294,7 +469,7 @@
       "refersTo": "button-primary",
       "description": "The principal existing action.",
       "html": "<button class=\"ds-control ds-primary\">Log paper</button>",
-      "css": ".ds-control{font-family:Manrope,Segoe UI,sans-serif;font-size:12px;font-weight:550;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-primary{background:var(--action);color:var(--on-action);border:1px solid transparent}.ds-primary:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "css": ".ds-control{font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif);font-size:13px;font-weight:600;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-primary{background:var(--action);color:var(--on-action);border:1px solid transparent}.ds-primary:hover{filter:brightness(.96)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
     },
     {
       "name": "Quiet button",
@@ -302,7 +477,7 @@
       "refersTo": "button-quiet",
       "description": "A supporting action with no persistent frame.",
       "html": "<button class=\"ds-control ds-quiet\">View history</button>",
-      "css": ".ds-control{font-family:Manrope,Segoe UI,sans-serif;font-size:12px;font-weight:550;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-quiet{background:transparent;color:var(--text);border:1px solid transparent}.ds-quiet:hover{background:var(--hover)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "css": ".ds-control{font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif);font-size:13px;font-weight:500;border-radius:7px;padding:9px 14px;min-height:37px;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;cursor:pointer}.ds-control:disabled{opacity:.5;cursor:not-allowed}.ds-quiet{background:transparent;color:var(--text);border:1px solid transparent}.ds-quiet:hover{background:var(--hover)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
     },
     {
       "name": "Text field",
@@ -310,7 +485,7 @@
       "refersTo": "input",
       "description": "Readable data entry with a clear outline.",
       "html": "<label class=\"ds-field\"><span>Date attempted</span><input class=\"ds-control ds-input\" type=\"text\" placeholder=\"Choose a date\"></label>",
-      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;font:500 12px Manrope,Segoe UI,sans-serif;color:var(--text)}.ds-input{font:400 14px/1.5 Manrope,Segoe UI,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--input-line);border-radius:7px;padding:10px 12px;min-height:42px}.ds-input:hover{border-color:var(--input-hover)}.ds-input::placeholder{color:var(--muted);opacity:1}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;font:500 13px var(--font-ui,\"Open Sans\",Arial,sans-serif);color:var(--text)}.ds-input{font:400 14px/1.6 var(--font-ui,\"Open Sans\",Arial,sans-serif);color:var(--ink);background:var(--surface);border:1px solid var(--input-line);border-radius:7px;padding:10px 12px;min-height:42px}.ds-input:hover{border-color:var(--input-hover)}.ds-input::placeholder{color:var(--muted);opacity:1}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
     },
     {
       "name": "Labelled navigation",
@@ -318,21 +493,22 @@
       "refersTo": "nav-selected",
       "description": "Neutral selection with a retained label.",
       "html": "<button class=\"ds-control ds-nav\" aria-current=\"page\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8\"/></svg>Overview</button>",
-      "css": ".ds-nav{display:flex;gap:12px;align-items:center;min-height:40px;padding:9px 13px;background:var(--nav-active);color:var(--nav-on-active);border:0;border-radius:7px;font:650 13px Manrope,Segoe UI,sans-serif;cursor:pointer}.ds-nav:hover{background:var(--nav-active)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "css": ".ds-nav{display:flex;gap:12px;align-items:center;min-height:40px;padding:9px 13px;background:var(--surface,#f7f7f8);color:var(--ink,#24272c);border:0;border-radius:10px;font:600 13px var(--font-ui,\"Open Sans\",Arial,sans-serif);cursor:pointer}.ds-nav:hover{background:var(--surface,#f7f7f8)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
     },
     {
       "name": "Attachment chip",
       "kind": "chip",
-      "description": "A compact document action.",
-      "html": "<button class=\"ds-control ds-chip\">Question paper</button>",
-      "css": ".ds-chip{font:550 11px Manrope,Segoe UI,sans-serif;min-height:27px;padding:4px 7px;border:0;border-radius:5px;background:var(--soft);color:var(--text);cursor:pointer}.ds-chip:hover{background:var(--hover)}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "description": "A document-role label that opens its real attachment; filenames stay available in the accessible name.",
+      "html": "<button class=\"ds-control ds-chip\" aria-label=\"Open Question paper: 9709_s26_qp_12.pdf\" title=\"Open 9709_s26_qp_12.pdf\">Question paper</button>",
+      "css": ".ds-chip{font:400 12px/1.5 var(--font-ui,\"Open Sans\",Arial,sans-serif);min-height:30px;padding:5px 8px;border:0;border-radius:5px;background:var(--soft,#e2e6ea);color:var(--text,#424b55);text-align:left;white-space:normal;cursor:pointer;transition:background-color .16s ease}.ds-chip:hover{background:var(--hover,#dde2e7)}.ds-chip:focus-visible{outline:2px solid var(--focus,#5e7385);outline-offset:3px}",
+      "refersTo": "attachment-chip"
     },
     {
       "name": "Analytical surface",
       "kind": "card",
-      "description": "A reading surface whose depth comes from white space and soft elevation.",
+      "description": "A reading surface whose depth comes from tone and whitespace; flat in Light and White.",
       "html": "<section class=\"ds-analysis\"><h2>Performance over time</h2><p>Your completed papers, by component</p></section>",
-      "css": ".ds-analysis{padding:23px 24px 16px;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:none;font-family:Manrope,Segoe UI,sans-serif}.ds-analysis h2{font-size:17px;font-weight:650;letter-spacing:-.5px;margin:0 0 5px}.ds-analysis p{font-size:11px;color:var(--muted);margin:0}"
+      "css": ".ds-analysis{padding:25px 28px 22px;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:none;font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif)}.ds-analysis h2{font-family:var(--font-editorial,Newsreader,Georgia,serif);font-size:24px;font-weight:450;line-height:1.25;letter-spacing:-.015em;margin:0 0 5px}.ds-analysis p{font-size:12px;color:var(--muted);margin:0}"
     },
     {
       "name": "Examination feature",
@@ -340,30 +516,52 @@
       "refersTo": "feature-panel",
       "description": "The intentional dark feature plane.",
       "html": "<section class=\"ds-feature\"><h2>Next examination</h2><p>Add your confirmed examination date.</p><button class=\"ds-control ds-feature-action\">View exam plan</button></section>",
-      "css": ".ds-feature{background:var(--feature);color:var(--feature-ink);border-radius:12px;padding:24px;font-family:Manrope,Segoe UI,sans-serif}.ds-feature h2{font-size:13px;font-weight:500;color:var(--feature-muted);margin:0 0 22px}.ds-feature p{font-size:11px;line-height:1.8;color:var(--feature-muted)}.ds-feature-action{font:500 11px Manrope,Segoe UI,sans-serif;background:transparent;color:var(--feature-ink);border:0;padding:0;cursor:pointer}.ds-feature-action:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "css": ".ds-feature{background:var(--feature);color:var(--feature-ink);border-radius:12px;padding:24px;font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif)}.ds-feature h2{font-family:var(--font-editorial,Newsreader,Georgia,serif);font-size:22px;font-weight:450;line-height:1.25;color:var(--feature-muted);margin:0 0 22px}.ds-feature p{font-size:15px;line-height:1.65;color:var(--feature-muted)}.ds-feature-action{font:500 13px var(--font-ui,\"Open Sans\",Arial,sans-serif);background:transparent;color:var(--feature-ink);border:0;padding:0;cursor:pointer}.ds-feature-action:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
     },
     {
       "name": "Compact subject record",
       "kind": "custom",
-      "description": "An open row with separate identity, measures and existing action.",
-      "html": "<article class=\"ds-record\"><div><h3>Mathematics</h3><p>Cambridge 9709</p></div><button class=\"ds-control ds-syllabus\">Syllabus <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button></article>",
-      "css": ".ds-record{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 3px;border-bottom:1px solid var(--line);font-family:Manrope,Segoe UI,sans-serif;color:var(--ink)}.ds-record h3{font-size:13px;font-weight:600;line-height:1.6;margin:0 0 1px}.ds-record p{font-size:11px;color:var(--muted);margin:0}.ds-syllabus{font:600 11px Manrope,Segoe UI,sans-serif;color:var(--ink);border:0;background:transparent;cursor:pointer}.ds-syllabus:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}"
+      "description": "Compact subject identity with an authored parabola mark, measures and the existing syllabus action.",
+      "html": "<article class=\"ds-record\"><span class=\"ds-subject-mark\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M4 3v17h17 M6 6q6 22 13 0\"/></svg></span><div><h3>Mathematics</h3><p>Cambridge 9709</p></div><button class=\"ds-control ds-syllabus\">Syllabus <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button></article>",
+      "css": ".ds-record{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 3px;border-bottom:1px solid var(--line);font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif);color:var(--ink)}.ds-record h3{font-size:14px;font-weight:600;line-height:1.6;margin:0 0 1px}.ds-record p{font-size:12px;color:var(--muted);margin:0}.ds-syllabus{font:500 13px var(--font-ui,\"Open Sans\",Arial,sans-serif);color:var(--ink);border:0;background:transparent;cursor:pointer}.ds-syllabus:hover{text-decoration:underline}.ds-control:focus-visible{outline:2px solid var(--focus);outline-offset:3px}.ds-subject-mark{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:27px;height:27px;padding:4px;background:var(--subject-backplate,#24272c);color:#f7f7f8;border-radius:7px}.ds-record>div{flex:1}"
+    },
+    {
+      "name": "Subject collection",
+      "kind": "custom",
+      "refersTo": "collection-tab",
+      "description": "A real subject tab connects directly to its shared paper-library surface.",
+      "html": "<section class=\"ds-collection\"><div class=\"ds-collection-heading\"><div class=\"ds-collection-title\"><h2><svg class=\"ds-folder-mark\" width=\"44\" height=\"35\" viewBox=\"0 0 56 44\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 10V7a3 3 0 0 1 3-3h14l6 6h24a3 3 0 0 1 3 3v24a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V10z\" fill=\"var(--folder-back,#b7c0c9)\" stroke=\"var(--folder-edge,#8996a2)\"/><path d=\"M9 14h38v12H9z\" fill=\"var(--folder-page,#f7f7f8)\"/><path d=\"M3 18h50l-2 20a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3L3 18z\" fill=\"var(--folder-front,#d4dbe1)\" stroke=\"var(--folder-edge,#8996a2)\"/></svg>Mathematics</h2><p>Cambridge 9709</p></div><span class=\"ds-collection-count\">2 papers / 3 attempts</span></div><div class=\"ds-collection-body\"><span>Paper & documents</span><span>Latest attempt</span><span>Best full paper</span></div></section>",
+      "css": ".ds-collection{font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif);color:var(--ink,#24272c)}.ds-collection-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px}.ds-collection-title{background:var(--surface,#f7f7f8);border-radius:12px 12px 0 0;padding:15px 24px 13px}.ds-collection-title h2{display:flex;align-items:center;gap:11px;font-family:var(--font-editorial,Newsreader,Georgia,serif);font-size:22px;font-weight:450;letter-spacing:-.01em;line-height:1.3;margin:0}.ds-folder-mark{flex-shrink:0}.ds-collection-title p{font-size:12px;color:var(--muted,#626b75);margin:5px 0 0 55px}.ds-collection-count{padding-bottom:12px;font-size:12px;color:var(--muted,#626b75)}.ds-collection-body{display:flex;justify-content:space-between;gap:22px;background:var(--surface,#f7f7f8);padding:12px 24px;border-radius:0 12px 12px 12px;font-size:12px;color:var(--muted,#626b75)}"
+    },
+    {
+      "name": "Attachment file row",
+      "kind": "custom",
+      "description": "Filename, stored status and document role remain explicit, including on narrow screens.",
+      "html": "<div class=\"ds-file-row\"><svg width=\"21\" height=\"25\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" aria-hidden=\"true\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h8 M8 17h5\"/></svg><div class=\"ds-file-identity\"><strong>9709_s26_qp_12.pdf</strong><small>0.23 MB · Stored</small></div><span class=\"ds-file-role\">Question paper</span><button class=\"ds-file-open\">Open</button></div>",
+      "css": ".ds-file-row{display:flex;align-items:center;gap:14px;padding:19px 0;border-bottom:1px solid var(--line,#d9dde2);color:var(--muted,#626b75);font-family:var(--font-ui,\"Open Sans\",Arial,sans-serif)}.ds-file-identity{flex:1;min-width:0}.ds-file-identity strong{display:block;font-size:13px;font-weight:600;line-height:1.65;color:var(--ink,#24272c);overflow-wrap:anywhere}.ds-file-identity small{display:block;font-size:12px;line-height:1.7;margin-top:3px}.ds-file-role{display:inline-block;padding:3px 8px;border-radius:5px;background:var(--soft,#e2e6ea);font-size:12px;white-space:normal}.ds-file-open{font:500 13px var(--font-ui,\"Open Sans\",Arial,sans-serif);background:transparent;color:var(--text,#424b55);border:0;border-radius:7px;padding:9px 14px;cursor:pointer}.ds-file-open:hover{background:var(--hover,#dde2e7)}.ds-file-open:focus-visible{outline:2px solid var(--focus,#5e7385);outline-offset:3px}@media(max-width:760px){.ds-file-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:9px 10px;padding:20px 0}.ds-file-identity{grid-column:2;grid-row:1}.ds-file-role{grid-column:2;grid-row:2;justify-self:start}.ds-file-open{grid-column:3;grid-row:1;align-self:start}}"
     }
   ],
   "narrative": {
     "northStar": "The Academic Workspace",
-    "overview": "A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. The interface uses one coherent sans-serif family, open alignment and a small number of distinct surface treatments.\n\nLight mode is the primary identity. Off-white analytical surfaces sit on a soft-silver canvas, with a deeper silver sidebar and pure white reserved for elevated dialogs. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf.",
+    "overview": "A calm working environment where the evidence of study carries the visual weight. Apple minimalism supplies restraint, Linear supplies precision, Attio supplies record organization, and Things supplies straightforward lists. Newsreader gives major headings an editorial academic voice; Open Sans keeps functional evidence precise. Open alignment and a small number of distinct surface treatments preserve the calm workspace.\n\nLight mode is the primary identity. Off-white analytical surfaces sit on a soft-silver canvas, with a slightly deeper silver sidebar. Charcoal provides text, actions and intentional feature areas. Pure white is reserved for elevated dialogs. Dark mode uses neutral charcoal rather than a navy wash. The existing labelled sidebar and Study tools disclosure remain the navigation grammar. The second approved pass removes the notebook grid and decorative subject-cover shelf. Its folder-library extension uses real subject collections, joined tab-and-body surfaces, grey folder silhouettes and charcoal subject-symbol backplates within the same visual world.",
     "keyCharacteristics": [
       "Open reading areas and compact, aligned records.",
+      "Editorial serif headings paired with functional sans-serif evidence.",
       "Deliberate numerical hierarchy with tabular data.",
       "Quiet neutral controls with restrained slate-blue chart roles.",
-      "Short state transitions and full reduced-motion support."
+      "Short state transitions and full reduced-motion support.",
+      "Flat collection tabs and explicit document identities, with latest and best attempts kept distinct."
     ],
     "rules": [
       {
         "name": "The Role Consistency Rule",
         "body": "Assign colour through shared reading, action, focus and analytical roles so controls remain legible across themes.",
         "section": "colors"
+      },
+      {
+        "name": "The Editorial and Evidence Rule",
+        "body": "Use Newsreader for major headings and Open Sans for functional information. Paper identifiers and numeric results remain sans-serif even when they occupy a heading-sized position. All six appearance choices preserve this relationship and weight hierarchy.",
+        "section": "typography"
       },
       {
         "name": "The Evidence Scale Rule",
@@ -384,14 +582,18 @@
     "dos": [
       "Do give saved evidence and useful actions a clear reading order.",
       "Do keep labelled navigation, explicit focus states and readable supporting text.",
+      "Do pair Newsreader headings with Open Sans controls, identifiers and numerical evidence.",
       "Do vary open lists, analytical surfaces and intentional feature areas according to their purpose.",
-      "Do preserve existing data, routes and controls when extending this visual system."
+      "Do preserve existing data, routes and controls when extending this visual system.",
+      "Do join collection tabs to their bodies and keep attachment roles visible at mobile widths.",
+      "Do use real subject/document groupings and flat grey folder planes within the existing palette."
     ],
     "donts": [
       "Don't restore the notebook grid or decorative cover shelf to this approved workspace.",
       "Don't wash all surfaces in blue or rely on faint text for hierarchy.",
       "Don't turn every record into an identical bordered card.",
-      "Don't invent scores, dates or chart data to fill empty states."
+      "Don't invent scores, dates or chart data to fill empty states.",
+      "Don't turn folder styling into mock operating-system controls, a new Resources destination or a new upload mode.\r"
     ]
   }
 }
