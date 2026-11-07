@@ -10,7 +10,18 @@ async function localWrite(table,items,remove=false){const d=await db();return ne
 function storedSession(){try{return JSON.parse(localStorage.getItem('ct-session')||'null');}catch{return null;}}
 export const store={mode:localStorage.getItem('ct-mode')||'local',session:storedSession(),records:[],ready:false};
 function saveSession(s){store.session=s;if(s)localStorage.setItem('ct-session',JSON.stringify(s));else localStorage.removeItem('ct-session');}
-async function authRequest(path,body){const r=await fetch(`${config.supabaseUrl}/auth/v1/${path}`,{method:'POST',headers:{apikey:config.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.msg||data.error_description||data.message||'Sign-in failed. Please try again.');return data;}
+async function authRequest(path,body) {
+ const response=await fetch(`${config.supabaseUrl}/auth/v1/${path}`,{
+  method:'POST',headers:{apikey:config.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify(body)
+ });
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok){
+  const error=new Error(data.msg||data.error_description||data.message||'The account request failed. Try again.');
+  error.status=response.status;
+  throw error;
+ }
+ return data;
+}
 let refreshInFlight;
 async function token(){
  let s=store.session,latest=storedSession();
@@ -24,11 +35,69 @@ async function token(){
  return s.access_token;
 }
 async function cloud(path,options={}){const t=await token();const r=await fetch(config.supabaseUrl+path,{...options,headers:{apikey:config.supabaseKey,Authorization:`Bearer ${t}`,...options.headers}});if(!r.ok){let message=await r.text(),code;try{const j=JSON.parse(message);code=j.code||j.error;message=j.message||j.error_description||j.error||message;}catch{}const error=new Error(message||`Cloud request failed (${r.status}).`);error.status=r.status;error.code=code;throw error;}return r;}
-export async function signIn(email,password){const s=await authRequest('token?grant_type=password',{email,password});s.expires_at=Math.floor(Date.now()/1000)+s.expires_in;saveSession(s);await switchMode('cloud');}
-export async function signUp(email,password){const s=await authRequest('signup?redirect_to='+encodeURIComponent(location.origin+'/' ),{email,password});if(s.access_token){s.expires_at=Math.floor(Date.now()/1000)+s.expires_in;saveSession(s);await switchMode('cloud');return true;}return false;}
+async function openCloudSession(session) {
+ const previous=store.session;
+ saveSession(session);
+ try { await switchMode('cloud'); }
+ catch(error) { saveSession(previous); throw error; }
+}
+function withExpiry(session) {
+ return {...session,expires_at:Math.floor(Date.now()/1000)+Number(session.expires_in||3600)};
+}
+export async function signIn(email,password) {
+ const session=await authRequest('token?grant_type=password',{email,password});
+ await openCloudSession(withExpiry(session));
+}
+export async function signUp(email,password) {
+ const session=await authRequest('signup?redirect_to='+encodeURIComponent(location.origin+'/'),{email,password,data:{revision_onboarding:true}});
+ if(!session.access_token)return false;
+ await openCloudSession(withExpiry(session));
+ return true;
+}
+export function requestPasswordReset(email) {
+ return authRequest('recover?redirect_to='+encodeURIComponent(location.origin+'/'),{email});
+}
+let recoverySession;
+export function hasRecoverySession() {
+ return Boolean(recoverySession&&recoverySession.expires_at>Date.now()/1000);
+}
+export async function resetPassword(password) {
+ if(!hasRecoverySession())throw new Error('Request a fresh password recovery link.');
+ const headers={apikey:config.supabaseKey,Authorization:`Bearer ${recoverySession.access_token}`,'Content-Type':'application/json'};
+ const result=await fetch(config.supabaseUrl+'/auth/v1/user',{method:'PUT',headers,body:JSON.stringify({password})});
+ if(!result.ok){
+  const error=await result.json().catch(()=>({}));
+  throw new Error(error.msg||error.message||'Unable to update the password. Try again or request a fresh link.');
+ }
+ const accountId=recoverySession.user.id;
+ recoverySession=null;
+ if(store.session?.user?.id===accountId){
+  saveSession(null);
+  store.mode='local';
+  store.records=[];
+  localStorage.setItem('ct-mode','local');
+ }
+}
+export async function consumeAuthCallback() {
+ const hash=new URLSearchParams(location.hash.slice(1));
+ if(!hash.has('access_token')&&!hash.has('error'))return null;
+ history.replaceState(null,'',location.pathname+location.search);
+ if(hash.has('error'))return 'invalid';
+ const access_token=hash.get('access_token'),refresh_token=hash.get('refresh_token');
+ if(!access_token||!refresh_token)return 'invalid';
+ const result=await fetch(config.supabaseUrl+'/auth/v1/user',{headers:{apikey:config.supabaseKey,Authorization:`Bearer ${access_token}`}});
+ if(!result.ok)return 'invalid';
+ const session=withExpiry({access_token,refresh_token,expires_in:hash.get('expires_in'),user:await result.json()});
+ if(hash.get('type')==='recovery'){
+  recoverySession=session;
+  return 'recovery';
+ }
+ await openCloudSession(session);
+ return 'signed-in';
+}
 export async function signOut(){try{if(store.session)await cloud('/auth/v1/logout',{method:'POST'});}finally{saveSession(null);await switchMode('local');}}
 export async function switchMode(mode){if(mode==='cloud'&&!store.session)throw new Error('Sign in before opening your cloud workspace.');const previous=store.mode;store.mode=mode;try{await loadRecords();localStorage.setItem('ct-mode',mode);}catch(e){store.mode=previous;throw e;}}
-export async function initialize(){const h=new URLSearchParams(location.hash.slice(1));if(h.get('access_token')){const userResponse=await fetch(`${config.supabaseUrl}/auth/v1/user`,{headers:{apikey:config.supabaseKey,Authorization:`Bearer ${h.get('access_token')}`}});if(userResponse.ok){saveSession({access_token:h.get('access_token'),refresh_token:h.get('refresh_token'),expires_at:Math.floor(Date.now()/1000)+Number(h.get('expires_in')||3600),user:await userResponse.json()});store.mode='cloud';localStorage.setItem('ct-mode','cloud');history.replaceState(null,'',location.pathname);}}if(store.mode==='cloud'&&!store.session)store.mode='local';await loadRecords();store.ready=true;}
+export async function initialize(){const callback=await consumeAuthCallback();if(store.mode==='cloud'&&!store.session)store.mode='local';if(callback!=='signed-in'&&callback!=='recovery')await loadRecords();store.ready=true;}
 export async function loadRecords(){let next;if(store.mode==='local')next=await localRead('records');else{next=[];for(let start=0;;start+=1000){const r=await cloud(`/rest/v1/revision_records?select=id,kind,payload,updated_at&order=id.asc&offset=${start}&limit=1000`),page=await r.json();next.push(...page.map(r=>({...r.payload,id:r.id,kind:r.kind})));if(page.length<1000)break;}}store.records=next;return next;}
 export const all=kind=>store.records.filter(r=>r.kind===kind);
 export const get=id=>store.records.find(r=>r.id===id);

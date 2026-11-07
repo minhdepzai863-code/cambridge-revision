@@ -4,6 +4,8 @@ export const isRecordId=id=>typeof id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9
 const types=new Set(['application/pdf','image/png','image/jpeg','image/webp']);
 const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const numeric=(v,min=0)=>v!==''&&v!=null&&Number.isFinite(+v)&&+v>=min;
+const day=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v));
+const textWithin=(v,length)=>typeof v==='string'&&v.length<=length;
 function validateRecord(r){
   if(['attempt','session','mistake','question','exam','topic','threshold'].includes(r.kind)&&!SUBJECTS[r.subject])throw Error('The backup contains an invalid subject.');
   if(r.kind==='attempt'){
@@ -24,6 +26,9 @@ function validateRecord(r){
     if(r.subjects!==undefined&&(!Array.isArray(r.subjects)||r.subjects.some(s=>!Object.hasOwn(SUBJECTS,s))))throw Error('The backup contains an invalid subject selection.');
     if(r.year!==undefined&&![2026,2027].includes(+r.year))throw Error('The backup contains an unsupported syllabus year.');
     if(r.routes!==undefined&&(!object(r.routes)||Object.entries(r.routes).some(([s,route])=>!SUBJECTS[s]||!Object.hasOwn(ROUTES[s],route))))throw Error('The backup contains an invalid examination route.');
+    if(r.qualification!==undefined&&!['all','AS','A2'].includes(r.qualification))throw Error('The backup contains an invalid qualification stage.');
+    if(r.studyPlan!==undefined&&(!Array.isArray(r.studyPlan)||r.studyPlan.some(p=>!object(p)||!isRecordId(p.id)||!textWithin(p.title,120)||!p.title.trim()||!day(p.date)||!numeric(p.minutes,1)||p.minutes>720||(p.subject&&!Object.hasOwn(SUBJECTS,p.subject))||typeof p.done!=='boolean')))throw Error('The backup contains an invalid planned session.');
+    if(r.bookmarks!==undefined&&(!Array.isArray(r.bookmarks)||r.bookmarks.some(b=>!object(b)||!isRecordId(b.id)||!isRecordId(b.recordId)||!['attempt','question'].includes(b.kind)||!Object.hasOwn(SUBJECTS,b.subject)||!['AS','A2'].includes(b.level)||!textWithin(b.title,220)||!textWithin(b.section,100)||(b.reviewOn&&!day(b.reviewOn)))))throw Error('The backup contains an invalid bookmark.');
   }
 }
 // Validate the entire manifest before any file or record is written.

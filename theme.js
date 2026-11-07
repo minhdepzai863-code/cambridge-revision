@@ -11,7 +11,7 @@
     document.documentElement.dataset.theme = theme === 'system' ? (dark.matches ? 'black' : 'white') : theme;
     document.documentElement.dataset.grid = grid ? 'on' : 'off';
     document.documentElement.dataset.appearance = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', document.documentElement.dataset.theme === 'black' ? '#191a1c' : theme === 'current' ? '#f6f7f1' : theme === 'paper' ? '#faf5e9' : '#edeef0');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', document.documentElement.dataset.theme === 'black' ? '#171817' : '#f7f6f2');
   };
   window.revisionAppearance = {
     get theme() { return theme; },

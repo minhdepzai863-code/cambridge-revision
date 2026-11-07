@@ -17,7 +17,7 @@ Upload real papers, preserve repeat attempts, mark individual questions, correct
 Use official syllabus editions for selected exam year. Never invent marks, grades, exam dates, or Cambridge question provenance. Partial attempts never receive a full-paper grade. Component thresholds are separate from qualification grades. Retain every attempt unless explicitly deleted. Source must be published to the user's GitHub, followed by browser verification.
 
 ## Brand Commitments
-The 6 November 2026 second design pass follows Apple minimalism, Linear precision, Attio workspace organization and Things simplicity, with Craft informing document presentation. Light mode is the primary identity: soft-silver canvas, off-white reading surfaces, a deeper silver sidebar, charcoal text and restrained slate-blue charts. Use a neutral charcoal dark mode. Preserve the labelled sidebar and five core destinations. The redesign changes presentation only; preserve functionality, data structures, routes, authentication, uploads, attempts and backend connections. Motion may change to fit the visual system.
+The revision workspace uses ivory, warm white and stone, with charcoal ink and a single muted slate-green accent. Dark mode uses neutral charcoal. Cambridge editorial typography, Apple restraint, Attio organization and PsychSAT workflow grouping inform the identity. The public folio uses credited archival library images and a labelled paper record. Keep the independent identity and preserve existing accounts, paper attempts, uploads and backend connections.
 
 ## Evidence on Hand
 Four usable screenshots (20261105180810, 14, 18, 21); two other PNGs contain only a narrow strip. No original application source or historical user data has been imported.
@@ -27,7 +27,7 @@ Persistence before decoration. Measurements before confidence. Correct provenanc
 
 ## Current appearance and complexity guidance
 
-Performance, exam preparation and recent work lead the Overview. Subjects use compact management rows beneath them. Papers read as a document library with attachment controls and separate attempt history. Remove the notebook grid and decorative subject-cover shelf from the interface. Existing theme choices remain available; Light is the primary neutral identity. Secondary capabilities remain under Study tools. No new search, workflow, persistence or backend feature is part of this redesign.
+The dashboard leads with the next useful task and exam preparation, followed by actual marks and study activity. Subjects use compact management rows. The paper library groups attachments and repeat attempts and provides scoped search. Workspace, Practice, Review and Resources group destinations. Account preferences, planned sessions and bookmarks use the existing private settings records. The public landing and dedicated account pages sit apart from the cloud dashboard and the explicit local workspace.
 
 ## Academic collection presentation
 

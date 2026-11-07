@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const owner='a54180be-48bc-456b-99ba-5c0cd5e4557b';
 let values=new Map();
 globalThis.localStorage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)};
-const {store,loadRecords}=await import('../store.mjs');
+const {store,loadRecords,consumeAuthCallback,hasRecoverySession,requestPasswordReset,resetPassword}=await import('../store.mjs');
 function session(access='expired-test-token',expires=0){return {access_token:access,refresh_token:'test-refresh-token',expires_at:expires,user:{id:owner}};}
 function setup(s=session()){values=new Map([['ct-mode','cloud'],['ct-session',JSON.stringify(s)]]);store.mode='cloud';store.session=structuredClone(s);store.records=[];}
 
@@ -32,4 +32,39 @@ test('Signing out in another tab prevents reuse of an in-memory token',async()=>
   setup(session('still-unexpired-test-token',Math.floor(Date.now()/1000)+3600));values.delete('ct-session');
   globalThis.fetch=async()=>{assert.fail('No request should be sent after sign-out.');};
   await assert.rejects(loadRecords(),/Sign in/);
+});
+
+test('Password recovery uses an isolated verified token and clears the callback URL',async()=>{
+  const current=session('signed-in-account-token',Math.floor(Date.now()/1000)+3600);
+  setup(current);
+  globalThis.location={origin:'https://workspace.example',pathname:'/',search:'',hash:'#type=recovery&access_token=recovery-token&refresh_token=recovery-refresh'};
+  let replaced,verified=false,changed=false;
+  globalThis.history={replaceState:(_state,_title,path)=>{replaced=path;}};
+  globalThis.fetch=async(url,options)=>{
+    const path=new URL(url).pathname;
+    if(path==='/auth/v1/recover'){
+      assert.equal(new URL(url).searchParams.get('redirect_to'),'https://workspace.example/');
+      assert.equal(JSON.parse(options.body).email,'test@example.com');
+      return new Response('{}');
+    }
+    assert.equal(path,'/auth/v1/user');
+    assert.equal(options.headers.Authorization,'Bearer recovery-token');
+    assert.equal(replaced,'/');
+    if(options.method==='PUT'){
+      assert.equal(JSON.parse(options.body).password,'sample-password');
+      changed=true;
+    }else verified=true;
+    return new Response(JSON.stringify({id:owner}));
+  };
+  await requestPasswordReset('test@example.com');
+  assert.equal(await consumeAuthCallback(),'recovery');
+  assert.equal(verified,true);
+  assert.equal(hasRecoverySession(),true);
+  assert.equal(store.session.access_token,current.access_token);
+  await resetPassword('sample-password');
+  assert.equal(changed,true);
+  assert.equal(hasRecoverySession(),false);
+  assert.equal(store.session,null);
+  assert.equal(values.has('ct-session'),false);
+  await assert.rejects(resetPassword('sample-password'),/fresh password recovery link/);
 });

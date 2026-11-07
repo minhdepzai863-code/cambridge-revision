@@ -23,3 +23,7 @@ The old welcome illustrations remain in source history but are not included in t
 ## Academic editorial fonts
 
 The latest user-approved pairing uses Newsreader for editorial headings and Open Sans for functional UI and evidence. Both normal variable faces are self-hosted from the official Google Fonts repository (ofl/newsreader and ofl/opensans), with their unmodified SIL Open Font License files beside them. Only the two used faces are loaded; no university font files or identity artwork are included. Previous Manrope/DM Sans files remain source history and are excluded from the new production build.
+# Landing page archive images
+
+- `assets/pepys-library.jpg` is the Pepys Library interior from H. B. Wheatley's 1899 edition of *The Diary of Samuel Pepys: Pepysiana*. Public-domain photograph, sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Pepys_Library_Cambridge_interior.jpg). Served at 1280 × 898, with the source credited in the page caption.
+- `assets/cambridge-library-etching.jpg` is Thomas Rowlandson's *Inside View of the Public Library, Cambridge* (1809), The Metropolitan Museum of Art, 59.533.1635. [The Met's object record](https://www.metmuseum.org/art/collection/search/786809) and [CC0 source image](https://commons.wikimedia.org/wiki/File:Inside_View_of_the_Public_Library,_Cambridge_MET_DP883794.jpg). Served at 1280 × 944 and lazy-loaded. The displayed image is cropped by CSS.
