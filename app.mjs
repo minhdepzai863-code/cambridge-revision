@@ -131,7 +131,7 @@ function render() {
   return;
  }
  if(path==='/'&&!routeNames.has(location.hash.slice(1).split(':')[0])){
-  $('#app').innerHTML=landingView(Boolean(store.session));
+  $('#app').innerHTML=landingView(Boolean(store.session), landingDashboard());
   document.title='Cambridge Revision';
   return;
  }
@@ -161,6 +161,17 @@ function go(route,id) {
 }
 function viewContext(){
  return {state,esc,icon,subjectIcon,button,link,heading,filters,badge,pct,mins,date,scoped,all,activeSubjects,countdownText,localDate,input,select};
+}
+function landingDashboard(){
+ const attempts=[54,57,60,63].map((marks,index)=>{
+  const day=new Date();
+  day.setDate(day.getDate()-[12,7,3,0][index]);
+  return {id:'demo-'+index,subject:'9709',paper:'12',series:'s',year:2024,date:localDate(day),scope:'full',marks,max:75,minutes:45+index*5};
+ });
+ const records=kind=>kind==='attempt'?attempts:[];
+ const view={...viewContext(),preview:true,state:{},scoped:records,all:records,activeSubjects:()=>[],
+  activity:studyEvents(attempts,[],[]),dueBookmarks:0,streak:0};
+ return overviewView(view);
 }
 function home(){
  const c=viewContext();

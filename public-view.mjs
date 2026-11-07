@@ -14,48 +14,28 @@ export function publicShell(content, signedIn = false, landing = false) {
   </div>`;
 }
 
-export function landingView(signedIn) {
+export function landingView(signedIn, dashboard) {
   const start = signedIn ? '/dashboard' : '/signup';
   return publicShell(`<div class="folio-width">
     <section class="folio-hero">
       <div class="folio-intro">
-        <h1>Every paper.<br>Every improvement.</h1>
+        <h1><span>Every paper.</span> <span>Every improvement.</span></h1>
         <p class="folio-edition">Cambridge International AS &amp; A Level revision</p>
         <p>Bring your past papers, marks and corrections together. See where you stand and decide what to study next.</p>
         <div class="folio-actions"><a class="btn primary" href="${start}">Start revising</a><a class="btn" href="#features">Explore features</a></div>
         <a class="folio-local" href="/workspace">Use on this device without an account</a>
       </div>
-      <figure class="folio-archive">
-        <img src="/assets/pepys-library.jpg" alt="Historic photograph of the Pepys Library bookcases and reading desks" width="1280" height="898" fetchpriority="high">
-        <figcaption><span>The Pepys Library, Cambridge</span><a href="https://commons.wikimedia.org/wiki/File:Pepys_Library_Cambridge_interior.jpg">1899 archive photograph</a></figcaption>
-      </figure>
+      <figure class="folio-preview landing-dashboard" aria-label="Workspace preview with demo paper marks, score trend and study activity"><figcaption><span>${book} Workspace dashboard</span><span>Demo data</span></figcaption><div class="landing-dashboard-body" inert>${dashboard}</div></figure>
     </section>
-    <section class="folio-method" id="method" aria-label="How it works">
-      <article><span>01</span><div><h2>Log the paper</h2><p>Keep the question paper, mark scheme and your working together.</p></div></article>
-      <article><span>02</span><div><h2>Find the lost marks</h2><p>Record scores by component and link errors to syllabus topics.</p></div></article>
-      <article><span>03</span><div><h2>Return to the question</h2><p>Use corrections, bookmarks and spaced review to plan the next session.</p></div></article>
-    </section>
-    <section class="folio-tour" id="features">
-      <div class="folio-tour-intro"><h2>One paper. A record of what changed.</h2><p>Compare attempts in the same place you keep the paper, mark scheme and your working. When you’re ready to revisit a question, the correction is there too.</p></div>
-      <figure class="folio-preview" aria-labelledby="sample-caption">
-        <figcaption id="sample-caption"><span>${book} Revision workspace</span><span>Example data</span></figcaption>
-        <div class="folio-preview-body">
-          <div class="folio-preview-heading"><div><p>Mathematics / 9709</p><h2>Paper record</h2></div><span class="folio-preview-tag">Paper 12</span></div>
-          <div class="folio-preview-score"><div><strong>84%</strong><span>Latest attempt</span></div><div><strong>+12</strong><span>Percentage points</span></div></div>
-          <svg viewBox="0 0 420 95" class="folio-preview-chart" role="img" aria-label="Example scores of 72, 77 and 84 percent"><path d="M10 23H410M10 52H410M10 81H410" stroke="var(--line)"/><path d="M22 70L210 51 398 25" stroke="var(--chart-high)" stroke-width="2.5" fill="none"/><g fill="var(--chart-high)"><circle cx="22" cy="70" r="4"/><circle cx="210" cy="51" r="4"/><circle cx="398" cy="25" r="4"/></g></svg>
-          <div class="folio-preview-row"><span>9709/12/M/J/24</span><strong>63 / 75</strong><span>Latest</span></div>
-          <div class="folio-preview-row"><span>9709/12/M/J/24</span><strong>54 / 75</strong><span>First attempt</span></div>
-          <div class="folio-preview-note"><span>Next review</span><strong>Q6 · Differentiation</strong></div>
-        </div>
-      </figure>
-    </section>
-    <section class="folio-features">
-      <header><h2>Follow the evidence.</h2><p>Build a record you can use when deciding what to revise next.</p></header>
-      <dl><div><dt>Past papers and attachments</dt><dd>Group files by paper and compare repeat attempts without losing earlier scores.</dd></div>
-      <div><dt>Marks and progress</dt><dd>Read score trends by subject and component, alongside time spent and topics that cost marks.</dd></div>
-      <div><dt>Mistakes and bookmarks</dt><dd>Keep corrections and deliberately saved questions in separate lists.</dd></div>
-      <div><dt>Study plan and exams</dt><dd>Plan sessions around dates confirmed by your centre, with due reviews and recent activity in view.</dd></div></dl>
-      <figure class="folio-print"><img src="/assets/cambridge-library-etching.jpg" width="1280" height="944" loading="lazy" alt="Thomas Rowlandson’s 1809 print showing readers among the Cambridge library shelves"><figcaption><a href="https://www.metmuseum.org/art/collection/search/786809">Thomas Rowlandson, Cambridge public library, 1809. The Metropolitan Museum of Art.</a></figcaption></figure>
+    <section class="landing-walkthrough" id="features">
+      <header><h2>From paper to your next revision session.</h2><p>Keep the evidence from each attempt in one place.</p></header>
+      <div class="landing-walkthrough-content" id="method">
+        <img src="/assets/exam-preparation.png" width="971" height="728" loading="lazy" alt="Worked exam practice sheets and a pencil on a desk">
+        <ol><li><h3>Upload the paper</h3><p>Keep the question paper, mark scheme and your working together.</p></li>
+        <li><h3>Record your marks</h3><p>Compare attempts by paper and component.</p></li>
+        <li><h3>Log the mistake</h3><p>Link lost marks to a topic and write down the correction.</p></li>
+        <li><h3>Review and revise</h3><p>Return to corrections and bookmarks when they’re due.</p></li></ol>
+      </div>
     </section>
     <section class="folio-end"><div><h2>Start with your next paper.</h2><p>Choose your subjects and set up a workspace for the exams you’re preparing for.</p></div><a class="btn primary" href="${start}">Start revising</a></section>
   </div>`, signedIn, true);

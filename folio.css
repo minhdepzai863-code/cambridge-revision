@@ -321,3 +321,37 @@ html { scroll-padding-top: 26px; }
   .folio-preview-body { padding-inline: 13px; }
   .subject-checks { grid-template-columns: 1fr; }
 }
+.public-folio:has(.landing-dashboard) .folio-width { width: min(100% - clamp(36px, 6vw, 100px), 1450px); }
+.folio-hero:has(.landing-dashboard) { grid-template-columns: minmax(0,43fr) minmax(0,57fr); gap: clamp(24px,4vw,66px); }
+.folio-hero:has(.landing-dashboard) .folio-intro { container-type: inline-size; }
+.folio-hero:has(.landing-dashboard) h1 { font-size: min(9.9cqi,78px); }
+.folio-hero:has(.landing-dashboard) h1 span { display: block; white-space: nowrap; }
+.landing-dashboard-body { padding: clamp(12px,2vw,26px); }
+.landing-dashboard .dashboard-summary { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin-bottom: 18px; }
+.landing-dashboard .dashboard-summary > div:nth-child(n+4), .landing-dashboard .trend-component, .landing-dashboard .chart-scroll-hint { display: none; }
+.landing-dashboard .dashboard-summary > div { grid-area: auto; padding-left: 8px; }
+.landing-dashboard .dashboard-summary > div:first-child { padding-left: 0; }
+.landing-dashboard .dashboard-summary strong, .landing-dashboard .dashboard-summary .primary-measure strong { font-size: clamp(19px,2.3vw,34px); }
+.landing-dashboard .overview-composition { grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); grid-template-areas: "performance activity"; gap: 14px; }
+.landing-dashboard .performance-module { padding: 12px; background: var(--soft); }
+.landing-dashboard .performance-plot > .line-chart { min-width: 0; width: 100%; height: auto; min-height: 0; }
+.landing-dashboard .section-heading { margin-bottom: 8px; }
+.landing-dashboard .section-heading h2 { font-size: 19px; }
+.landing-dashboard .section-heading .text-link { display: none; }
+.landing-dashboard .dashboard-activity { padding-block: 10px; }
+.landing-dashboard .activity-calendar button { min-height: 24px; font-size: 11px; }
+.landing-walkthrough { padding-block: clamp(28px,5vw,68px); border-top: 1px solid var(--line); }
+.landing-walkthrough header { margin-bottom: 24px; }
+.landing-walkthrough h2 { font: 450 clamp(33px,4vw,54px)/1.1 var(--font-editorial); margin: 0; }
+.landing-walkthrough h3 { margin: 0; font: 450 25px/1.15 var(--font-editorial); }
+.landing-walkthrough p { margin: 5px 0 0; color: var(--muted); max-width: 55ch; }
+.landing-walkthrough-content { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(22px,5vw,68px); align-items: center; }
+.landing-walkthrough img { width: 100%; height: auto; display: block; border-radius: 5px; }
+.landing-walkthrough ol { margin: 0; padding-left: 28px; }
+.landing-walkthrough li { padding: 12px 0 12px 5px; border-bottom: 1px solid var(--line); }
+@media (max-width: 900px) {
+ .folio-hero:has(.landing-dashboard), .landing-walkthrough-content { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 500px) {
+ .landing-dashboard .overview-composition { grid-template-columns: minmax(0,1fr); grid-template-areas: "performance" "activity"; }
+}
