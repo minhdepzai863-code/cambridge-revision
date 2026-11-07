@@ -241,7 +241,7 @@ Paper search puts the field and apply action side by side on wide screens and wr
 
 ## Elevation & Depth
 
-Tonal separation and fine rules do most of the work. The sample ledger has a soft shadow (`0 14px 40px rgb(24 27 24 / .07)`) inside the stone tour. The dashboard next task and examination note meet as two planes. Paper collections share a flat reading surface. Dialogs interrupt with a backdrop and shadow. Ivory dialogs use an elevated warm-white surface and `0 18px 60px rgba(36,39,44,.14)`.
+Tonal separation and fine rules do most of the work. The sample ledger has a soft shadow (`0 14px 40px rgb(24 27 24 / .07)`) inside the stone tour. A tinted next-task panel leads the dashboard. A quieter examination panel sits beside it on wider screens and follows it on phones. Paper collections share a flat reading surface. Dialogs interrupt with a backdrop and shadow. Ivory dialogs use an elevated warm-white surface and `0 18px 60px rgba(36,39,44,.14)`.
 
 ## Shapes
 
@@ -249,13 +249,13 @@ The public book mark uses 8px corners. Standard buttons, fields and selected nav
 
 ## Components
 
-### Public header, archive and sample ledger
+### Public header, dashboard preview and paper walkthrough
 
-The header pairs the open-book mark with the Cambridge Revision name and an independent-workspace descriptor. Features and How it works are landing anchors. The compact header retains the 44px appearance button, Log in and Get started. Signed-in visitors see Open dashboard. The footer identifies the independent project and links to the local workspace.
+The header pairs the open-book mark with the Cambridge Revision name and an independent-workspace descriptor. Dashboard preview and How it works are landing anchors. The compact header retains the 44px appearance button, Log in and Get started. Signed-in visitors see Open dashboard. The footer identifies the independent project and links to the local workspace.
 
-The public headline leads with the qualification line immediately underneath. Beside it, the hero uses the 1899 Pepys Library interior photograph, cropped to a 1.38 aspect ratio, with descriptive alt text and a visible source credit. The lower print credits Thomas Rowlandson and The Metropolitan Museum of Art. [ASSETS.md](ASSETS.md) records the source and rights for both images.
+The public hero uses a full-height film with top navigation and a bottom-aligned headline, supporting copy and paired actions. Warm ink, ivory and restrained brass apply to the public stage. The split paper tablet follows the hero. A scroll-driven route leads into the walkthrough, and the rendered Overview appears below it with marks and activity labelled as demo data.
 
-The sample ledger is real HTML with a small inline chart, a stone caption strip and an **Example data** label. A paper code, aligned scores, separate first and latest attempts, and a next-review note show the relationship between evidence and action.
+The four-step walkthrough uses a stable frame, shared question marks table and a supplied exam-preparation photograph. Each tab has a visible focus state and supports pointer, touch, arrow keys, Home and End. The example adapts Cambridge International 9709/11 May/June 2024 Q1 and its published marking guidance. The sample working and marks are labelled as demo data.
 
 ### Workspace navigation
 
@@ -280,14 +280,14 @@ Subject collections attach the tab to a shared reading surface. Document role ch
 
 ### Motion
 
-Standard button states transition in 160ms. Dialogs use a 160ms ease-out entrance and the subject drawer uses a 200ms slide. Supported browsers give the folio tour and print a small scroll-linked translation while motion is enabled. The effect yields to keyboard focus. Reduced-motion preference disables transitions, animations and smooth scrolling.
+Standard button states transition in 160ms. Dialogs use a 160ms ease-out entrance and the subject drawer uses a 200ms slide. The compact hero film fades into the paper surface and autoplays while visible. The Appearance menu contains the Background motion setting. Smaller screens get a smaller video; reduced-motion and data-saving users start on the poster. In the tablet preview, the pen sweeps to the question, draws an underline, then points to the mark scheme and returns to the edge of the tablet. It runs when the tablet first comes into view and when the Upload step is reopened. The journey trace follows scroll progress and its four steps are the walkthrough tabs. Pointer-triggered tab changes use a 180ms fade and short translation while keeping the step controls in place. Dashboard route changes use a 140ms fade for pointer navigation. Reduced motion starts with the poster and a completed trace, and omits automatic pen playback, tab and route movement, and smooth scrolling.
 
 ## Do's and Don'ts
 
 - Do give the next useful task and saved evidence a clear reading order.
 - Do pair editorial headings with functional labels, codes and tabular results.
 - Do keep route, focus and progress states legible in both themes.
-- Do keep archival source credits visible and label illustrative scores as example data.
+- Do credit sourced sample questions and label illustrative scores as demo data.
 - Do keep file roles, attempt scope and score labels visible at narrow widths.
 - Don't invent scores, grades, exam dates or provenance for workspace records.
 - Don't use institutional logos, arms or wordmarks for the independent project.

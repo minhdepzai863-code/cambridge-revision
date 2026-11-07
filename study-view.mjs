@@ -39,7 +39,7 @@ export function eventRows(events,c) {
   }).join('');
 }
 
-export function activityCalendar(events,c,days=28) {
+export function activityCalendar(events,c,days=28,{planner=false}={}) {
   const {state,esc,date,mins,link}=c;
   const today=new Date();
   const selected=state.activityDate;
@@ -56,7 +56,7 @@ export function activityCalendar(events,c,days=28) {
   const week=events.filter(event=>event.date>=localDate(since)&&event.date<=localDate(today));
   const active=events.filter(event=>event.date===selected);
   const minutes=week.reduce((total,event)=>total+(event.type==='Review'?0:Number(event.record.minutes)||0),0);
-  return `<section class="dashboard-activity"><div class="section-heading"><div><h2>Study activity</h2><p>Last 7 days: ${mins(minutes)} studied · ${week.filter(e=>e.type==='Paper').length} paper attempts · ${week.filter(e=>e.type==='Review').length} reviews</p></div>${link('Open history','history')}</div>
+  return `<section class="dashboard-activity"><div class="section-heading"><div><h2>Study activity</h2><p>Last 7 days: ${mins(minutes)} studied · ${week.filter(e=>e.type==='Paper').length} paper attempts · ${week.filter(e=>e.type==='Review').length} reviews</p></div><div class="activity-links">${link('Open history','history')}${planner?link('Exam planner','exams'):''}</div></div>
     <div class="activity-calendar" aria-label="Study calendar">${cells}</div><div class="activity-calendar-legend"><span>Last ${days} days</span><span>Today</span></div>
     ${selected?`<div class="activity-day"><h3>${date(selected)}</h3>${active.length?`<ul>${active.map(event=>`<li>${esc(event.type)} · ${esc(eventTitle(event))}</li>`).join('')}</ul>`:'<p>No recorded activity for this date.</p>'}</div>`:''}
   </section>`;
@@ -68,5 +68,6 @@ export function nextStudyTask({draft,due,planned,attempts,questions,dueBookmarks
   if(dueBookmarks)return {title:'Revisit a saved question',copy:'A bookmark is ready for review.',action:'review',label:'Open review queue'};
   if(planned.length)return {title:planned[0].title,copy:'Your next planned session.',action:'plan',label:'Open study plan'};
   if(attempts.length&&questions.length)return {title:'Practise a syllabus topic',copy:'Choose from the questions already saved in your workspace.',action:'practice',label:'Open focused study'};
+  if(!attempts.length)return {title:'Log your first paper',copy:'Add the paper and mark scheme, then record your marks and working time.',action:'log',label:'Log a paper'};
   return {title:'Log your next paper',copy:'Add the paper and mark scheme, then record your marks and working time.',action:'log',label:'Log a paper'};
 }
