@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /dashboard
+Disallow: /workspace
+Sitemap: https://cambridge-revision.vercel.app/sitemap.xml

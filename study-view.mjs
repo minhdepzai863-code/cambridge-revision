@@ -49,7 +49,7 @@ export function activityCalendar(events,c,days=28,{planner=false}={}) {
     const day=new Date(today);
     day.setDate(day.getDate()+index-days+1);
     const key=localDate(day), count=counts.get(key)||0;
-    return `<button type="button" class="heat-cell intensity-${Math.min(count,3)}" data-action="activity-day" data-date="${key}" aria-pressed="${selected===key}" aria-label="${date(key)}, ${count} ${count===1?'activity':'activities'}" title="${date(key)}: ${count}">${day.getDate()}</button>`;
+    return `<button type="button" class="heat-cell intensity-${Math.min(count,3)}" data-action="activity-day" data-date="${key}" aria-pressed="${selected===key}" aria-label="${day.getDate()} · ${date(key)}, ${count} ${count===1?'activity':'activities'}" title="${date(key)}: ${count}">${day.getDate()}</button>`;
   }).join('');
   const since=new Date(today);
   since.setDate(since.getDate()-6);

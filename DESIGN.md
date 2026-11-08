@@ -195,13 +195,13 @@ components:
 
 Cambridge Revision brings paper records, marks and corrections into one study sequence. Ivory, stone and warm-white surfaces frame the work in light mode. Neutral charcoal carries the same hierarchy in dark mode. Newsreader gives the page an editorial voice, and Open Sans keeps controls and results easy to scan.
 
-The public folio introduces the method with a credited archival photograph and an explicitly labelled sample record. The workspace carries that visual language into private or device-local study, where the next action, exam preparation and actual saved evidence lead the page. The open-book symbol and name identify an independent tool.
+The public folio introduces the method through an interactive sample record from one Cambridge Mathematics paper. The workspace carries that visual language into private or device-local study, where the next action, exam preparation and actual saved evidence lead the page. The open-book symbol and name identify an independent tool.
 
 **Key Characteristics:**
 
 - Shared ivory and charcoal themes across public, account and workspace pages.
 - Editorial headings with functional labels, codes and tabular numerical evidence.
-- Credited archival imagery on the public folio and quiet, data-led workspace surfaces.
+- A live paper walkthrough and quiet, data-led workspace surfaces.
 - Navigation grouped around planning, practice, review and reference.
 - Aligned records and restrained color for selection, progress and feedback.
 
@@ -219,7 +219,7 @@ Success, warning and danger come from the existing semantic roles in [style.css]
 
 ## Typography
 
-Both variable fonts are self-hosted and preloaded. Newsreader uses normal weights 200–800 with Georgia as fallback. Open Sans uses normal weights 300–800 with Arial as fallback. The stylesheet enables optical sizing and disables synthesized styles.
+Both variable fonts are self-hosted as WOFF2. Core Latin and Vietnamese characters preload, with complete faces available for other characters. Newsreader uses normal weights 200–800 with Georgia as fallback. Open Sans uses normal weights 300–800 with Arial as fallback. The stylesheet enables optical sizing and disables synthesized styles.
 
 The public hero uses the display role at weight 450. At 760px and below it scales with `clamp(43px, 11vw, 64px)`. Workspace page headings use the headline role and a 1.2 line height on mobile. Collection headings use 22px on desktop and 21px on mobile. The paper detail code stays Open Sans at 30px on desktop and 27px on mobile.
 
@@ -229,11 +229,11 @@ Open Sans carries labels, controls, filters, body text, charts, filenames and pa
 
 ## Layout
 
-The folio is centered at up to 1240px with 40px side gutters, 24px at 1040px and below, and 18px at 760px and below. On desktop the headline and actions sit beside the photograph. The three numbered method steps share a ruled strip. The tour places its explanation beside the paper ledger. A credited archival print follows the feature list before the closing action. At 760px these sections stack, and the public header keeps the appearance and account actions visible. Account pages stack with the form first.
+The public folio caps at 1216px. On desktop the headline and actions sit beside the four-step paper walkthrough. An example performance view and closing action follow. At 760px the introduction and walkthrough stack, and the public header keeps appearance and account actions in reach. Account pages stack with the form first.
 
 The workspace uses a 240px sidebar, a 65px compact rail and a content area capped at 1430px. Main padding steps from 36px to 27px below 1200px and 20px at 760px and below. The top bar keeps the current location and paper logging action in reach. At 760px the workspace spans the viewport and navigation opens as a drawer up to 300px or 85vw, whichever is smaller.
 
-The dashboard places the next task beside the examination note, then shows five open measures. The measures reflow to three columns at 1040px and two at 760px. Performance and study activity sit side by side on wide screens. At 1090px performance spans the full row. At 760px the next task and examination note stack, and the remaining sections flow in order from performance through activity, recent work, review and subjects. The performance plot has a focusable scroll region at 959px and below, with a 620px minimum chart width and a visible scroll hint.
+The dashboard leads with the next action and examination date, followed by recent papers and review priorities. Performance and study activity share a row when space allows. A single completed paper provides a baseline. Only attempts within the same syllabus and component connect to form a trend. On phones the desk follows a single reading order.
 
 Paper search puts the field and apply action side by side on wide screens and wraps the action beneath the field on mobile. Paper rows align identity and documents, latest attempt, best full paper and actions in four desktop columns. At 1100px and below the actions move beneath the score columns. At 760px and below the identity spans both columns, scores keep their labels, and actions have a separate bottom row. Attachment names wrap, with the role visible on a second line.
 
@@ -253,9 +253,7 @@ The public book mark uses 8px corners. Standard buttons, fields and selected nav
 
 The header pairs the open-book mark with the Cambridge Revision name and an independent-workspace descriptor. Dashboard preview and How it works are landing anchors. The compact header retains the 44px appearance button, Log in and Get started. Signed-in visitors see Open dashboard. The footer identifies the independent project and links to the local workspace.
 
-The public hero uses a full-height film with top navigation and a bottom-aligned headline, supporting copy and paired actions. Warm ink, ivory and restrained brass apply to the public stage. The split paper tablet follows the hero. A scroll-driven route leads into the walkthrough, and the rendered Overview appears below it with marks and activity labelled as demo data.
-
-The four-step walkthrough uses a stable frame, shared question marks table and a supplied exam-preparation photograph. Each tab has a visible focus state and supports pointer, touch, arrow keys, Home and End. The example adapts Cambridge International 9709/11 May/June 2024 Q1 and its published marking guidance. The sample working and marks are labelled as demo data.
+The public hero places the invitation alongside a working example with attachment rows and a shared marks table. The reference and evidence stay in one frame while the student moves between Upload, Mark, Correct and Review. The steps support pointer, touch, arrow keys, Home and End. The example adapts Cambridge International 9709/11 May/June 2024 Q1 and its published marking guidance. The working and scores are labelled as examples.
 
 ### Workspace navigation
 
@@ -280,7 +278,7 @@ Subject collections attach the tab to a shared reading surface. Document role ch
 
 ### Motion
 
-Standard button states transition in 160ms. Dialogs use a 160ms ease-out entrance and the subject drawer uses a 200ms slide. The compact hero film fades into the paper surface and autoplays while visible. The Appearance menu contains the Background motion setting. Smaller screens get a smaller video; reduced-motion and data-saving users start on the poster. In the tablet preview, the pen sweeps to the question, draws an underline, then points to the mark scheme and returns to the edge of the tablet. It runs when the tablet first comes into view and when the Upload step is reopened. The journey trace follows scroll progress and its four steps are the walkthrough tabs. Pointer-triggered tab changes use a 180ms fade and short translation while keeping the step controls in place. Dashboard route changes use a 140ms fade for pointer navigation. Reduced motion starts with the poster and a completed trace, and omits automatic pen playback, tab and route movement, and smooth scrolling.
+Standard button states transition in about 150ms. Dialogs use an ease-out entrance and the subject drawer slides in. The walkthrough is still at rest. Optional playback moves through the tabs in order, keeping the paper reference and frame in place. Tab changes shift the evidence by a few pixels. Keyboard focus stays visible, and reduced motion removes movement from walkthrough and route changes.
 
 ## Do's and Don'ts
 
@@ -291,3 +289,17 @@ Standard button states transition in 160ms. Dialogs use a 160ms ease-out entranc
 - Do keep file roles, attempt scope and score labels visible at narrow widths.
 - Don't invent scores, grades, exam dates or provenance for workspace records.
 - Don't use institutional logos, arms or wordmarks for the independent project.
+
+## Marked paper redesign
+
+Audience: Cambridge International AS and A Level students. The public page lets a prospective student try one paper workflow and then start a workspace. The dashboard helps a returning student decide what to do next.
+
+| Concept | Signature | Originality | Fit | Feasibility | Portability |
+|---|---|---:|---:|---:|---:|
+| Marked paper | A Mathematics paper holds its identity while the evidence changes from files to marks to correction to retry | 5 | 5 | 5 | 1 |
+| Examination calendar | Upcoming sittings determine the visual and study rhythm | 3 | 4 | 5 | 3 |
+| Syllabus index | A subject and topic index leads into papers, mistakes and progress | 3 | 4 | 5 | 3 |
+
+The marked paper connects the product promise directly to the student's actual workflow. The signature is a live sample using the workspace's attachment and question evidence, with a real paper reference and clearly labelled example marks. It stays still at rest. The optional playback moves between evidence in a shared frame, stops on user input or when the tab is hidden, and respects reduced motion.
+
+The landing leads with a split composition, then a compact progress example and a ruled closing action. The workspace uses aligned task rows, paper references and topic evidence. The study workbench uses a charcoal stage (#202520), a raised slate surface (#292f29), warm ivory (#f5efe2), champagne (#e0c197) and sage rules (#566157). Newsreader remains the display face and Open Sans remains the functional face. Keep large serif type for the landing and a few key decisions. Use tabular numerals for paper references and score data. The public measure caps at 1216px and falls to one column on phones. Use native links, buttons and disclosures, and short state transitions where they show a change in evidence.

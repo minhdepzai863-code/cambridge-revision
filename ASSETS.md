@@ -23,12 +23,18 @@ The old welcome illustrations remain in source history but are not included in t
 ## Academic editorial fonts
 
 The latest user-approved pairing uses Newsreader for editorial headings and Open Sans for functional UI and evidence. Both normal variable faces are self-hosted from the official Google Fonts repository (ofl/newsreader and ofl/opensans), with their unmodified SIL Open Font License files beside them. Only the two used faces are loaded; no university font files or identity artwork are included. Previous Manrope/DM Sans files remain source history and are excluded from the new production build.
+
+The production CSS loads core WOFF2 subsets for common Latin, Vietnamese, and mathematical characters. Separate extended subsets cover the remaining source characters when needed. Both retain variable weights. Open Sans uses its normal width and Newsreader uses its 36-point optical cut.
 # Landing page archive images
 
 - `assets/pepys-library.jpg` is the Pepys Library interior from H. B. Wheatley's 1899 edition of *The Diary of Samuel Pepys: Pepysiana*. Public-domain photograph, sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Pepys_Library_Cambridge_interior.jpg). Served at 1280 × 898, with the source credited in the page caption.
 - `assets/cambridge-library-etching.jpg` is Thomas Rowlandson's *Inside View of the Public Library, Cambridge* (1809), The Metropolitan Museum of Art, 59.533.1635. [The Met's object record](https://www.metmuseum.org/art/collection/search/786809) and [CC0 source image](https://commons.wikimedia.org/wiki/File:Inside_View_of_the_Public_Library,_Cambridge_MET_DP883794.jpg). Served at 1280 × 944 and lazy-loaded. The displayed image is cropped by CSS.
 
 
-## Revision landing video
+## Previous landing video
 
 The desktop and mobile versions of `assets/alevel-study` use [Close-Up Shot of a Student Doing Homework](https://www.pexels.com/video/close-up-shot-of-a-student-doing-homework-8472444/) by MART PRODUCTION under the [Pexels License](https://www.pexels.com/legal-pages/license/). The edited footage shows a student using a pen, study papers and a calculator. The clip is silent and uses a short dissolve at the loop seam. The poster uses a still from the same edit. The paper shown in the walkthrough is separate and identified by its Cambridge paper reference.
+
+## Revision desk share preview
+
+The share image is a browser capture of the interactive landing preview. The paper reference and equation identify the source example, and the attempt marks are illustrative. The current hero uses HTML and CSS. The earlier video is retained in the source assets for provenance.

@@ -7,10 +7,13 @@
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check app.mjs && node --check theme.js && node --check store.mjs && node --check backup.mjs && node --check domain.mjs && node --check syllabus.mjs && node --check charts.mjs && node --check workspace-view.mjs",
+    "check": "node --check app.mjs && node --check entry.mjs && node --check public-view.mjs && node --check account-actions.mjs && node --check paper-journey.mjs && node --check theme.js && node --check store.mjs && node --check backup.mjs && node --check domain.mjs && node --check syllabus.mjs && node --check charts.mjs && node --check workspace-view.mjs",
     "build": "node build.mjs"
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

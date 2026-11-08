@@ -1,0 +1,178 @@
+/* Hallmark · Cambridge Revision · shared workspace palette · redesign: full · scope: app */
+/* Critique: first-use screens should teach one task, and open ledgers should show evidence. */
+
+.study-folio {
+  display: grid;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: start;
+  padding: clamp(1.125rem, 3vw, 1.875rem) 0;
+  margin-block: 1rem;
+  border-block: 1px solid var(--line);
+}
+
+.study-folio-example {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+}
+
+.study-folio h2, .review-ledger h2 {
+  margin: 0 0 .5rem;
+  color: var(--ink);
+  font: 450 clamp(1.5rem, 3vw, 1.875rem)/1.12 var(--font-editorial);
+  overflow-wrap: break-word;
+}
+
+.study-folio p, .review-ledger > p {
+  color: var(--muted);
+  max-width: 50ch;
+  margin: 0 0 1rem;
+  font-size: .9375rem;
+  line-height: 1.55;
+}
+
+.study-folio .button-row {
+  align-items: center;
+}
+
+.ledger-example {
+  padding: .875rem 1rem;
+  background: var(--surface);
+  border-inline-start: 2px solid var(--accent);
+}
+
+.ledger-example h3 {
+  margin: 0 0 .5rem;
+  color: var(--ink);
+  font: 650 .875rem/1.4 var(--font-ui);
+}
+
+.ledger-example dl, .threshold-guidance dl {
+  margin: 0;
+}
+
+.ledger-example dl > div, .threshold-guidance dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: .35rem .75rem;
+  align-items: baseline;
+  padding: .5rem 0;
+  border-top: 1px solid var(--line);
+  font-size: .8125rem;
+}
+
+.ledger-example dt, .threshold-guidance dt {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ledger-example dd, .threshold-guidance dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+.threshold-guidance, .record-filters {
+  margin-block: 1rem;
+}
+
+.threshold-guidance > summary, .record-filters > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--ink);
+  padding: .45rem 0;
+  font-size: .875rem;
+  font-weight: 650;
+}
+
+.threshold-guidance > summary:hover, .record-filters > summary:hover {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.threshold-guidance dl {
+  max-width: 42rem;
+}
+
+.threshold-register caption {
+  padding: .625rem .75rem;
+  text-align: left;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.threshold-paper, .threshold-values, .correction-result > strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.threshold-values {
+  display: flex;
+  gap: .25rem .75rem;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.threshold-values li {
+  white-space: nowrap;
+}
+
+.threshold-values strong {
+  color: var(--accent);
+}
+
+.threshold-source {
+  display: block;
+  margin-top: .375rem;
+}
+
+.correction-heading, .correction-meta {
+  display: flex;
+  gap: .5rem 1.25rem;
+  justify-content: space-between;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.correction-heading h3 {
+  margin: .5rem 0 .125rem;
+}
+
+.correction-result {
+  display: flex;
+  gap: .35rem .625rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.correction-result > strong {
+  color: var(--ink);
+  font-size: .875rem;
+}
+
+.correction-entry .correction-meta {
+  justify-content: flex-start;
+  margin: .75rem 0 0;
+  font-size: .8125rem;
+  color: var(--muted);
+}
+
+.review-ledger {
+  padding-block: 1.125rem;
+  border-top: 1px solid var(--line);
+}
+
+.review-bookmarks > h3 {
+  margin: .75rem 0 .25rem;
+}
+
+@media (max-width: 680px) {
+  .study-folio-example {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .ledger-example dl > div, .threshold-guidance dl > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
