@@ -19,10 +19,14 @@ function validateRecord(r){
   if(r.kind==='session'&&(!numeric(r.minutes)||!numeric(r.marks)||+r.marks>+r.max))throw Error('The backup contains invalid practice marks or time.');
   if(r.kind==='mistake'&&!numeric(r.lost))throw Error('The backup contains invalid lost marks.');
   if(r.kind==='question'&&(!numeric(r.difficulty,1)||r.difficulty>5||!['original','cambridge'].includes(r.source)))throw Error('The backup contains an invalid practice question.');
+  if(r.kind==='question'&&r.correctOption&&(!/^[A-D]$/.test(r.correctOption)||Number(r.max)!==1))throw Error('The backup contains an invalid multiple-choice answer.');
+  if(r.kind==='exam'&&r.topicIds!==undefined&&(!Array.isArray(r.topicIds)||r.topicIds.some(id=>!textWithin(id,100))))throw Error('The backup contains invalid examination topics.');
   if(r.kind==='topic'&&(!numeric(r.confidence)||r.confidence>5))throw Error('The backup contains invalid topic confidence.');
   if(r.kind==='threshold'&&(!['component','qualification'].includes(r.scope)||!object(r.values)||validateThreshold(r)))throw Error('The backup contains invalid thresholds or source links.');
   if(r.kind==='exam'&&(!/^\d{2}$/.test(r.paper)||!COMPONENTS[r.subject]?.[r.paper[0]]||!numeric(r.duration,1)||!Number.isFinite(Date.parse(r.datetime))))throw Error('The backup contains an invalid examination date or component.');
   if(r.kind==='settings'){
+    if(r.customPapers!==undefined&&(!Array.isArray(r.customPapers)||r.customPapers.some(p=>!object(p)||!isRecordId(p.id)||!textWithin(p.title,120)||!Array.isArray(p.ids)||p.ids.some(id=>!isRecordId(id)&&!/^(?:9702-s24-12-q(?:[1-9]|[1-3][0-9]|40)|9709-s24-11-q[1-6])$/.test(id)))))throw Error('The backup contains an invalid custom paper.');
+    if(r.syllabusPlans!==undefined&&(!Array.isArray(r.syllabusPlans)||r.syllabusPlans.some(p=>!object(p)||!isRecordId(p.id)||!Object.hasOwn(SUBJECTS,p.subject)||!['AS','A2'].includes(p.level)||!day(p.finish))))throw Error('The backup contains an invalid syllabus plan.');
     if(r.subjects!==undefined&&(!Array.isArray(r.subjects)||r.subjects.some(s=>!Object.hasOwn(SUBJECTS,s))))throw Error('The backup contains an invalid subject selection.');
     if(r.year!==undefined&&![2026,2027].includes(+r.year))throw Error('The backup contains an unsupported syllabus year.');
     if(r.routes!==undefined&&(!object(r.routes)||Object.entries(r.routes).some(([s,route])=>!SUBJECTS[s]||!Object.hasOwn(ROUTES[s],route))))throw Error('The backup contains an invalid examination route.');

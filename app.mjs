@@ -3,10 +3,11 @@ import {renderLanding} from './landing-content.mjs';
 import {overviewView,libraryView,attemptHistoryView,paperAttachmentsView,questionBreakdownView} from './workspace-view.mjs';
 import {SUBJECTS,workspaceSubjects,SERIES,CATEGORIES,COMPONENTS,ROUTES,identifyFilename,component,paperCode,percent,full,sum,average,gradeFor,thresholdFor,validateAttempt,validateThreshold,questionTotals,stats,topicStats,timerValues,nextReview,localDate,countdown,weightedTotal} from './domain.mjs';
 import {TOPICS,topicsFor,syllabusSource} from './syllabus.mjs';
-import {store,uid,loadRecords,all,get,save,saveMany,removeMany,upload,openFile,fileBlob,download,exportBackup,importBackup,exportCSV,signOut,switchMode,copyLocalToCloud,consumeAuthCallback,hasRecoverySession} from './store.mjs';
+import {store,uid,loadRecords,all,get,save,saveMany,removeMany,upload,openFile,fileBlob,download,exportBackup,importBackup,exportCSV,signOut,switchMode,copyLocalToCloud,cloudConflicts,dismissConflict,exportConflict,applyRecoveredConflict,consumeAuthCallback,hasRecoverySession} from './store.mjs';
 import {lineChart,bars,scatter,gradeBars,boundaryChart} from './charts.mjs';
 import {initPaperWalkthrough,bindPreviewTabs,accountView,publicShell} from './public-view.mjs';
 import {activityCalendar,eventRows,nextStudyTask,studyEvents,studyStreak} from './study-view.mjs';
+import {catalogQuestions,paperCatalogue,catalogueView,builderView,matchingBuilderQuestions,topicQuestionIds,resourceLinks,gradeTarget,shiftMonth,distributeTopics,calendarView,syllabusPlansView} from './revision-tools.mjs';
 import {paperJourneyView} from './paper-journey.mjs';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -18,25 +19,39 @@ let state={route:'home',subject:'all',level:'all',year:2027,menu:false,detail:nu
 const workspaceKey=()=>`ct-draft-${store.mode}-${store.session?.user?.id||'local'}`;
 let W=null,activeTimer=null,busy=false;
 const groups = [
-  ['Workspace',[['home','Dashboard','home'],['plan','Study plan','calendar'],['analytics','Analytics','chart']]],
-  ['Practice',[['papers','Past papers','folder'],['practice','Focused study','play'],['syllabus','Subjects & syllabus','check'],['bank','Question bank','book']]],
+  ['Workspace',[['home','Dashboard','home'],['plan','Study plan','calendar'],['calendar','Study calendar','calendar'],['analytics','Analytics','chart']]],
+  ['Practice',[['papers','Past papers','folder'],['saved-papers','Saved attempts','file'],['builder','Exam builder','edit'],['mcq','MCQ practice','check'],['practice','Focused study','play'],['syllabus','Subjects & syllabus','check'],['bank','Question bank','book']]],
   ['Review',[['history','History','clock'],['mistakes','Mistakes','edit'],['bookmarks','Bookmarks','flag'],['review','Review queue','repeat']]],
-  ['Resources',[['exams','Examination planner','calendar'],['boundaries','Grade thresholds','flag'],['calculator','Grade calculator','chart']]]
+  ['Resources',[['exams','Examination planner','calendar'],['boundaries','Grade thresholds','flag'],['calculator','Grade targets','chart'],['syllabus-plan','Syllabus plans','book']]]
 ];
 const accountPaths = new Set(['/login','/signup','/forgot-password','/reset-password']);
 const routeNames = new Set([...groups.flatMap(([,items])=>items.map(([route])=>route)),'log','detail','settings','profile','onboarding']);
-const collapsedGroups = new Set(['Practice','Resources']);
+const collapsedGroups = new Set();
+routeNames.add('catalogue');
 let compact=false,accountMessage='';
 const profile=()=>all('settings')[0]||{};
+const settingsId=()=>store.mode==='cloud'?store.session.user.id:uid();
+const syllabusPlans=()=>Array.isArray(profile().syllabusPlans)?profile().syllabusPlans:[];
 const planned=()=>Array.isArray(profile().studyPlan)?profile().studyPlan:[];
+const customPapers=()=>Array.isArray(profile().customPapers)?profile().customPapers:[];
+const availableQuestions=()=>[...all('question'),...catalogQuestions].filter(q=>activeSubjects().includes(q.subject));
+const questionById=id=>get(id)||catalogQuestions.find(q=>q.id===id);
+const builderKey=()=>workspaceKey()+'-builder';
+function builderDraft(){
+ if(state.builderDraft)return state.builderDraft;
+ try{const draft=JSON.parse(sessionStorage.getItem(builderKey()));if(Array.isArray(draft?.ids))state.builderDraft=draft;}catch{}
+ return state.builderDraft||={title:'',ids:[]};
+}
+function persistBuilder(){sessionStorage.setItem(builderKey(),JSON.stringify(builderDraft()));}
 const bookmarks=()=>Array.isArray(profile().bookmarks)?profile().bookmarks:[];
 const events=()=>studyEvents(scoped('attempt'),scoped('session'),scoped('mistake'));
+const tabKey=()=>workspaceKey()+'-tabs';
 const workspacePath=()=>store.mode==='cloud'?'/dashboard':'/workspace';
 const practiceKey=()=>workspaceKey()+'-practice';
 function readPracticeDraft(){
  try{
   const draft=JSON.parse(localStorage.getItem(practiceKey())||'null');
-  return draft?.ids?.length&&get(draft.ids[draft.index])?.kind==='question'?draft:null;
+  return draft?.ids?.length&&questionById(draft.ids[draft.index])?.kind==='question'?draft:null;
  }catch{return null;}
 }
 function practiceMinutes(p){
@@ -85,7 +100,7 @@ function empty(title,body,cta='',action='',symbol='book'){return `<div class="em
 function heading(title,desc,action=''){return `<div class="page-heading"><div><h1${state.route==='detail'?' class="paper-code-title"':''}>${title}</h1><p>${desc}</p></div>${action}</div>`;}
 function filters(){return `<div class="subject-tabs" role="group" aria-label="Subject filter">${button(esc(state.subject==='all'?'All subjects':SUBJECTS[state.subject].name)+icon('arrow'),'choose-subject','subject-tab active','aria-haspopup="dialog" aria-label="Choose subject: '+esc(state.subject==='all'?'All subjects':SUBJECTS[state.subject].name)+'"')}<div class="level-tabs" role="group" aria-label="Level filter">${['all','AS','A2'].map(l=>`<button data-level="${l}" aria-pressed="${state.level===l}" class="${state.level===l?'active':''}">${l==='all'?'AS + A2':l}</button>`).join('')}</div></div>`;}
 function subjectPicker(){modal('Your subjects',`<p>Choose a subject to focus your workspace.</p><div class="subject-options">${[['all','All subjects'],...activeSubjects().map(s=>[s,SUBJECTS[s].name])].map(([s,n])=>`<div class="subject-option"><button type="button" data-subject="${s}" class="btn ${state.subject===s?'primary':''}" aria-pressed="${state.subject===s}">${s==='all'?icon('book'):subjectIcon(s)}<span>${esc(n)}${s==='all'?'':`<small>Cambridge ${s}</small>`}</span>${state.subject===s?icon('check'):''}</button>${s==='all'?'':button(icon('trash'),'remove-subject','icon-button',`data-code="${s}" aria-label="Remove ${esc(n)}" title="Remove subject"`)}</div>`).join('')}</div>${activeSubjects().length?'':'<p>No subjects yet. Add a STEM subject to get started.</p>'}<div class="dialog-actions">${button(icon('plus')+' Add subject','new-subject')}</div>`);$('#dialog').classList.add('subject-drawer');}
-function removeSubject(code){if(!activeSubjects().includes(code))return;confirmAction(`Remove ${SUBJECTS[code].name}?`,'Remove this subject from your workspace. Saved papers, files and progress are kept and will be available if you add it again.',async()=>{const settings=all('settings')[0]||{id:uid(),kind:'settings'};await save({...settings,subjects:activeSubjects().filter(s=>s!==code)});if(state.subject===code)state.subject='all';closeModal();render();notify(`${SUBJECTS[code].name} removed. Saved work retained.`);},'Remove subject');}
+function removeSubject(code){if(!activeSubjects().includes(code))return;confirmAction(`Remove ${SUBJECTS[code].name}?`,'Remove this subject from your workspace. Saved papers, files and progress are kept and will be available if you add it again.',async()=>{const settings=all('settings')[0]||{id:settingsId(),kind:'settings'};await save({...settings,subjects:activeSubjects().filter(s=>s!==code)});if(state.subject===code)state.subject='all';closeModal();render();notify(`${SUBJECTS[code].name} removed. Saved work retained.`);},'Remove subject');}
 
 function addSubjectModal(){const available=Object.keys(SUBJECTS).filter(s=>!activeSubjects().includes(s));if(!available.length){modal('All STEM subjects added.','<p>Every subject in the current STEM catalogue is already in your workspace.</p>');return;}modal('Add a STEM subject',`<p>Add a subject with its official syllabus checklist and paper components.</p>${select('Subject','subject',available.map(s=>[s,`${SUBJECTS[s].name} · ${s}`]),available[0],'required')}`,'add-subject','Add subject');}
 
@@ -104,6 +119,23 @@ function navigation() {
    return `<button data-route="${route}" class="nav-item ${current?'active':''}" ${current?`aria-current="${route===state.route?'page':'location'}"`:''} aria-label="${title}${due?` ${due} due`:''}" title="${title}">${icon(symbol)}<span>${title}</span> ${due?`<b aria-hidden="true">${due}</b>`:''}</button>`;
   }).join('')}</div></details>`;
  }).join('');
+}
+function trackWorkspaceTab(){
+ if(!state.tabs){
+  try{state.tabs=JSON.parse(sessionStorage.getItem(tabKey()));}catch{}
+ }
+ state.tabs=(Array.isArray(state.tabs)?state.tabs:[]).filter(tab=>tab&&routeNames.has(tab.route));
+ if(!state.tabs.some(tab=>tab.route===state.route&&(tab.id||null)===(state.detail||null)))
+  state.tabs.push({route:state.route,id:state.detail||null,title:state.route==='detail'&&get(state.detail)?paperCode(get(state.detail)):titleFor()});
+ sessionStorage.setItem(tabKey(),JSON.stringify(state.tabs));
+}
+function workspaceTabs(){
+ return '<nav class="workspace-tabs" aria-label="Open workspace tabs">'+state.tabs.map((tab,index)=>{
+  const active=tab.route===state.route&&(tab.id||null)===(state.detail||null);
+  return '<div class="workspace-tab" '+(active?'data-current':'')+'>'+
+   button(esc(tab.title),'switch-workspace-tab','quiet','data-index="'+index+'" '+(active?'aria-current="page"':''))+
+   (state.tabs.length>1?button(icon('close'),'close-workspace-tab','quiet','data-index="'+index+'" aria-label="Close '+esc(tab.title)+' tab"'):'')+'</div>';
+ }).join('')+'</nav>';
 }
 function shell(content) {
  const collapsed=compact?' sidebar-compact':'';
@@ -125,7 +157,7 @@ function shell(content) {
  ${button(icon('menu'),'compact-menu','icon-button desktop-collapse','aria-label="'+(compact?'Expand':'Collapse')+' sidebar" aria-controls="workspace-navigation" aria-expanded="'+!compact+'"')}
  <div class="breadcrumbs"><span>Workspace</span><span>/</span><strong>${titleFor()}</strong></div>
  <div class="top-actions"><button class="storage-status" data-action="auth" aria-label="${store.mode==='cloud'?'Cloud':'Local'} storage and account">${icon(store.mode==='cloud'?'cloud':'check')}<span>${store.mode==='cloud'?'Cloud':'Local'}</span></button>${state.route==='log'?'':button(icon('plus')+' Log paper','log','primary')}</div></header>
- <main id="main" tabindex="-1">${content}<footer><span>Cambridge Revision</span><span>Independent AS &amp; A Level study workspace</span></footer></main></div></div>`;
+ ${workspaceTabs()}<main id="main" tabindex="-1">${content}<footer><span>Cambridge Revision</span><span>Independent AS &amp; A Level study workspace</span></footer></main></div></div>`;
 }
 let disposeLanding;
 function render() {
@@ -144,9 +176,21 @@ function render() {
   return;
  }
  if(state.subject!=='all'&&!activeSubjects().includes(state.subject))state.subject='all';
- if(state.route==='practice'&&state.practice?.timed!==false&&state.practice&&!state.practice.startedAt)state.practice.startedAt=Date.now();
- const pages={home,papers,history:historyPage,log:wizard,detail:detailPage,mistakes:mistakesPage,review:reviewPage,analytics:analyticsPage,syllabus:syllabusPage,boundaries:boundariesPage,calculator:calculatorPage,exams:examsPage,bank:bankPage,practice:practicePage,settings:settingsPage,profile:profilePage,onboarding:onboardingPage,plan:planPage,bookmarks:bookmarksPage};
+ if(state.route==='practice'&&state.practice?.timed!==false&&state.practice&&!state.practice.startedAt&&!state.practice.feedback)state.practice.startedAt=Date.now();
+ const pages={home,papers,'saved-papers':()=>paperHub(libraryView(viewContext())),history:historyPage,log:wizard,detail:detailPage,mistakes:mistakesPage,review:reviewPage,analytics:analyticsPage,syllabus:syllabusPage,boundaries:boundariesPage,calculator:calculatorPage,exams:examsPage,bank:()=>paperHub(bankPage()),catalogue:papers,builder:()=>paperHub(builderView({...viewContext(),customPapers:customPapers()},availableQuestions(),builderDraft())),mcq:()=>paperHub(mcqPage()),practice:practicePage,settings:settingsPage,profile:profilePage,onboarding:onboardingPage,plan:planPage,bookmarks:bookmarksPage,calendar:()=>calendarView({...viewContext(),events:events(),planned:planned(),plans:syllabusPlans().filter(inScope)}),'syllabus-plan':()=>syllabusPlansView(viewContext(),syllabusPlans().filter(inScope))};
+ trackWorkspaceTab();
+ const tabScroll=$('.workspace-tabs')?.scrollLeft||0;
  $('#app').innerHTML=shell((pages[state.route]||home)());
+ const tabStrip=$('.workspace-tabs');
+ const currentTab=$('.workspace-tab[data-current]');
+ if(tabStrip&&currentTab){
+  tabStrip.scrollLeft=tabScroll;
+  const strip=tabStrip.getBoundingClientRect(),current=currentTab.getBoundingClientRect();
+  if(current.left<strip.left)tabStrip.scrollLeft+=current.left-strip.left;
+  if(current.right>strip.right)tabStrip.scrollLeft+=current.right-strip.right;
+ }
+ const activeTab=$('.workspace-tab[data-current]');
+ if(activeTab)activeTab.scrollIntoView({block:'nearest',inline:'nearest'});
  const shortcuts=$('[data-overview-shortcuts]');
  if(shortcuts)bindPreviewTabs(shortcuts,index=>{state.overviewShortcut=index;});
  document.title=`${titleFor()} · Cambridge Revision`;
@@ -182,7 +226,24 @@ function home(){
   planned:planned().filter(p=>!p.done).sort((a,b)=>a.date.localeCompare(b.date)),attempts,questions:scoped('question'),dueBookmarks});
  return overviewView({...c,next,activity,dueBookmarks,streak:studyStreak(activity)});
 }
-function papers(){return libraryView(viewContext());}
+function paperHub(content){
+ const current=state.route==='catalogue'?'papers':state.route;
+ const tools=[
+  ['papers','Find a paper','Question papers and mark schemes','file'],
+  ['bank','Topical questions','Find questions by syllabus topic','book'],
+  ['builder','Exam builder','Choose questions for a custom paper','edit'],
+  ['mcq','MCQ practice','Build a set or sit a real paper','check'],
+  ['saved-papers','Saved attempts','Your uploaded papers and results','folder']
+ ];
+ return '<nav class="paper-tool-links" aria-label="Paper tools">'+tools.map(([route,title,description,symbol])=>
+  '<button type="button" data-route="'+route+'" '+(current===route?'aria-current="page"':'')+'>'+
+  icon(symbol)+'<span><strong>'+title+'</strong><small>'+description+'</small></span></button>').join('')+'</nav>'+content;
+}
+function papers(){
+ return heading('Past papers','Find a Cambridge paper, build a custom exam or practise multiple choice.',button('Upload & log paper','log','primary'))+
+ paperHub(catalogueView(viewContext()));
+}
+
 function historyPage(){
  const h=state.history,type=h.type||'all';
  const papers=filteredHistory();
@@ -211,11 +272,11 @@ function historyFilters(){const h=state.history;return `<form id="history-filter
 function filteredHistory(){const h=state.history;let a=scoped('attempt').filter(a=>(!h.component||h.component==='all'||a.paper[0]===h.component)&&(!h.year||a.year==h.year)&&(!h.series||h.series==='all'||a.series===h.series)&&(!h.timed||h.timed==='all'||a.timed===(h.timed==='yes'))&&(!h.from||a.date>=h.from)&&(!h.to||a.date<=h.to)&&(h.min===''||h.min==null||percent(a)>=+h.min)&&(h.max===''||h.max==null||percent(a)<=+h.max));if(h.grade&&h.grade!=='all')a=a.filter(a=>h.grade==='unavailable'?!gradeFor(a,all('threshold')).grade:gradeFor(a,all('threshold')).grade===h.grade);a.sort((a,b)=>h.sort==='oldest'?a.date.localeCompare(b.date):h.sort==='duration'?(b.minutes||0)-(a.minutes||0):h.sort==='marks'?b.marks-a.marks:h.sort==='best'?percent(b)-percent(a):h.sort==='worst'?percent(a)-percent(b):b.date.localeCompare(a.date)||String(b.createdAt).localeCompare(String(a.createdAt)));return a;}
 function attemptNumber(a){return all('attempt').filter(p=>paperCode(p)===paperCode(a)).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt))).findIndex(p=>p.id===a.id)+1;}
 function historyTable(attempts){if(!attempts.length)return empty('No paper attempts here yet.','Log a paper, or adjust your filters to find an earlier attempt.','Log a paper','log');return `<div class="table-caption"><span>${attempts.length} attempts · full and partial scores are labelled separately</span></div><div class="table-wrap"><table><thead><tr>${['Date','Subject','Paper','Marks','Percentage','Grade','Time','Difficulty','Attempt',''].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${attempts.map(a=>{const g=gradeFor(a,all('threshold'));return `<tr><td>${date(a.date)}<small>${a.level} · ${a.scope==='partial'?'Partial':'Full paper'}</small></td><td>${badge(a.subject)}</td><td><strong>${paperCode(a)}</strong><small>${esc(component(a)?.[0])}</small></td><td>${a.marks}/${a.max}</td><td><strong>${pct(percent(a))}</strong>${a.scope==='partial'?'<small>Attempted marks only</small>':''}</td><td><span class="grade ${g.grade?'':'unavailable'}" title="${esc(g.label)}">${g.grade||'Unavailable'}</span>${g.grade?`<small>${g.threshold.official?'Official component':'Manual estimate'}</small>`:''}</td><td>${mins(a.minutes)}<small>${a.timed?'Timed':'Untimed'}</small></td><td>${a.difficulty}/10</td><td>#${attemptNumber(a)}</td><td>${button('View details','detail','quiet','data-id="'+a.id+'"')}</td></tr>`;}).join('')}</tbody></table></div>`;}
-function newWizard(source=null,edit=false,navigate=true){const comp=source&&component(source);W=source?structuredClone(source):{id:uid(),kind:'attempt',subject:state.subject==='all'?defaultSubject():state.subject,level:state.level==='all'?'AS':state.level,paper:'12',series:'s',year:state.year,date:localDate(),marks:'',max:'',paperMax:'',minutes:'',elapsedMinutes:'',officialMinutes:'',difficulty:5,scope:'full',timed:false,examConditions:false,questionsAttempted:0,correct:0,partialCorrect:0,notes:'',struggled:'',files:[],questions:[],mistakes:[]};if(source&&!edit){W.id=uid();W.date=localDate();W.marks='';W.minutes='';W.elapsedMinutes='';W.notes='';W.questions=[];W.mistakes=[];W.timer=null;W.createdAt=null;}else if(source&&edit)W.mistakes=all('mistake').filter(m=>m.attemptId===source.id).map(m=>structuredClone(m));W.step=source?2:0;W.editing=edit;W.mistakes||=[];activeTimer=W.timer||null;persistDraft();if(navigate)go('log');}
+function newWizard(source=null,edit=false,navigate=true){const comp=source&&component(source);W=source?structuredClone(source):{id:uid(),kind:'attempt',subject:state.subject==='all'?defaultSubject():state.subject,level:state.level==='all'?'AS':state.level,paper:'12',series:'s',year:state.year,date:localDate(),marks:'',max:'',paperMax:'',minutes:'',elapsedMinutes:'',officialMinutes:'',difficulty:5,scope:'full',timed:false,examConditions:false,questionsAttempted:0,correct:0,partialCorrect:0,notes:'',struggled:'',files:[],questions:[],mistakes:[]};if(source&&!edit){delete W._cloudVersion;W.id=uid();W.date=localDate();W.marks='';W.minutes='';W.elapsedMinutes='';W.notes='';W.questions=[];W.mistakes=[];W.timer=null;W.createdAt=null;}else if(source&&edit)W.mistakes=all('mistake').filter(m=>m.attemptId===source.id).map(m=>structuredClone(m));W.step=source?2:0;W.editing=edit;W.mistakes||=[];activeTimer=W.timer||null;persistDraft();if(navigate)go('log');}
 function persistDraft(){if(W)try{localStorage.setItem(workspaceKey(),JSON.stringify(W));}catch{notify('Draft could not be cached. Save this attempt before leaving.','error');}}
 function captureWizard(){if(!W)return;const f=$('#wizard-form');if(!f)return;const data=new FormData(f);for(const [k,v]of data){if(k.startsWith('q-'))continue;W[k]=v;}for(const c of f.querySelectorAll('input[type="checkbox"]'))W[c.name]=c.checked;W.questions=(W.questions||[]).map((q,i)=>({...q,number:data.get(`q-number-${i}`)??q.number,max:+(data.get(`q-max-${i}`)??q.max),marks:+(data.get(`q-marks-${i}`)??q.marks),topic:data.get(`q-topic-${i}`)??q.topic}));for(const key of ['marks','max','paperMax','minutes','elapsedMinutes','officialMinutes','difficulty','questionsAttempted','correct','partialCorrect','year'])if(W[key]!==''&&W[key]!=null)W[key]=+W[key];persistDraft();}
 function wizard(){if(!activeSubjects().length)return heading('Choose your subjects first.','Add a subject before logging a paper.')+empty('Your STEM workspace starts here.','Add a subject and its syllabus.','Add subject','new-subject');if(!W){try{W=JSON.parse(localStorage.getItem(workspaceKey())||'null');activeTimer=W?.timer||null;}catch{}if(!W)newWizard(null,false,false);}const steps=['Upload','Identify','Performance','Questions & mistakes','Save & analyse'];let content='';
-if(W.step===0)content=`<h2>Keep the paper with your progress.</h2><p>Add a question paper PDF, then attach the mark scheme, your answers or an examiner report.</p>${uploadZone()}<div id="upload-status" role="status"></div>${fileList(W.files,true)}<p class="small muted">PDF, PNG, JPEG or WebP · 20 MB per file · files are stored in ${store.mode==='cloud'?'your private Supabase bucket':'this browser’s database'}. Uploaded files are reusable across attempts.</p>`;
+if(W.step===0)content=`<h2>Keep the paper with your progress.</h2><p>Add a question paper PDF, then attach the mark scheme, your answers or an examiner report.</p>${uploadZone()}<div id="upload-status" role="status"></div>${W.questionUrl?'<div class="button-row">'+questionLinks(W)+'</div>':''}${fileList(W.files,true)}<p class="small muted">PDF, PNG, JPEG or WebP · 20 MB per file · files are stored in ${store.mode==='cloud'?'your private Supabase bucket':'this browser’s database'}. Uploaded files are reusable across attempts.</p>`;
 if(W.step===1)content=`<h2>Check the paper details.</h2><p>Filename recognition is a starting point. Confirm the paper’s cover before continuing.</p>${W.recognition?`<div class="notice">${esc(W.recognition)}</div>`:''}<div class="form-grid">${select('Subject','subject',subjectOptions(),W.subject,'required')}${select('Stage studied','level',['AS','A2'],W.level)}${input('Paper code (component + variant)','paper',W.paper,'text','pattern="[0-9]{2}" maxlength="2" required placeholder="12"')}${select('Examination series','series',Object.entries(SERIES),W.series)}${input('Examination year','year',W.year,'number','min="2000" max="2100" required')}${input('Official duration (minutes)','officialMinutes',W.officialMinutes,'number','min="1" placeholder="Confirm from cover"')}</div><div class="notice subtle">${COMPONENTS[W.subject]?.[W.paper?.[0]]?`Syllabus reference: ${component(W)[0]} · ${component(W)[1]} marks · ${component(W)[2]} minutes. `:''}Paper cover details take precedence. ${W.series==='m'?'Cambridge’s m filename code normally means February/March; s means May/June.':''}</div>`;
 if(W.step===2)content=`<div class="section-heading"><div><h2>Record your attempt.</h2><p>${paperCode(W)} · ${esc(component(W)?.[0])}</p></div>${badge(W.subject)}</div><section class="form-section"><h3>Score and paper</h3><div class="form-grid">${input('Date attempted','date',W.date,'date','required')}${select('Attempt coverage','scope',[['full','Full paper'],['partial','Partial paper']],W.scope)}${input('Marks achieved','marks',W.marks,'number','min="0" step="0.25" required')}${input(W.scope==='partial'?'Available marks in attempted questions':'Maximum paper marks','max',W.max,'number','min="0.25" step="0.25" required')}${W.scope==='partial'?input('Full-paper maximum marks','paperMax',W.paperMax,'number','min="1" required'):''}${input('Difficulty (1–10)','difficulty',W.difficulty,'number','min="1" max="10" required')}</div></section><section class="form-section"><h3>Time and conditions</h3>${timerPanel()}<div class="form-grid">${input('Active working time (minutes)','minutes',W.minutes,'number','min="0" step="0.01" required placeholder="94"')}${input('Elapsed time, including pauses (optional)','elapsedMinutes',W.elapsedMinutes,'number','min="0" step="0.01"')}</div><div class="check-row">${check('Timed attempt','timed',W.timed)}${check('Completed under examination conditions','examConditions',W.examConditions)}</div></section><section class="form-section"><h3>Question counts</h3><div class="form-grid">${input('Questions attempted','questionsAttempted',W.questionsAttempted,'number','min="0" step="1"')}${input('Fully correct questions','correct',W.correct,'number','min="0" step="1"')}${input('Partially correct questions','partialCorrect',W.partialCorrect,'number','min="0" step="1"')}</div></section><section class="form-section"><h3>Reflections</h3>${textarea('Topics I struggled with','struggled',W.struggled)}${textarea('Notes and reflections','notes',W.notes)}</section><div class="live-score" id="live-score">${scorePreview()}</div>`;
 if(W.step===3)content=`<div class="section-heading"><div><h2>Make the lost marks useful.</h2><p>Optional. Add question marks now, or come back to this attempt later.</p></div>${button(icon('plus')+' Add question','add-row')}</div>${questionEditor(W)}<div id="question-summary" class="notice ${questionDiscrepancy(W)?'warning':'subtle'}">${questionSummary(W)}</div><div class="section-heading"><h3>Mistakes to revisit</h3>${button(icon('plus')+' Log a mistake','new-mistake','','data-attempt="'+W.id+'"')}</div>${W.mistakes.length?W.mistakes.map(m=>`<div class="mistake-line"><div><strong>Q${esc(m.question)} · ${m.lost} marks lost</strong><small>${esc(topicName(m.topic))} · ${esc(m.category)}</small></div>${button('Edit','edit-draft-mistake','quiet','data-id="'+m.id+'"')}</div>`).join(''):'<p class="muted">No mistake notes yet. Your question marks and reflections are saved independently.</p>'}`;
@@ -311,7 +372,7 @@ function reviewPage(){
    ]));
  return title+filters()+
   `<section class="review-ledger"><h2>Due now</h2>
-  ${due.length?`<div class="review-list">${due.map(mistakeCard).join('')}</div>`:''}
+  ${due.length?`<div class="review-list">${due.map(m=>mistakeCard(m)+(m.topic?button('Practise this topic','practise-topic','quiet','data-topic="'+esc(m.topic)+'"'):'')).join('')}</div>`:''}
   ${saved.length?`<section class="review-bookmarks"><h3>Saved questions and sections</h3>${bookmarkRows(saved,true)}</section>`:''}
   ${!due.length&&!saved.length?`<p>${scheduled.length?`Your next correction is scheduled for ${date(scheduled[0].retryDate)}.`:'Nothing is due for these filters.'}</p>${link('Focused study','practice')}`:''}</section>
   ${scheduled.length?`<section class="folio-section"><h2>Scheduled corrections</h2><div class="review-list">${scheduled.map(mistakeCard).join('')}</div></section>`:''}
@@ -369,19 +430,19 @@ function boundariesPage(){
   <td><span class="pill">${t.official?'Official source supplied':'Manual estimate'}</span>${/^https?:\/\//i.test(t.sourceUrl||'')?`<a class="threshold-source" target="_blank" rel="noopener" href="${esc(t.sourceUrl)}">View source</a>`:''}</td>
   <td>${button('Edit','edit-threshold','quiet',`data-id="${t.id}"`)}</td></tr>`).join('')}</tbody></table></div>`+guidance;
 }
-function calculatorPage(){if(!activeSubjects().length)return heading('Choose your subjects first.','Add a subject to use its component routes.')+empty('Your STEM workspace starts here.','Add a subject and its syllabus.','Add subject','new-subject');const subject=state.subject==='all'?defaultSubject():state.subject,route=state.calcRoute&&ROUTES[subject][state.calcRoute]?state.calcRoute:Object.keys(ROUTES[subject]).at(-1),parts=ROUTES[subject][route];return heading('What could your next results make possible?','Simulate a valid component route. Every future A2 mark is hypothetical.')+filters()+`<form id="calculator" class="panel"><div class="form-grid">${select('Examination route','route',Object.keys(ROUTES[subject]),route)}${select('Examination series','series',Object.entries(SERIES),'s')}${input('Examination year','year',state.year,'number','min="2026" max="2027"')}${input('Overall threshold entry option','optionCode','','text','required placeholder="Exact option, e.g. AY"')}</div><div class="notice subtle">${['9702','9701','9700'].includes(subject)?`${SUBJECTS[subject].name} Paper 3 raw marks are multiplied by 0.75; other components have factor 1.`:'Raw component marks use factor 1 for these routes.'} ${subject==='9709'&&parts.includes(2)?'The P1 + P2 AS route cannot be carried forward to a full A Level route.':''}</div><div class="table-wrap"><table><thead><tr><th>Component</th><th>Raw marks</th><th>Maximum</th><th>Result type</th></tr></thead><tbody>${parts.map(p=>`<tr><td>P${p} ${COMPONENTS[subject][p][0]}</td><td><input type="number" name="score-${p}" min="0" max="${COMPONENTS[subject][p][1]}" required aria-label="Paper ${p} raw marks"></td><td>${COMPONENTS[subject][p][1]}</td><td>${select('','type-'+p,[['actual','Recorded component result'],['future','Hypothetical future result']],COMPONENTS[subject][p][3]==='A2'?'future':'actual','aria-label="Paper '+p+' mark source"')}</td></tr>`).join('')}</tbody></table></div><div class="check-row">${check('My centre has confirmed this component combination and any carry-forward eligibility','eligible',false)}</div><button class="btn primary">Calculate estimate</button><div id="calculation-result" aria-live="polite"></div></form>`;}
+function calculatorPage(){if(!activeSubjects().length)return heading('Choose your subjects first.','Add a subject to use its component routes.')+empty('Your STEM workspace starts here.','Add a subject and its syllabus.','Add subject','new-subject');const subject=state.subject==='all'?defaultSubject():state.subject,route=state.calcRoute&&ROUTES[subject][state.calcRoute]?state.calcRoute:Object.keys(ROUTES[subject]).at(-1),parts=ROUTES[subject][route];return heading('Grade targets','Work out the weighted marks you still need on your Cambridge route.')+filters()+`<form id="calculator" class="panel"><div class="form-grid">${select('Examination route','route',Object.keys(ROUTES[subject]),route)}${select('Examination series','series',Object.entries(SERIES),state.gradeInputs?.series||'s')}${input('Examination year','year',state.gradeInputs?.year||state.year,'number','min="2000" max="2100"')}${input('Overall threshold entry option','optionCode',state.gradeInputs?.optionCode||'','text','placeholder="Exact option, e.g. AY"')}</div><div class="notice subtle">${['9702','9701','9700'].includes(subject)?`${SUBJECTS[subject].name} Paper 3 raw marks are multiplied by 0.75; other components have factor 1.`:'Raw component marks use factor 1 for these routes.'} ${subject==='9709'&&parts.includes(2)?'The P1 + P2 AS route cannot be carried forward to a full A Level route.':''}</div><div class="table-wrap"><table><thead><tr><th>Component</th><th>Raw marks</th><th>Maximum</th><th>Result type</th></tr></thead><tbody>${parts.map(p=>`<tr><td>P${p} ${COMPONENTS[subject][p][0]}</td><td><input type="number" name="score-${p}" min="0" max="${COMPONENTS[subject][p][1]}" value="${esc(state.gradeInputs?.['score-'+p]||'')}" aria-label="Paper ${p} raw marks"></td><td>${COMPONENTS[subject][p][1]}</td><td>${select('','type-'+p,[['actual','Sat'],['mock','Mock forecast'],['future','Still to sit']],state.gradeInputs?.['type-'+p]||(COMPONENTS[subject][p][3]==='A2'?'future':'actual'),'aria-label="Paper '+p+' mark source"')}</td></tr>`).join('')}</tbody></table></div><div class="form-grid">${select('Target grade','target',(route.startsWith('AS:')?['A','B','C','D','E']:['A*','A','B','C','D','E']),state.gradeInputs?.target||'A')}${input('Manual target boundary (weighted marks, optional)','manualBoundary',state.gradeInputs?.manualBoundary||'','number','min="0" step="0.25"')}</div><div class="check-row">${check('My centre has confirmed this component combination and any carry-forward eligibility','eligible',false)}</div><button class="btn primary">Calculate target</button><div id="calculation-result" aria-live="polite"></div></form>`;}
 function examsPage(){const exams=[...scoped('exam')].sort((a,b)=>a.datetime.localeCompare(b.datetime));if(!all('exam').length)return heading('Examination plan','Keep your confirmed Cambridge examination dates in one place.')+
  studyFolio('Add your first examination','Enter the date and time confirmed by your centre. Each paper gets its own countdown.',
   button(icon('plus')+' Add examination','new-exam','primary'));
- return heading('Examination plan','See confirmed examination dates and the topics to work on next.',button(icon('plus')+' Add examination','new-exam','primary'))+filters()+(exams.length?`<div class="exam-timeline">${exams.map(e=>{const days=countdown(e.datetime).days,weak=TOPICS.filter(t=>t.subject===e.subject&&t.components.some(c=>String(c)===e.paper[0])).map(t=>({...t,...topicStats(t.id,all('attempt'),all('mistake'),all('session'))})).sort((a,b)=>b.lost-a.lost)[0];return `<article class="panel exam-card"><div class="exam-date"><strong>${new Date(e.datetime).getDate()}</strong><span>${new Date(e.datetime).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}</span></div><div>${badge(e.subject)}<h2>${SUBJECTS[e.subject].name} · Paper ${esc(e.paper)}</h2><p>${new Date(e.datetime).toLocaleString('en-GB')} · ${e.duration} min · ${e.level} · Target ${esc(e.target)}</p><p>${weak?.lost?`Prioritise ${weak.title}: ${weak.lost} marks lost in recorded attempts.`:days<=14?'Keep sessions short, timed and focused. Review corrections before another full paper.':'Build a baseline with a paper, then practise the topics where marks are lost.'}</p></div><div><div class="countdown" data-countdown="${esc(e.datetime)}">${countdownText(e.datetime)}</div><div class="button-row">${button('Edit','edit-exam','','data-id="'+e.id+'"')}${button(icon('trash'),'delete-record','icon-button','data-id="'+e.id+'" aria-label="Delete exam"')}</div></div></article>`;}).join('')}</div>`:studyFolio('No examinations for this selection','Choose a different subject or level to see your dates.',button('Add examination','new-exam','primary')));}
-function bankPage(){const b=state.bank,questions=scoped('question').filter(q=>(!b.search||[q.title,q.prompt,topicName(q.topic),q.reference].join(' ').toLowerCase().includes(b.search.toLowerCase()))&&(b.source==='all'||q.source===b.source)&&(b.difficulty==='all'||q.difficulty==b.difficulty));if(!all('question').length)return heading('Question bank','Keep the questions you want to practise again.')+
+ return heading('Examination plan','See confirmed examination dates and the topics to work on next.',button(icon('plus')+' Add examination','new-exam','primary'))+filters()+(exams.length?`<div class="exam-timeline">${exams.map(e=>{const days=countdown(e.datetime).days,weak=TOPICS.filter(t=>t.subject===e.subject&&t.components.some(c=>String(c)===e.paper[0])).map(t=>({...t,...topicStats(t.id,all('attempt'),all('mistake'),all('session'))})).sort((a,b)=>b.lost-a.lost)[0];return `<article class="panel exam-card"><div class="exam-date"><strong>${new Date(e.datetime).getDate()}</strong><span>${new Date(e.datetime).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}</span></div><div>${badge(e.subject)}<h2>${SUBJECTS[e.subject].name} · Paper ${esc(e.paper)}</h2><p>${new Date(e.datetime).toLocaleString('en-GB')} · ${e.duration} min · ${e.level} · Target ${esc(e.target)}</p><p>${weak?.lost?`Prioritise ${weak.title}: ${weak.lost} marks lost in recorded attempts.`:days<=14?'Keep sessions short, timed and focused. Review corrections before another full paper.':'Build a baseline with a paper, then practise the topics where marks are lost.'}</p></div><div><div class="countdown" data-countdown="${esc(e.datetime)}">${countdownText(e.datetime)}</div>${button('Revision run-up','exam-run-up','quiet','data-id="'+e.id+'"')}<div class="button-row">${button('Edit','edit-exam','','data-id="'+e.id+'"')}${button(icon('trash'),'delete-record','icon-button','data-id="'+e.id+'" aria-label="Delete exam"')}</div></div></article>`;}).join('')}</div>`:studyFolio('No examinations for this selection','Choose a different subject or level to see your dates.',button('Add examination','new-exam','primary')));}
+function bankPage(){const b=state.bank,questions=availableQuestions().filter(inScope).filter(q=>(!b.search||[q.title,q.prompt,topicName(q.topic),q.reference].join(' ').toLowerCase().includes(b.search.toLowerCase()))&&(b.source==='all'||q.source===b.source)&&(b.difficulty==='all'||q.difficulty==b.difficulty));if(!availableQuestions().length)return heading('Question bank','Keep the questions you want to practise again.')+
  studyFolio('Save your first question','Add an original question or a reference from a past paper, then use it in focused study.',
   button(icon('plus')+' Add question','new-question','primary')+link('Focused study','practice'));
- return heading('Question bank','Find saved questions by paper, topic or difficulty.',button(icon('plus')+' Add question','new-question','primary'))+filters()+`<form id="bank-filters" class="bank-filters">${input('Search questions','search',b.search,'search','placeholder="Search topic, paper code or question…"')}${select('Source','source',[['all','All sources'],['original','Original practice'],['cambridge','Cambridge past paper']],b.source)}${select('Difficulty','difficulty',[['all','All difficulties'],...[1,2,3,4,5].map(n=>[n,n+'/5'])],b.difficulty)}<button class="btn">Search</button></form><div class="table-caption"><span>${questions.length} questions · difficulty is your revision estimate</span>${button(`Practise selected (${state.selected.length})`,'practice-selected','',state.selected.length?'':'disabled')}</div>`+(questions.length?`<div class="table-wrap"><table><thead><tr><th>Select</th><th>Question / source</th><th>Subject & topic</th><th>Challenge</th><th>Last score</th><th></th></tr></thead><tbody>${questions.map(q=>{const latest=all('session').filter(s=>s.questionId===q.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0];return `<tr><td><input type="checkbox" data-select-question="${q.id}" ${state.selected.includes(q.id)?'checked':''} aria-label="Select ${esc(q.title)}"></td><td><strong>${esc(q.title)}</strong><small>${q.level} · ${q.max} marks${q.reference?' · '+esc(q.reference):''}</small><span class="pill">${q.source==='cambridge'?'Cambridge past paper · user supplied':'Original practice'}</span></td><td>${badge(q.subject)}<small>${esc(topicName(q.topic))}</small></td><td>${q.difficulty}/5</td><td>${latest?`${latest.marks}/${latest.max}`:'Unattempted'}</td><td>${button('Open','open-question','quiet','data-id="'+q.id+'"')}${button('Bookmark','bookmark','quiet','data-id="'+q.id+'"')}</td></tr>`;}).join('')}</tbody></table></div>`:studyFolio('No matching questions','Try another paper code, topic, source or difficulty.',button('Add question','new-question','primary')));}
-function practicePage(){const p=state.practice;if(p){const q=get(p.ids[p.index]);if(!q)return empty('This question is no longer available.','Clear this unfinished set to choose another question.','Clear unfinished set','discard-practice');return heading('Try first. Then check your reasoning.',`Question ${p.index+1} of ${p.ids.length} · ${q.source==='original'?'Original practice':'Cambridge reference supplied by you'}`)+`<section class="panel practice-card">${badge(q.subject)}<h2>${esc(q.title)}</h2><p class="small muted">${esc(topicName(q.topic))} · ${q.max} marks · ${q.level}</p><p class="question-prompt preserve">${esc(q.prompt)}</p>${fileList(q.files)}<label class="field"><span>Your working (saved with this attempt)</span><textarea id="practice-working" rows="7">${esc(p.working||'')}</textarea></label><div class="split">${p.timed===false?'<span>Untimed practice</span>':`<span class="practice-clock" data-practice-time>${mins(practiceMinutes(p))}</span>`}${button(p.revealed?'Hide answer':'Reveal answer','reveal-answer')}</div><div class="button-row">${button('Bookmark question','bookmark','quiet',`data-id="${q.id}"`)}${button('Clear unfinished set','discard-practice','quiet')}</div>${p.revealed?`<div class="answer-block"><h3>Answer & marking notes</h3><p class="preserve">${esc(q.answer)}</p></div><form id="self-mark"><div class="form-grid">${input('Marks earned','marks','','number',`min="0" max="${q.max}" step="0.25" required`)}${input('Working time (minutes)','minutes',p.timed===false?'0':practiceMinutes(p).toFixed(2),'number','min="0" step="0.01" required')}${select('Confidence after checking','confidence',[1,2,3,4,5],3)}</div><button class="btn primary">Save practice result${p.index<p.ids.length-1?' & continue':''}</button></form>`:''}</section>`;}const sessions=scoped('session');return heading('Focused study','Practise a syllabus topic using your saved questions, then record marks and working time.')+filters()+focusedStudyForm()+`<section class="folio-section"><h2>Session history</h2>${sessions.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Question</th><th>Subject</th><th>Marks</th><th>Time</th></tr></thead><tbody>${[...sessions].reverse().map(s=>`<tr><td>${date(s.date)}</td><td>${esc(get(s.questionId)?.title||s.title||'Practice question')}</td><td>${badge(s.subject)}</td><td>${s.marks}/${s.max}</td><td>${mins(s.minutes)}</td></tr>`).join('')}</tbody></table></div>`:empty('Your next focused session starts here.','Add questions to the bank, select a set and begin.','Choose a set','bank')}</section>`;}
+ return heading('Question bank','Find saved questions by paper, topic or difficulty.',button(icon('plus')+' Add question','new-question','primary'))+filters()+`<form id="bank-filters" class="bank-filters">${input('Search questions','search',b.search,'search','placeholder="Search topic, paper code or question…"')}${select('Source','source',[['all','All sources'],['original','Original practice'],['cambridge','Cambridge past paper']],b.source)}${select('Difficulty','difficulty',[['all','All difficulties'],...[1,2,3,4,5].map(n=>[n,n+'/5'])],b.difficulty)}<button class="btn">Search</button></form><div class="table-caption"><span>${questions.length} questions · difficulty is your revision estimate</span>${button(`Practise selected (${state.selected.length})`,'practice-selected','',state.selected.length?'':'disabled')}</div>`+(questions.length?`<div class="table-wrap"><table><thead><tr><th>Select</th><th>Question / source</th><th>Subject & topic</th><th>Challenge</th><th>Last score</th><th></th></tr></thead><tbody>${questions.map(q=>{const latest=all('session').filter(s=>s.questionId===q.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0];return `<tr><td><input type="checkbox" data-select-question="${q.id}" ${state.selected.includes(q.id)?'checked':''} aria-label="Select ${esc(q.title)}"></td><td><strong>${esc(q.title)}</strong><small>${q.level} · ${q.max} marks${q.reference?' · '+esc(q.reference):''}</small><span class="pill">${q.source==='cambridge'?'Cambridge past paper · user supplied':'Original practice'}</span></td><td>${badge(q.subject)}<small>${esc(topicName(q.topic))}</small></td><td>${q.difficulty}/5</td><td>${latest?`${latest.marks}/${latest.max}`:'Unattempted'}</td><td>${button('Open','open-question','quiet','data-id="'+q.id+'"')}${get(q.id)?button('Bookmark','bookmark','quiet','data-id="'+q.id+'"'):''}</td></tr>`;}).join('')}</tbody></table></div>`:studyFolio('No matching questions','Try another paper code, topic, source or difficulty.',button('Add question','new-question','primary')));}
+function practicePage(){const p=state.practice;if(p){const q=questionById(p.ids[p.index]);if(!q)return empty('This question is no longer available.','Clear this unfinished set to choose another question.','Clear unfinished set','discard-practice');if(q.correctOption&&p.mode!=='written')return mcqQuestionPage(p,q);return heading('Try first. Then check your reasoning.',`Question ${p.index+1} of ${p.ids.length} · ${q.source==='original'?'Original practice':'Cambridge reference supplied by you'}`)+`<section class="panel practice-card">${badge(q.subject)}<h2>${esc(q.title)}</h2><p class="small muted">${esc(topicName(q.topic))} · ${q.max} marks · ${q.level}</p><p class="question-prompt preserve">${esc(q.prompt)}</p><div class="button-row">${questionLinks(q,p.revealed)}</div>${fileList(q.files)}<label class="field"><span>Your working (saved with this attempt)</span><textarea id="practice-working" rows="7">${esc(p.working||'')}</textarea></label><div class="split">${p.timed===false?'<span>Untimed practice</span>':`<span class="practice-clock" data-practice-time>${mins(practiceMinutes(p))}</span>`}${button(p.revealed?'Hide answer':'Reveal answer','reveal-answer')}</div><div class="button-row">${get(q.id)?button('Bookmark question','bookmark','quiet',`data-id="${q.id}"`):''}${button('Clear unfinished set','discard-practice','quiet')}</div>${p.revealed?`<div class="answer-block"><h3>Answer & marking notes</h3><p class="preserve">${esc(q.answer)}</p></div><form id="self-mark"><div class="form-grid">${input('Marks earned','marks','','number',`min="0" max="${q.max}" step="0.25" required`)}${input('Working time (minutes)','minutes',p.timed===false?'0':practiceMinutes(p).toFixed(2),'number','min="0" step="0.01" required')}${select('Confidence after checking','confidence',[1,2,3,4,5],3)}</div><button class="btn primary">Save practice result${p.index<p.ids.length-1?' & continue':''}</button></form>`:''}</section>`;}const sessions=scoped('session');return heading('Focused study','Practise a syllabus topic using your saved questions, then record marks and working time.')+filters()+focusedStudyForm()+`<section class="folio-section"><h2>Session history</h2>${sessions.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Question</th><th>Subject</th><th>Marks</th><th>Time</th></tr></thead><tbody>${[...sessions].reverse().map(s=>`<tr><td>${date(s.date)}</td><td>${esc(questionById(s.questionId)?.title||s.title||'Practice question')}</td><td>${badge(s.subject)}</td><td>${s.marks}/${s.max}</td><td>${mins(s.minutes)}</td></tr>`).join('')}</tbody></table></div>`:empty('Your next focused session starts here.','Add questions to the bank, select a set and begin.','Choose a set','bank')}</section>`;}
 async function saveProfile(values){
  const settings=profile();
- return save({...settings,id:settings.id||uid(),kind:'settings',...values});
+ return save({...settings,id:settings.id||settingsId(),kind:'settings',...values});
 }
 function setupRequired(){
  return store.mode==='cloud'&&store.session?.user?.user_metadata?.revision_onboarding===true&&!profile().onboarded&&!store.records.length;
@@ -417,7 +478,21 @@ function setWorkspacePreferences(){
  state.year=profile().year||2027;
  state.level=profile().qualification||'all';
  state.practice=readPracticeDraft();
- if(state.practice)state.practice.startedAt=null;
+ if(state.practice&&!state.practice.test){
+  const p=state.practice,q=questionById(p.ids[p.index]),result=get(p.resultId);
+  p.startedAt=null;
+  if(result&&q?.correctOption)p.feedback={choice:result.working,correct:q.correctOption};
+  else if(result)advancePractice();
+ }
+}
+function syllabusPlanModal(id){
+ const plan=syllabusPlans().find(item=>item.id===id);
+ modal(plan?'Edit syllabus plan':'Add syllabus plan',
+  select('Subject','subject',subjectOptions(),plan?.subject||(state.subject==='all'?defaultSubject():state.subject))+
+  select('Stage','level',['AS','A2'],plan?.level||(state.level==='A2'?'A2':'AS'))+
+  input('Finish date','finish',plan?.finish||'','date','min="'+localDate()+'" required'),
+  'syllabus-plan','Save syllabus plan');
+ dialogContext.record=plan||{};
 }
 function planPage(){
  const plans=[...planned()].sort((a,b)=>Number(a.done)-Number(b.done)||a.date.localeCompare(b.date));
@@ -436,7 +511,7 @@ function planSessionModal(id){
  const p=planned().find(plan=>plan.id===id);
  modal(p?'Edit planned session':'Plan a study session',input('Session title','title',p?.title||'','text','required maxlength="120"')+
   select('Subject','subject',[['','Any subject'],...subjectOptions()],p?.subject||'')+
-  input('Date','date',p?.date||localDate(),'date','required')+input('Minutes','minutes',p?.minutes||45,'number','required min="1" max="720"'),
+  input('Date','date',p?.date||(state.route==='calendar'&&state.calendarDate)||localDate(),'date','required')+input('Minutes','minutes',p?.minutes||45,'number','required min="1" max="720"'),
   'plan-session',p?'Save changes':'Add to study plan');
  dialogContext.record=p||{};
 }
@@ -483,7 +558,7 @@ function focusedStudyForm(){
  <div class="button-row"><button class="btn primary">Start practice</button>${button('Add a question','new-question','quiet')}</div>
  </form>`;
 }
-function settingsPage(){return heading('A workspace you can keep.','Control where your data lives and keep a complete backup.')+`<div class="settings-grid"><section class="panel appearance-panel"><h2>Make yourself at home.</h2><p>Choose a readable palette for your study space. Saved on this browser.</p><div class="theme-options" role="group" aria-label="Workspace theme">${[['blue','Ivory'],['black','Dark'],['system','Device']].map(([v,l])=>`<button class="theme-option" data-action="set-theme" data-theme-value="${v}" aria-pressed="${(window.revisionAppearance.theme===v||(v==='blue'&&['paper','current','white'].includes(window.revisionAppearance.theme)))}"><span class="theme-swatch ${v}" aria-hidden="true"></span>${l}</button>`).join('')}</div></section><section class="panel"><h2>Storage & account</h2><div class="notice ${store.mode==='cloud'?'success':'subtle'}">${store.mode==='cloud'?`Signed in as ${esc(store.session?.user?.email)}. Records and files are stored in your private Supabase workspace.`:'You are using the local workspace. Records and files survive refresh and browser restarts on this browser profile. Clearing site data removes them. They do not sync to other devices.'}</div><div class="button-row">${store.mode==='cloud'?button('Sign out','signout')+button('Open local workspace','local-mode'):button('Sign in to cloud workspace','auth','primary')}${store.session&&store.mode==='local'?button('Open cloud workspace','cloud-mode'):''}</div>${store.mode==='cloud'?`<hr><h3>Bring local work to the cloud</h3><p>Copy this browser’s saved records and attachments into your account. Local originals are retained. Matching record IDs are updated.</p>${button('Copy local data to cloud','migrate-local')}`:''}</section><section class="panel"><h2>Export & restore</h2><p>A complete JSON backup contains records and the actual attachment bytes. CSV is a spreadsheet-friendly summary of paper attempts.</p><div class="button-row">${button(icon('download')+' Complete JSON backup','backup','primary')}${button('Paper history CSV','csv')}</div><hr><label class="field"><span>Restore a complete JSON backup</span><input type="file" id="import-backup" accept="application/json,.json"></label><p class="small muted">Records with matching IDs are updated; other records remain. Review the confirmation before importing. Import into the local workspace first if you want to inspect an unfamiliar backup.</p></section><section class="panel"><h2>Academic data</h2><p>Examination years: 2026 and 2027. Historical papers can be logged separately. Component durations and routes are based on official Cambridge syllabuses.</p><div class="source-links">${activeSubjects().map(s=>`<a target="_blank" rel="noopener" href="${syllabusSource(s,state.year)}">${SUBJECTS[s].name} official syllabus</a>`).join('')}</div><p>Thresholds are entered from your supplied official PDFs or explicitly labelled manual estimates. No synthetic results or dates are preloaded.</p></section><section class="panel"><h2>About this workspace</h2><p class="small muted">An independent revision tool; not affiliated with Cambridge International Education.</p></section></div>`;}
+function settingsPage(){return heading('A workspace you can keep.','Control where your data lives and keep a complete backup.')+`<div class="settings-grid"><section class="panel appearance-panel"><h2>Make yourself at home.</h2><p>Choose a readable palette for your study space. Saved on this browser.</p><div class="theme-options" role="group" aria-label="Workspace theme">${[['blue','Ivory'],['black','Dark'],['system','Device']].map(([v,l])=>`<button class="theme-option" data-action="set-theme" data-theme-value="${v}" aria-pressed="${(window.revisionAppearance.theme===v||(v==='blue'&&['paper','current','white'].includes(window.revisionAppearance.theme)))}"><span class="theme-swatch ${v}" aria-hidden="true"></span>${l}</button>`).join('')}</div></section><section class="panel"><h2>Storage & account</h2><div class="notice ${store.mode==='cloud'?'success':'subtle'}">${store.mode==='cloud'?`Signed in as ${esc(store.session?.user?.email)}. Records and files are stored in your private Supabase workspace.`:'You are using the local workspace. Records and files survive refresh and browser restarts on this browser profile. Clearing site data removes them. They do not sync to other devices.'}</div><div class="button-row">${store.mode==='cloud'?button('Sign out','signout')+button('Open local workspace','local-mode'):button('Sign in to cloud workspace','auth','primary')}${store.session&&store.mode==='local'?button('Open cloud workspace','cloud-mode'):''}</div>${store.mode==='cloud'?`<hr><h3>Bring local work to the cloud</h3><p>Copy this browser’s saved records and attachments into your account. Local originals are retained. Existing cloud records are preserved. Run the copy again to resume after an interruption.</p>${button('Copy local data to cloud','migrate-local')+button('Cloud conflicts','cloud-conflicts')+button('Reload cloud records','reload-cloud')}`:''}</section><section class="panel"><h2>Export & restore</h2><p>A complete JSON backup contains records and the actual attachment bytes. CSV is a spreadsheet-friendly summary of paper attempts.</p><div class="button-row">${button(icon('download')+' Complete JSON backup','backup','primary')}${button('Paper history CSV','csv')}</div><hr><label class="field"><span>Restore a complete JSON backup</span><input type="file" id="import-backup" accept="application/json,.json"></label><p class="small muted">Cloud restore keeps existing records and saves differing copies for recovery. Local restore updates matching IDs. Review the confirmation before importing. Import into the local workspace first if you want to inspect an unfamiliar backup.</p></section><section class="panel"><h2>Academic data</h2><p>Examination years: 2026 and 2027. Historical papers can be logged separately. Component durations and routes are based on official Cambridge syllabuses.</p><div class="source-links">${activeSubjects().map(s=>`<a target="_blank" rel="noopener" href="${syllabusSource(s,state.year)}">${SUBJECTS[s].name} official syllabus</a>`).join('')}</div><p>Thresholds are entered from your supplied official PDFs or explicitly labelled manual estimates. No synthetic results or dates are preloaded.</p></section><section class="panel"><h2>About this workspace</h2><p class="small muted">An independent revision tool; not affiliated with Cambridge International Education.</p></section></div>`;}
 
 let dialogContext={},confirmCallback=null,pendingImport=null;
 function modal(title,body,form='',submit='Save'){const d=$('#dialog');d.classList.remove('subject-drawer');dialogContext.form=form;d.setAttribute('aria-labelledby','dialog-title');d.innerHTML=`<div class="dialog-heading"><h2 id="dialog-title">${title}</h2>${button(icon('close'),'close-dialog','icon-button','aria-label="Close dialog"')}</div>${form?`<form id="modal-form" data-form="${form}">${body}<div class="dialog-actions">${button('Cancel','close-dialog')}<button class="btn primary" type="submit">${submit}</button></div><p id="modal-error" class="error" role="alert"></p></form>`:body}`;if(!d.open)d.showModal();}
@@ -495,15 +570,58 @@ function authModal(){
  const actions=store.mode==='cloud'?button('Settings & backup','settings')+button('Sign out','signout'):button('Open cloud workspace','cloud-mode','primary');
  modal('Your account',`<p>Signed in as ${email}.</p><div class="button-row">${actions}</div>`);
 }
-function mistakeModal(existing=null,attemptId=null){if(state.route==='log')captureWizard();const attempts=all('attempt'),attempt=attemptId===W?.id?W:get(attemptId||existing?.attemptId),subject=existing?.subject||attempt?.subject||(state.subject==='all'?defaultSubject():state.subject),m=existing||{id:uid(),kind:'mistake',attemptId:attempt?.id||'',subject,level:attempt?.level||'AS',question:'',lost:1,topic:'',category:CATEGORIES[0],original:'',correctAnswer:'',explanation:'',remember:'',retryDate:localDate(new Date(Date.now()+86400000)),corrected:false,files:[],reviewHistory:[]};dialogContext={record:m,draft:state.route==='log',files:[...(m.files||[])]};modal(existing?'Update the correction.':'Turn a lost mark into a next step.',`<div class="form-grid">${select('Original paper attempt','attemptId',[[W&&state.route==='log'?W.id:'','Current draft / no linked paper'],...attempts.map(a=>[a.id,`${paperCode(a)} · ${date(a.date)} · #${attemptNumber(a)}`])],m.attemptId)}${select('Subject','subject',subjectOptions(),m.subject)}${select('Stage','level',['AS','A2'],m.level)}${input('Question number and subpart','question',m.question,'text','required placeholder="2(b)(ii)"')}${input('Marks lost','lost',m.lost,'number','min="0.25" step="0.25" required')}${select('Syllabus topic / subtopic','topic',topicOptions(m.subject,true,m.level),m.topic,'required')}${select('Mistake category','category',CATEGORIES,m.category)}${input('Retry date','retryDate',m.retryDate,'date','required')}</div>${textarea('Original question or task (for retry)','prompt',m.prompt||get(m.questionId)?.prompt||'')}${textarea('My original working or answer','original',m.original)}${textarea('Correct working or answer','correctAnswer',m.correctAnswer)}${textarea('What went wrong','explanation',m.explanation,'required')}${textarea('What to remember next time','remember',m.remember)}<label class="field"><span>Optional question / working images</span><input id="mistake-files" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" multiple></label><div id="modal-attachments">${(m.files||[]).map(f=>`<p>${esc(f.name)} · Stored</p>`).join('')}</div>${check('This mistake has been corrected','corrected',m.corrected)}`,'mistake','Save mistake');}
+function mistakeModal(existing=null,attemptId=null){if(state.route==='log')captureWizard();const attempts=all('attempt'),attempt=attemptId===W?.id?W:get(attemptId||existing?.attemptId),subject=existing?.subject||attempt?.subject||(state.subject==='all'?defaultSubject():state.subject),m=existing||{id:uid(),kind:'mistake',attemptId:attempt?.id||'',subject,level:attempt?.level||'AS',question:'',lost:1,topic:'',category:CATEGORIES[0],original:'',correctAnswer:'',explanation:'',remember:'',retryDate:localDate(new Date(Date.now()+86400000)),corrected:false,files:[],reviewHistory:[]};dialogContext={record:m,draft:state.route==='log',files:[...(m.files||[])]};modal(existing?'Update the correction.':'Turn a lost mark into a next step.',`<div class="form-grid">${select('Original paper attempt','attemptId',[[W&&state.route==='log'?W.id:'','Current draft / no linked paper'],...attempts.map(a=>[a.id,`${paperCode(a)} · ${date(a.date)} · #${attemptNumber(a)}`])],m.attemptId)}${select('Subject','subject',subjectOptions(),m.subject)}${select('Stage','level',['AS','A2'],m.level)}${input('Question number and subpart','question',m.question,'text','required placeholder="2(b)(ii)"')}${input('Marks lost','lost',m.lost,'number','min="0.25" step="0.25" required')}${select('Syllabus topic / subtopic','topic',topicOptions(m.subject,true,m.level),m.topic,'required')}${select('Mistake category','category',CATEGORIES,m.category)}${input('Retry date','retryDate',m.retryDate,'date','required')}</div>${textarea('Original question or task (for retry)','prompt',m.prompt||questionById(m.questionId)?.prompt||'')}${textarea('My original working or answer','original',m.original)}${textarea('Correct working or answer','correctAnswer',m.correctAnswer)}${textarea('What went wrong','explanation',m.explanation,'required')}${textarea('What to remember next time','remember',m.remember)}<label class="field"><span>Optional question / working images</span><input id="mistake-files" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" multiple></label><div id="modal-attachments">${(m.files||[]).map(f=>`<p>${esc(f.name)} · Stored</p>`).join('')}</div>${check('This mistake has been corrected','corrected',m.corrected)}`,'mistake','Save mistake');}
 function thresholdModal(existing=null){const t=existing||{id:uid(),kind:'threshold',subject:state.subject==='all'?defaultSubject():state.subject,scope:'component',level:'AS',paper:'12',year:state.year,series:'s',max:75,values:{},official:false,sourceUrl:'',optionCode:'',route:'',files:[]};dialogContext={record:t,files:[...(t.files||[])]};modal('Use the exact threshold row.',`<p>Attach an official threshold PDF, then transcribe and verify its row. PDFs are retained as evidence; table values are never guessed.</p><div class="form-grid">${select('Subject','subject',subjectOptions(),t.subject)}${select('Threshold scope','scope',[['component','Individual component'],['qualification','Overall qualification']],t.scope)}${select('Qualification level','level',['AS','A Level'],t.level)}${input('Paper + variant (component only)','paper',t.paper,'text','placeholder="12" maxlength="2"')}${input('Examination year','year',t.year,'number','min="2000" max="2100" required')}${select('Examination series','series',Object.entries(SERIES),t.series)}${input('Maximum marks (weighted for overall)','max',t.max,'number','min="1" step="0.25" required')}${input('Entry option code (overall only)','optionCode',t.optionCode,'text','placeholder="Exact Cambridge option"')}${select('Component route (overall only)','route',[['','Choose exact route'],...Object.keys(ROUTES[t.subject])],t.route)}</div><div class="boundary-inputs">${['A*','a','b','c','d','e'].map(g=>input(`${g==='A*'?'A* (overall A Level only)':g+' / '+g.toUpperCase()} boundary`,`boundary-${g}`,t.values[g]??t.values[g.toUpperCase()]??'','number','min="0" step="0.25"')).join('')}</div>${input('Official Cambridge source URL (optional with PDF)','sourceUrl',t.sourceUrl,'url','placeholder="https://www.cambridgeinternational.org/…"')}<label class="field"><span>Official threshold PDF</span><input type="file" id="threshold-files" accept="application/pdf" multiple></label><div id="modal-attachments">${(t.files||[]).map(f=>`<p>${esc(f.name)} · Stored</p>`).join('')}</div>${check('I verified these values against the attached / linked official Cambridge threshold row','official',t.official)}<p class="small muted">Leave unchecked for a clearly labelled manual estimate. Component a is not A*. Match the year, series, exact variant and maximum.</p>`,'threshold','Save thresholds');}
-function examModal(existing=null){const e=existing||{id:uid(),kind:'exam',subject:state.subject==='all'?defaultSubject():state.subject,level:'AS',paper:'12',datetime:'',duration:110,target:'a'};dialogContext={record:e};modal('Your actual examination date.',`<div class="form-grid">${select('Subject','subject',subjectOptions(),e.subject)}${select('Stage','level',['AS','A2'],e.level)}${input('Paper number and variant','paper',e.paper,'text','pattern="[0-9]{2}" required')}${input('Date and start time (your local timezone)','datetime',e.datetime?localDateTime(e.datetime):'','datetime-local','required')}${input('Duration (minutes)','duration',e.duration,'number','min="1" required')}${select('Target qualification grade','target',e.level==='AS'?['a','b','c','d','e']:['A*','A','B','C','D','E'],e.target)}</div><p class="small muted">Use your centre’s confirmed timetable. Times display in your device’s local timezone.</p>`,'exam','Save examination');}
+function examTopics(exam){
+ const part=Number(String(exam.paper)[0]);
+ return topicsFor(exam.subject,exam.level).filter(t=>!t.supplementary&&(t.components.includes(part)||(part===1&&['9702','9701','9700'].includes(exam.subject)&&t.components.includes(2))));
+}
+function examRunUp(exam){
+ if(!exam)return;
+ const topics=examTopics(exam).filter(t=>!exam.topicIds?.length||exam.topicIds.includes(t.id));
+ const finish=new Date(exam.datetime);
+ finish.setDate(finish.getDate()-1);
+ const schedule=distributeTopics(topics,localDate(),localDate(finish),all('topic'));
+ modal('Revision run-up','<p>'+esc(SUBJECTS[exam.subject].name)+' · Paper '+esc(exam.paper)+' · '+date(localDate(new Date(exam.datetime)))+'</p>'+
+  '<ul class="resource-list">'+schedule.milestones.map(({topic,date:day})=>'<li><div><strong>'+esc(topicName(topic.id))+'</strong><small>'+
+  (day?date(day):'Available now')+'</small></div>'+button('Practise','practise-topic','quiet','data-topic="'+topic.id+'"')+'</li>').join('')+
+  '</ul>'+(schedule.milestones.length?'':'<p>All selected topics are marked complete.</p>'));
+}
+function examTopicOptions(exam){
+ return examTopics(exam).map(t=>'<label class="checkbox"><input type="checkbox" name="examTopics" value="'+esc(t.id)+'" '+
+  (exam.topicIds?.includes(t.id)?'checked':'')+'> '+esc(topicName(t.id))+'</label>').join('')||'<p>Choose a valid component to see its topics.</p>';
+}
+function examModal(existing=null){const e=existing||{id:uid(),kind:'exam',subject:state.subject==='all'?defaultSubject():state.subject,level:'AS',paper:'12',datetime:'',duration:110,target:'a'};dialogContext={record:e};modal('Your actual examination date.',`<div class="form-grid">${select('Subject','subject',subjectOptions(),e.subject)}${select('Stage','level',['AS','A2'],e.level)}${input('Paper number and variant','paper',e.paper,'text','pattern="[0-9]{2}" required')}${input('Date and start time (your local timezone)','datetime',e.datetime?localDateTime(e.datetime):'','datetime-local','required')}${input('Duration (minutes)','duration',e.duration,'number','min="1" required')}${select('Target qualification grade','target',e.level==='AS'?['a','b','c','d','e']:['A*','A','B','C','D','E'],e.target)}</div><p class="small muted">Use your centre’s confirmed timetable. Times display in your device’s local timezone.</p><fieldset><legend>Topics to revise before this exam</legend><div class="exam-topic-options" id="exam-topic-options">${examTopicOptions(e)}</div></fieldset>`,'exam','Save examination');}
 function localDateTime(d){const x=new Date(d);return localDate(x)+`T${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;}
-function questionModal(existing=null){const q=existing||{id:uid(),kind:'question',subject:state.subject==='all'?(activeSubjects().includes('9618')?'9618':defaultSubject()):state.subject,level:'AS',title:'',source:'original',reference:'',topic:'',max:4,difficulty:3,prompt:'',answer:'',attemptId:'',files:[]};dialogContext={record:q,files:[...(q.files||[])]};modal(existing?'Edit this practice question.':'Keep a useful question.',`<div class="form-grid">${input('Question title','title',q.title,'text','required')}${select('Subject','subject',subjectOptions(),q.subject)}${select('Stage','level',['AS','A2'],q.level)}${select('Source','source',[['original','Original practice'],['cambridge','Authentic Cambridge past paper']],q.source)}${input('Verified Cambridge paper / question reference','reference',q.reference,'text','placeholder="9709/12/M/J/25 Q2"')}${select('Link to a recorded attempt (optional)','attemptId',[['','No linked attempt'],...all('attempt').map(a=>[a.id,paperCode(a)])],q.attemptId)}${select('Syllabus topic','topic',topicOptions(q.subject,true,q.level),q.topic,'required')}${input('Maximum marks','max',q.max,'number','min="0.25" step="0.25" required')}${select('Difficulty estimate','difficulty',[1,2,3,4,5],q.difficulty)}</div>${textarea('Question / task','prompt',q.prompt,'required')}${textarea('Answer and self-marking guidance','answer',q.answer,'required')}<label class="field"><span>Optional question image / PDF</span><input type="file" id="question-files" accept="application/pdf,image/png,image/jpeg,image/webp" multiple></label><div id="modal-attachments"></div>`,'question','Save question');}
+function questionModal(existing=null){const q=existing||{id:uid(),kind:'question',subject:state.subject==='all'?(activeSubjects().includes('9618')?'9618':defaultSubject()):state.subject,level:'AS',title:'',source:'original',reference:'',topic:'',max:4,difficulty:3,prompt:'',answer:'',attemptId:'',files:[]};if(!existing&&state.route==='bank'&&state.bank.topic){const topic=TOPICS.find(t=>t.id===state.bank.topic);if(topic){q.subject=topic.subject;q.level=topic.level==='AS/A2'?(state.level==='A2'?'A2':'AS'):topic.level;q.topic=topic.id;}}dialogContext={record:q,files:[...(q.files||[])]};modal(existing?'Edit this practice question.':'Keep a useful question.',`<div class="form-grid">${input('Question title','title',q.title,'text','required')}${select('Subject','subject',subjectOptions(),q.subject)}${select('Stage','level',['AS','A2'],q.level)}${select('Source','source',[['original','Original practice'],['cambridge','Authentic Cambridge past paper']],q.source)}${input('Verified Cambridge paper / question reference','reference',q.reference,'text','placeholder="9709/12/M/J/25 Q2"')}${select('Link to a recorded attempt (optional)','attemptId',[['','No linked attempt'],...all('attempt').map(a=>[a.id,paperCode(a)])],q.attemptId)}${select('Syllabus topic','topic',topicOptions(q.subject,true,q.level),q.topic,'required')}${input('Maximum marks','max',q.max,'number','min="0.25" step="0.25" required')}${select('Difficulty estimate','difficulty',[1,2,3,4,5],q.difficulty)}</div>${textarea('Question / task','prompt',q.prompt,'required')}${textarea('Answer and self-marking guidance','answer',q.answer)}${select('Correct MCQ option','correctOption',[['','Written question'],...'ABCD'],q.correctOption||'')}${input('Question paper link','questionUrl',q.questionUrl,'url')}${input('Mark scheme link','schemeUrl',q.schemeUrl,'url')}<label class="field"><span>Optional question image / PDF</span><input type="file" id="question-files" accept="application/pdf,image/png,image/jpeg,image/webp" multiple></label><div id="modal-attachments"></div>`,'question','Save question');}
 function topicModal(id){const t=TOPICS.find(t=>t.id===id),p=all('topic').find(p=>p.topicId===id)||{id:uid(),kind:'topic',topicId:id,subject:t.subject,level:t.level,status:'Not started',confidence:0};dialogContext={record:p};const s=topicStats(id,all('attempt'),all('mistake'),all('session'));modal(esc(topicName(id)),`<p>${SUBJECTS[t.subject].name}${mathsComponent(t)?' · '+esc(mathsComponent(t)):''} · Paper ${t.components.join(' / ')} · ${t.level}</p><div class="form-grid">${select('Completion status','status',['Not started','Learning','Practising','Complete'],p.status)}${select('Self-reported confidence','confidence',[[0,'Not rated'],[1,'1 · Uncertain'],[2,'2 · Developing'],[3,'3 · Getting there'],[4,'4 · Confident'],[5,'5 · Very confident']],p.confidence)}</div><div class="notice subtle">Measured accuracy: ${pct(s.accuracy)} · ${s.attempted} attempts · ${s.lost} marks lost. Changing confidence does not change these results.</div>`,'topic','Save topic progress');}
-function retryModal(id){const m=get(id);if(!m)return;state.retry=id;state.revealed=false;modal(`Retry Q${esc(m.question)}`,`<p>${esc(topicName(m.topic))}</p><p>Try this question again before revealing the correction.</p><p class="preserve">${esc(m.prompt||get(m.questionId)?.prompt)||'Open the original paper and attempt the question shown below. Your previous working is hidden until you reveal the correction.'}</p>${get(m.attemptId)?button('Open original paper','retry-paper','','data-id="'+m.attemptId+'"'):''}${fileList(m.files)}<label class="field"><span>Your retry working</span><textarea id="retry-working" rows="6"></textarea></label><div id="retry-answer"></div>${button('Reveal correction','reveal-correction','primary')}`);}
+function retryModal(id){const m=get(id);if(!m)return;state.retry=id;state.revealed=false;modal(`Retry Q${esc(m.question)}`,`<p>${esc(topicName(m.topic))}</p><p>Try this question again before revealing the correction.</p><p class="preserve">${esc(m.prompt||get(m.questionId)?.prompt)||'Open the original paper and attempt the question shown below. Your previous working is hidden until you reveal the correction.'}</p>${questionLinks(questionById(m.questionId)||{},false)+(get(m.attemptId)?button('Open original paper','retry-paper','','data-id="'+m.attemptId+'"'):'')}${fileList(m.files)}<label class="field"><span>Your retry working</span><textarea id="retry-working" rows="6"></textarea></label><div id="retry-answer"></div>${button('Reveal correction','reveal-correction','primary')}`);}
 function showRetryAnswer(){const m=get(state.retry);if(!m)return;state.revealed=true;$('#retry-answer').innerHTML=`<div class="answer-block"><h3>Previous working</h3><p class="preserve">${esc(m.original)||'No previous working recorded.'}</p><h3>Correct working</h3><p class="preserve">${esc(m.correctAnswer)||'No correct working recorded yet.'}</p><h3>Remember next time</h3><p class="preserve">${esc(m.remember)}</p></div><p>How well did you recall it?</p><div class="button-row">${button('Again · 1 day','review-rating','','data-rating="again"')}${button('Good · next interval','review-rating','primary','data-rating="good"')}${button('Corrected','review-rating','','data-rating="easy"')}</div>`;}
-function updateTimerDisplay(){if(W?.timer){const v=timerValues(W.timer);if($('[data-timer-active]'))$('[data-timer-active]').textContent=timeText(v.activeMs);if($('[data-timer-elapsed]'))$('[data-timer-elapsed]').textContent='Elapsed '+timeText(v.elapsedMs);}for(const e of document.querySelectorAll('[data-countdown]'))e.textContent=countdownText(e.dataset.countdown);if(state.practice&&$('[data-practice-time]'))$('[data-practice-time]').textContent=mins(practiceMinutes(state.practice));}
+function updateTimerDisplay(){const mcqClock=$('[data-mcq-clock]'),p=state.practice;if(mcqClock&&p?.test&&!p.test.submitting){const remaining=Math.max(0,p.test.deadline-Date.now());mcqClock.textContent=timeText(Math.ceil(remaining/1000)*1000)+' remaining';if(!remaining&&!busy)run(()=>gradeMcqTest(p));}if(W?.timer){const v=timerValues(W.timer);if($('[data-timer-active]'))$('[data-timer-active]').textContent=timeText(v.activeMs);if($('[data-timer-elapsed]'))$('[data-timer-elapsed]').textContent='Elapsed '+timeText(v.elapsedMs);}for(const e of document.querySelectorAll('[data-countdown]'))e.textContent=countdownText(e.dataset.countdown);if(state.practice&&$('[data-practice-time]'))$('[data-practice-time]').textContent=mins(practiceMinutes(state.practice));}
+function transferMessage({saved,unchanged,conflicts},verb){
+ return saved+' '+verb+', '+unchanged+' already present.'+(conflicts?' '+conflicts+' in Cloud conflicts.':'');
+}
+let reviewedCloudVersions=new Map();
+async function showCloudConflicts(){
+ await loadRecords();
+ const entries=await cloudConflicts();
+ reviewedCloudVersions=new Map(store.records.map(record=>[record.id,record._cloudVersion]));
+ const rows=entries.map(entry=>{
+  const ids=[...entry.ids,...entry.records.map(record=>record.id)];
+  const comparison=ids.map(id=>{
+   const pending=entry.records.find(record=>record.id===id),current=get(id);
+   const snapshot=record=>esc(JSON.stringify(record, (key,value)=>key==='_cloudVersion'?undefined:value, 2));
+   return '<details><summary>'+esc(pending?.title||current?.title||(pending||current)?.kind||'Removed record')+'</summary>'+
+    '<div class="conflict-versions"><section><h4>Current cloud record</h4><pre>'+(current?snapshot(current):'No current record')+'</pre></section>'+
+    '<section><h4>Recovered edit</h4><pre>'+(pending?snapshot(pending):'Delete request')+'</pre></section></div></details>';
+  }).join('');
+  const attrs='data-id="'+entry.id+'"';
+  return '<section class="panel"><h3>'+esc(new Date(entry.at).toLocaleString())+'</h3>'+comparison+
+   '<div class="button-row">'+(entry.records.length?button('Export recovered work','export-conflict','quiet',attrs)+button('Use recovered edit','apply-conflict','primary',attrs):'')+
+   button('Dismiss entry','dismiss-conflict','quiet',attrs)+'</div></section>';
+ }).join('');
+ modal('Cloud conflicts','<p>Review both versions. Export recovered edits with their attachments, or reapply the changes you want from the current cloud record.</p>'+(rows||'<p>No conflicts saved on this device.</p>'));
+}
 function notify(message,type='success'){const t=$('#toast');t.textContent=message;t.className='show '+type;clearTimeout(notify.timeout);notify.timeout=setTimeout(()=>t.className='',6500);}
 async function run(action){if(busy)return;busy=true;document.body.classList.add('busy');try{await action();}catch(e){console.error(e);notify(e.message||'Something went wrong. Your form has been kept.','error');const err=$('#modal-error')||$('#wizard-error');if(err)err.textContent=e.message;}finally{busy=false;document.body.classList.remove('busy');}}
 async function extractPDF(file){const guessed=identifyFilename(file.name);if(guessed?.role==='Question paper'){Object.assign(W,{subject:guessed.subject,paper:guessed.paper||W.paper,series:guessed.series,year:guessed.year});const c=component(W);if(c)W.level=c[3]==='AS/A2'?W.level:c[3];W.recognition=`Recognised filename: ${paperCode(W)}. Confirm the series and cover details.`;}if(file.type!=='application/pdf'||guessed?.role&&guessed.role!=='Question paper')return;try{const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296/build/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs';const pdf=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;const page=await pdf.getPage(1),text=(await page.getTextContent()).items.map(i=>i.str).join(' '),code=text.match(/\b(9709|9702|9618|9231|9701|9700)\s*\/\s*(\d{2})\b/);if(code){W.subject=code[1];W.paper=code[2];}const series=text.match(/(February\s*\/\s*March|May\s*\/\s*June|October\s*\/\s*November)\s+(20\d{2})/i);if(series){W.series=/February/i.test(series[1])?'m':/May/i.test(series[1])?'s':'w';W.year=+series[2];}const marks=text.match(/total\s+mark(?:s)?\s+(?:for\s+this\s+paper\s+)?(?:is|are|:)\s*(\d+)/i);if(marks){W.max=+marks[1];W.paperMax=+marks[1];W.verifiedMax=true;}const duration=text.match(/(?:(\d+)\s*hours?\s*)?(\d+)?\s*minutes?/i);if(duration&&(duration[1]||duration[2]))W.officialMinutes=(+duration[1]||0)*60+(+duration[2]||0);const c=component(W);if(c)W.level=c[3]==='AS/A2'?W.level:c[3];W.recognition=`Read PDF cover${marks?' and read the maximum marks':''}. Confirm all details before saving.`;await pdf.destroy();}catch{W.recognition=(W.recognition||'')+' PDF text extraction was unavailable or the PDF is scanned. Please confirm the paper identity and maximum marks manually.';}}
@@ -511,16 +629,24 @@ async function handlePaperFiles(files){if(!W)newWizard();captureWizard();const s
 async function saveAttempt(){captureWizard();if(W.timer?.running)throw new Error('Finish or pause the timer before saving.');const a={...W,kind:'attempt',marks:+W.marks,max:+W.max,minutes:+W.minutes,elapsedMinutes:W.elapsedMinutes===''?undefined:+W.elapsedMinutes,year:+W.year,difficulty:+W.difficulty,questionsAttempted:+W.questionsAttempted,correct:+W.correct,partialCorrect:+W.partialCorrect,createdAt:W.createdAt||new Date().toISOString()};const errors=validateAttempt(a);if(errors.length)throw new Error(errors.join(' '));if(!a.files.some(f=>f.role==='Question paper'&&f.type==='application/pdf'))throw new Error('Attach the question paper PDF before saving.');const old=get(a.id);if(old)a.revisions=[...(old.revisions||[]),{at:new Date().toISOString(),marks:old.marks,max:old.max,minutes:old.minutes,questions:old.questions,notes:old.notes}];const mistakes=W.mistakes.map(m=>({...m,kind:'mistake',attemptId:a.id,subject:a.subject,level:a.level,date:a.date}));delete a.mistakes;delete a.step;delete a.editing;await saveMany([a,...mistakes]);localStorage.removeItem(workspaceKey());W=null;activeTimer=null;go('detail',a.id);notify(`Attempt saved · ${a.marks}/${a.max} · ${pct(percent(a))}${a.scope==='partial'?' of attempted marks':''}.`);}
 async function wizardNext(){captureWizard();const form=$('#wizard-form');if(form&&!form.reportValidity())return;if(W.step===0&&!W.files.some(f=>f.role==='Question paper'&&f.type==='application/pdf'))throw new Error('Upload and label a question paper before continuing.');if(W.step===1){if(!COMPONENTS[W.subject]?.[W.paper[0]]||!/^\d{2}$/.test(W.paper))throw new Error('Choose a valid component and variant.');const c=component(W);if(c[3]!=='AS/A2'&&c[3]!==W.level)throw new Error('This component does not match the selected AS/A2 stage.');if(!W.officialMinutes&&[2026,2027].includes(+W.year))W.officialMinutes=c[2];}if(W.step===2){const e=validateAttempt(W);if(e.length)throw new Error(e.join(' '));}W.step=Math.min(4,W.step+1);persistDraft();render();window.scrollTo({top:0});}
 async function modalSubmit(form){const d=Object.fromEntries(new FormData(form)),type=form.dataset.form;const record=dialogContext.record||{};
-if(type==='add-subject'){if(!SUBJECTS[d.subject])throw Error('Choose a subject from the STEM catalogue.');const settings=all('settings')[0]||{id:uid(),kind:'settings'};await save({...settings,subjects:[...new Set([...activeSubjects(),d.subject])]});closeModal();render();notify(`${SUBJECTS[d.subject].name} added with its syllabus.`);return;}
+if(type==='add-subject'){if(!SUBJECTS[d.subject])throw Error('Choose a subject from the STEM catalogue.');const settings=all('settings')[0]||{id:settingsId(),kind:'settings'};await save({...settings,subjects:[...new Set([...activeSubjects(),d.subject])]});closeModal();render();notify(`${SUBJECTS[d.subject].name} added with its syllabus.`);return;}
 if(type==='mistake'){const m={...record,...d,lost:+d.lost,corrected:!!form.corrected.checked,files:dialogContext.files,kind:'mistake'};const a=m.attemptId===W?.id?W:get(m.attemptId);if(a&&(a.subject!==m.subject||a.level!==m.level))throw new Error('The mistake subject and stage must match its original attempt.');const t=TOPICS.find(t=>t.id===m.topic);if(!t||t.subject!==m.subject||(t.level!=='AS/A2'&&t.level!==m.level))throw new Error('Choose a topic from the mistake’s subject.');const q=a?.questions?.find(q=>q.number.trim().toLowerCase()===m.question.trim().toLowerCase());if(q&&m.lost>q.max-q.marks)throw new Error('Marks lost exceed the loss recorded for this question.');m.date=a?.date||localDate();if(record.updatedAt)m.corrections=[...(record.corrections||[]),{at:new Date().toISOString(),prompt:record.prompt,original:record.original,correctAnswer:record.correctAnswer,explanation:record.explanation,remember:record.remember,lost:record.lost,corrected:record.corrected}];if(dialogContext.draft&&m.attemptId===W.id){const i=W.mistakes.findIndex(v=>v.id===m.id);if(i<0)W.mistakes.push(m);else W.mistakes[i]=m;persistDraft();}else await save(m);closeModal();render();notify('Mistake saved and scheduled for review.');return;}
 if(type==='threshold'){const t={...record,...d,max:+d.max,year:+d.year,official:!!form.official.checked,files:dialogContext.files,values:{}};const grades=t.scope==='qualification'&&t.level==='A Level'?['A*','A','B','C','D','E']:['a','b','c','d','e'];for(const g of grades){const key=g==='A*'?'A*':g.toLowerCase();if(d['boundary-'+key]==='')throw new Error('Enter all grade boundaries for this threshold row.');t.values[g]=+d['boundary-'+key];}if(t.scope==='qualification'&&(!t.route||!t.optionCode))throw new Error('Overall thresholds require the exact component route and entry option.');const err=validateThreshold(t);if(err)throw new Error(err);await save(t);closeModal();render();notify('Thresholds saved. Matching paper grades updated.');return;}
-if(type==='exam'){const e={...record,...d,datetime:new Date(d.datetime).toISOString(),duration:+d.duration};if(!/^\d{2}$/.test(e.paper)||!COMPONENTS[e.subject]?.[e.paper[0]])throw new Error('Choose a valid examination component.');const c=component(e);if(c[3]!=='AS/A2'&&c[3]!==e.level)throw new Error('The component does not match the AS/A2 stage.');await save(e);closeModal();render();notify('Examination date saved.');return;}
-if(type==='question'){const q={...record,...d,max:+d.max,difficulty:+d.difficulty,files:dialogContext.files};if(q.source==='cambridge'&&!q.reference.trim())throw new Error('Authentic Cambridge questions need a verified paper and question reference.');const topic=TOPICS.find(t=>t.id===q.topic);if(!topic||topic.subject!==q.subject||(topic.level!=='AS/A2'&&topic.level!==q.level))throw new Error('Choose a syllabus topic that matches the question subject and stage.');if(q.attemptId&&(get(q.attemptId)?.subject!==q.subject||get(q.attemptId)?.level!==q.level))throw new Error('The linked paper belongs to another subject.');await save(q);closeModal();render();notify('Question saved.');return;}
+if(type==='exam'){const e={...record,...d,datetime:new Date(d.datetime).toISOString(),duration:+d.duration,topicIds:new FormData(form).getAll('examTopics')};delete e.examTopics;if(!/^\d{2}$/.test(e.paper)||!COMPONENTS[e.subject]?.[e.paper[0]])throw new Error('Choose a valid examination component.');const c=component(e);if(c[3]!=='AS/A2'&&c[3]!==e.level)throw new Error('The component does not match the AS/A2 stage.');const allowed=new Set(examTopics(e).map(t=>t.id));if(e.topicIds.some(id=>!allowed.has(id)))throw new Error('Choose topics covered by this examination.');await save(e);closeModal();render();notify('Examination date saved.');return;}
+if(type==='question'){const q={...record,...d,max:d.correctOption?1:+d.max,difficulty:+d.difficulty,files:dialogContext.files};if(q.correctOption&&!/^[A-D]$/.test(q.correctOption))throw new Error('Choose an answer letter from A to D.');if(!q.correctOption&&!q.answer.trim())throw new Error('Add an answer or marking guidance for this written question.');if((q.questionUrl||q.schemeUrl)&&resourceLinks(q).length!==Number(Boolean(q.questionUrl))+Number(Boolean(q.schemeUrl)))throw new Error('Use HTTPS links for question papers and mark schemes.');if(q.source==='cambridge'&&!q.reference.trim())throw new Error('Authentic Cambridge questions need a verified paper and question reference.');const topic=TOPICS.find(t=>t.id===q.topic);if(!topic||topic.subject!==q.subject||(topic.level!=='AS/A2'&&topic.level!==q.level))throw new Error('Choose a syllabus topic that matches the question subject and stage.');if(q.attemptId&&(get(q.attemptId)?.subject!==q.subject||get(q.attemptId)?.level!==q.level))throw new Error('The linked paper belongs to another subject.');await save(q);closeModal();render();notify('Question saved.');return;}
 if(type==='plan-session'){
  const title=d.title.trim(),minutes=+d.minutes;
  if(!title||!Number.isFinite(minutes)||minutes<1||minutes>720||!d.date||(d.subject&&!activeSubjects().includes(d.subject)))throw new Error('Check the session title, subject, date and duration.');
  const next={...record,id:record.id||uid(),title,minutes,date:d.date,subject:d.subject,done:Boolean(record.done)};
  await saveProfile({studyPlan:[...planned().filter(p=>p.id!==next.id),next]});closeModal();render();notify('Study plan updated.');return;
+}
+if(type==='syllabus-plan'){
+ const today=localDate();
+ if(!activeSubjects().includes(d.subject)||!['AS','A2'].includes(d.level)||!d.finish||d.finish<today||d.finish.slice(0,4)>String(new Date().getFullYear()+5))
+  throw new Error('Choose a subject, stage and finish date within the next five years.');
+ const plan={...record,id:record.id||uid(),subject:d.subject,level:d.level,finish:d.finish};
+ await saveProfile({syllabusPlans:[...syllabusPlans().filter(p=>p.id!==plan.id),plan]});
+ closeModal();render();notify('Syllabus plan saved.');return;
 }
 if(type==='bookmark'){
  const section=(d.section||'').trim(),current=bookmarks().find(b=>b.recordId===record.recordId&&(b.section||'')===section);
@@ -531,10 +657,112 @@ if(type==='topic'){await save({...record,status:d.status,confidence:+d.confidenc
 
 document.addEventListener('click',e=>{if(e.target.closest('.skip')){e.preventDefault();$('#main')?.focus();return;}const route=e.target.closest('[data-route]'),subject=e.target.closest('[data-subject]'),level=e.target.closest('[data-level]'),sg=e.target.closest('[data-subject-go]');if(route){closeModal();go(route.dataset.route);return;}if(subject){closeModal();state.subject=subject.dataset.subject;state.component='all';state.dashboardComponent='';state.selected=[];render();return;}if(level){state.level=level.dataset.level;state.dashboardComponent='';render();return;}if(sg){state.subject=sg.dataset.subjectGo;go('syllabus');return;}const el=e.target.closest('[data-action]');if(!el)return;const a=el.dataset.action,id=el.dataset.id;if(a==='close-dialog'){closeModal();return;}run(async()=>{
 if(!activeSubjects().length&&['log','new-mistake','new-exam','new-question','new-threshold','practice-selected'].includes(a)){addSubjectModal();return;}
+if(a==='reload-cloud'){await loadRecords();render();notify('Cloud records refreshed.');return;}
+if(a==='cloud-conflicts'){await showCloudConflicts();return;}
+if(a==='export-conflict'){const data=await exportConflict(id);download('cambridge-conflict-'+localDate()+'.json',JSON.stringify(data));return;}
+if(a==='apply-conflict'){const versions=reviewedCloudVersions;confirmAction('Use this recovered edit?','The cloud versions shown in the comparison will be kept as a recovery entry. If any changed again, the save will stop.',async()=>{await applyRecoveredConflict(id,versions);await showCloudConflicts();notify('Recovered work saved to the cloud.');},'Use recovered edit');return;}
+if(a==='dismiss-conflict'){confirmAction('Dismiss this recovery entry?','The saved cloud records stay in your workspace. Export the recovery entry first if you need these changes.',async()=>{await dismissConflict(id);await showCloudConflicts();},'Dismiss entry');return;}
 if(a==='reload'){location.reload();return;}
 if(a==='public-theme'){window.revisionAppearance.set(document.documentElement.dataset.theme==='black'?'blue':'black');return;}
 if(a==='compact-menu'){compact=!compact;render();document.querySelector('[data-action="compact-menu"]')?.focus();return;}
 if(a==='activity-day'){state.activityDate=el.dataset.date;const y=scrollY;render();document.querySelector('[data-date="'+state.activityDate+'"]')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
+if(a==='catalogue-filter'||a==='catalogue-reset'||a==='catalogue-page'){
+ if(a==='catalogue-reset'){state.catalogue={};state.cataloguePage=1;}
+ else if(a==='catalogue-page')state.cataloguePage=Math.max(1,(state.cataloguePage||1)+Number(el.dataset.step));
+ else{
+  const form=$('#catalogue-filters');
+  state.catalogue={...state.catalogue,...Object.fromEntries(new FormData(form)),attempted:form.elements.attempted.checked,[el.dataset.field]:el.dataset.value};
+  state.cataloguePage=1;
+ }
+ render();return;
+}
+if(a==='catalogue-log'){
+ const paper=paperCatalogue.find(item=>paperCode(item)===el.dataset.paper);
+ if(!paper)return;
+ if(W||localStorage.getItem(workspaceKey())){
+  go('log');notify('Your existing draft is open. Finish it before starting a new paper.');return;
+ }
+ if(!activeSubjects().includes(paper.subject)){addSubjectModal();return;}
+ newWizard(null,false,false);
+ Object.assign(W,{subject:paper.subject,level:paper.level==='AS/A2'?(state.level==='A2'?'A2':'AS'):paper.level,
+  paper:paper.paper,series:paper.series,year:paper.year,questionUrl:paper.questionUrl,schemeUrl:paper.schemeUrl});
+ persistDraft();go('log');return;
+}
+if(a==='switch-workspace-tab'||a==='close-workspace-tab'){
+ const index=Number(el.dataset.index),tab=state.tabs[index];
+ if(!tab)return;
+ if(a==='switch-workspace-tab'){go(tab.route,tab.id);return;}
+ state.tabs.splice(index,1);
+ if(tab.route===state.route&&(tab.id||null)===(state.detail||null)){
+  const next=state.tabs[Math.min(index,state.tabs.length-1)];
+  go(next?.route||'home',next?.id);
+ }else{
+  render();
+  $('.workspace-tab[data-current] [data-action="switch-workspace-tab"]')?.focus();
+ }
+ return;
+}
+if(a==='calendar-month'){
+ state.calendarMonth=shiftMonth(state.calendarMonth||localDate().slice(0,7),Number(el.dataset.step));
+ state.calendarDate=state.calendarMonth+'-01';
+ render();$('[data-action="calendar-month"][data-step="'+el.dataset.step+'"]')?.focus();return;
+}
+if(a==='calendar-day'){
+ state.calendarDate=el.dataset.date;state.calendarMonth=state.calendarDate.slice(0,7);
+ render();$('.student-calendar [data-date="'+state.calendarDate+'"]')?.focus();return;
+}
+if(a==='calendar-today'){state.calendarDate=localDate();state.calendarMonth=state.calendarDate.slice(0,7);render();return;}
+if(a==='syllabus-plan'){syllabusPlanModal(id);return;}
+if(a==='remove-syllabus-plan'){
+ confirmAction('Remove this syllabus plan?','Your syllabus progress and saved practice stay available.',async()=>{
+  await saveProfile({syllabusPlans:syllabusPlans().filter(plan=>plan.id!==id)});closeModal();render();
+ },'Remove plan');return;
+}
+if(a==='practise-topic'){
+ const topic=el.dataset.topic;
+ closeModal();
+ const ids=topicQuestionIds(availableQuestions().filter(inScope),all('mistake'),topic);
+ if(ids.length)startPractice(ids,false,'mixed');
+ else{state.bank={search:topicName(topic),source:'all',difficulty:'all',topic};go('bank');notify('Add a saved question for this topic to start practice.');}
+ return;
+}
+if(a==='mcq-mistakes'){
+ const ids=[...new Set(scoped('mistake').filter(m=>!m.corrected&&questionById(m.questionId)?.correctOption).map(m=>m.questionId))];
+ if(ids.length)startPractice(ids,false,'mcq');
+ return;
+}
+if(a==='mcq-mode'){state.mcqMode=el.dataset.mode;render();return;}
+if(a==='mcq-test-question'){
+ const p=state.practice;if(!p?.test||p.test.graded)return;
+ const selected=$('#mcq-test-answer input[name=choice]:checked');
+ if(selected)p.test.answers[p.index]=selected.value;
+ p.index=Number(el.dataset.index);savePracticeDraft();render();return;
+}
+if(a==='mcq-test-finish'){
+ const p=state.practice;if(!p?.test)return;
+ if(p.test.graded){state.practice=null;savePracticeDraft();go('mcq');return;}
+ const selected=$('#mcq-test-answer input[name=choice]:checked');
+ if(selected)p.test.answers[p.index]=selected.value;
+ await gradeMcqTest(p);return;
+}
+if(a==='mcq-continue'){
+ advancePractice();render();return;
+}
+if(a.startsWith('builder-')){
+ const draft=builderDraft(),question=questionById(id);
+ if(a==='builder-add'&&question&&!draft.ids.includes(id))draft.ids.push(id);
+ else if(a==='builder-remove')draft.ids=draft.ids.filter(value=>value!==id);
+ else if(a==='builder-move'){
+  const index=draft.ids.indexOf(id),next=index+Number(el.dataset.step);
+  if(index>=0&&next>=0&&next<draft.ids.length)[draft.ids[index],draft.ids[next]]=[draft.ids[next],draft.ids[index]];
+ }else if(a==='builder-open'){
+  const paper=customPapers().find(p=>p.id===id);
+  if(paper)state.builderDraft=structuredClone(paper);
+ }else if(a==='builder-new')state.builderDraft={title:'',ids:[]};
+ else if(a==='builder-sit'){startPractice(draft.ids.filter(id=>questionById(id)),true,'mixed');return;}
+ else if(a==='builder-print'||a==='builder-print-scheme'){await printBuilder(draft,a==='builder-print-scheme');return;}
+ persistBuilder();render();return;
+}
 if(a==='skip-onboarding'){await saveProfile({onboarded:true});go('home');return;}
 if(a==='plan-session'){planSessionModal(id);return;}
 if(a==='toggle-plan'){await saveProfile({studyPlan:planned().map(p=>p.id===id?{...p,done:!p.done}:p)});render();return;}
@@ -553,7 +781,7 @@ else if(a==='auth')authModal();
 else if(a==='signout'){try{await signOut();}finally{location.replace('/');}}
 else if(a==='local-mode'){await switchMode('local');location.assign('/workspace');}
 else if(a==='cloud-mode'){location.assign('/dashboard');}
-else if(a==='migrate-local')confirmAction('Copy local data to your account?','Local records and attachments will be copied. Matching IDs in your cloud workspace will be updated. Local originals remain.',async()=>{const n=await copyLocalToCloud();closeModal();render();notify(`${n} local records copied to Supabase.`);},'Copy to cloud');
+else if(a==='migrate-local')confirmAction('Copy local data to your account?','Local records and attachments will be copied. Matching cloud records are preserved. Local originals remain.',async()=>{const result=await copyLocalToCloud();closeModal();render();notify(transferMessage(result,'copied'));},'Copy to cloud');
 else if(a==='backup'){notify('Preparing a complete backup, including attachments…');const data=await exportBackup();download(`cambridge-revision-${localDate()}.json`,JSON.stringify(data));notify('Complete backup prepared.');}
 else if(a==='csv'){download(`paper-history-${localDate()}.csv`,exportCSV(scoped('attempt'),gradeFor,all('threshold'),paperCode,percent),'text/csv;charset=utf-8');notify('CSV prepared.');}
 else if(a==='wizard-next')await wizardNext();
@@ -588,6 +816,7 @@ else if(a==='edit-threshold')thresholdModal(get(id));
 else if(a==='choose-subject')subjectPicker();
 else if(a==='new-subject')addSubjectModal();
 else if(a==='remove-subject')removeSubject(el.dataset.code);
+else if(a==='exam-run-up')examRunUp(get(id));
 else if(a==='new-exam')examModal();
 else if(a==='edit-exam')examModal(get(id));
 else if(a==='topic')topicModal(el.dataset.topic);
@@ -596,10 +825,139 @@ else if(a==='open-question'){state.selected=[id];startPractice([id]);}
 else if(a==='practice-selected')startPractice(state.selected);
 else if(a==='reveal-answer'){state.practice.working=$('#practice-working')?.value||'';state.practice.revealed=!state.practice.revealed;savePracticeDraft();render();}
 });});
-function startPractice(ids,timed=true){
+function questionLinks(q,showScheme=true){
+ return resourceLinks(q).filter(([label])=>showScheme||label==='Question paper').map(([label,href])=>
+  '<a class="btn quiet" target="_blank" rel="noopener" href="'+esc(href)+'">'+label+'</a>').join('');
+}
+function mcqQuestions(){return availableQuestions().filter(q=>q.correctOption&&inScope(q));}
+function mcqPage(){
+ const questions=mcqQuestions();
+ const subjects=[...new Set(questions.map(q=>q.subject))];
+ const topics=[...new Set(questions.map(q=>q.topic))];
+ const mode=state.mcqMode||'practice';
+ const papers=[...new Set(questions.map(q=>q.paper).filter(Boolean))];
+ const due=new Set(scoped('mistake').filter(m=>!m.corrected).filter(m=>questionById(m.questionId)?.correctOption).map(m=>m.questionId));
+ const history=scoped('session').filter(item=>questionById(item.questionId)?.correctOption);
+ return heading('Multiple-choice practice','Work from the original paper and check each answer as you go.',link('Question bank','bank'))+filters()+
+  '<div class="resource-split"><section class="panel resource-panel"><h2>Start a set</h2><p>'+questions.length+' marked questions · '+subjects.map(code=>esc(SUBJECTS[code].name)).join(', ')+'</p>'+
+  (questions.length?'<div class="button-row">'+[['practice','Practice'],['test','Timed test'],['paper','Real paper']].map(([key,label])=>button(label,'mcq-mode',mode===key?'primary':'quiet','data-mode="'+key+'" aria-pressed="'+(mode===key)+'" '+(key==='paper'&&!papers.length?'disabled':''))).join('')+'</div><form id="mcq-start" class="resource-filters">'+
+   (mode==='paper'?select('Full paper','paper',papers):'<fieldset class="exam-topic-options"><legend>Topics (optional)</legend>'+topics.map(id=>'<label class="checkbox"><input type="checkbox" name="topics" value="'+esc(id)+'"> '+esc(topicName(id))+'</label>').join('')+'</fieldset>'+input('Number of questions','count',Math.min(10,questions.length),'number','min="1" max="'+questions.length+'" required')+(mode==='test'?input('Time limit (minutes)','minutes',20,'number','min="1" max="180" required'):''))+
+   '<button class="btn primary">Start MCQ practice</button></form>':'<p>Save a question with an answer letter or choose Physics AS to use the linked paper.</p>')+
+  '</section><section class="panel resource-panel"><h2>MCQ corrections</h2><p>'+due.size+' questions to retry.</p>'+
+  button('Practise my mistakes','mcq-mistakes','quiet',due.size?'':'disabled')+
+  '<h3>Recent answers</h3><ul class="resource-list">'+history.slice(-5).reverse().map(item=>'<li><div><strong>'+esc(item.title)+'</strong><small>'+esc(topicName(item.topic))+'</small></div><strong>'+item.marks+'/'+item.max+'</strong></li>').join('')+'</ul></section></div>';
+}
+function mcqQuestionPage(p,q){
+ if(p.test)return mcqTestPage(p,q);
+ const result=p.feedback;
+ return heading('Multiple-choice practice','Question '+(p.index+1)+' of '+p.ids.length+' · '+esc(q.reference||q.title))+
+ '<section class="panel resource-panel"><h2>'+esc(q.title)+'</h2><p>'+esc(topicName(q.topic))+'</p>'+
+ '<p class="preserve">'+esc(q.prompt)+'</p><div class="button-row">'+questionLinks(q,Boolean(result))+'</div>'+fileList(q.files)+
+ (result?'<div class="notice '+(result.choice===result.correct?'success':'warning')+'" role="status">You chose '+result.choice+'. Correct answer '+result.correct+'.'+
+  (q.answer?' '+esc(q.answer):'')+'</div>'+button(p.index+1===p.ids.length?'Finish set':'Next question','mcq-continue','primary'):
+  '<form id="mcq-answer"><fieldset class="mcq-answers"><legend>Choose your answer</legend>'+[...'ABCD'].map(letter=>
+   '<label><input type="radio" name="choice" value="'+letter+'" required> '+letter+'</label>').join('')+
+  '</fieldset><button class="btn primary">Check answer</button></form>')+
+ (p.timed?'<p class="small" data-practice-time>'+mins(practiceMinutes(p))+'</p>':'')+
+ button('Clear unfinished set','discard-practice','quiet')+'</section>';
+}
+function mcqTestPage(p,q){
+ const test=p.test;
+ if(test.graded){
+  const score=p.ids.reduce((total,id,index)=>total+Number(questionById(id)?.correctOption===test.answers[index]),0);
+  return heading('MCQ test results',score+' / '+p.ids.length+' correct')+
+   '<section class="panel resource-panel"><ol class="resource-list">'+p.ids.map((id,index)=>{
+    const item=questionById(id);
+    return '<li><div><strong>'+esc(item?.reference||item?.title||'Question '+(index+1))+'</strong><small>Your answer '+(test.answers[index]||'—')+
+     ' · Correct '+esc(item?.correctOption||'—')+'</small></div><div class="button-row">'+questionLinks(item||{})+'</div></li>';
+   }).join('')+'</ol>'+button('Back to MCQ practice','mcq-test-finish','primary')+'</section>';
+ }
+ const remaining=Math.ceil(Math.max(0,test.deadline-Date.now())/1000);
+ return heading('MCQ test','Question '+(p.index+1)+' of '+p.ids.length)+
+  '<section class="panel resource-panel"><p data-mcq-clock>'+timeText(remaining*1000)+' remaining</p><div class="button-row">'+p.ids.map((id,index)=>
+   button(String(index+1),'mcq-test-question',p.index===index?'primary':'quiet','data-index="'+index+'" aria-label="Question '+(index+1)+(test.answers[index]?' answered':'')+'"')).join('')+
+  '</div><h2>'+esc(q.title)+'</h2><p>'+esc(q.prompt)+'</p><div class="button-row">'+questionLinks(q,false)+'</div>'+fileList(q.files)+
+  '<form id="mcq-test-answer"><fieldset class="mcq-answers" '+(test.submitting?'disabled':'')+'><legend>Choose your answer</legend>'+[...'ABCD'].map(letter=>
+   '<label><input type="radio" name="choice" value="'+letter+'" '+(test.answers[p.index]===letter?'checked':'')+'> '+letter+'</label>').join('')+
+  '</fieldset></form>'+button(test.submitting?'Retry submitting test':'Submit test','mcq-test-finish','primary')+button('Clear unfinished set','discard-practice','quiet')+'</section>';
+}
+async function gradeMcqTest(p){
+ const test=p.test;
+ test.submitting=true;
+ test.resultIds||=p.ids.map(()=>uid());
+ savePracticeDraft();
+ const index=p.index;
+ try{
+  for(let i=0;i<p.ids.length;i++){
+   p.index=i;p.resultId=test.resultIds[i];
+   const q=questionById(p.ids[i]),choice=test.answers[i]||'';
+   if(q)await savePracticeResult(q,Number(choice===q.correctOption),0,choice===q.correctOption?4:2,choice,false);
+  }
+  test.graded=true;
+ }finally{
+  p.index=index;p.resultId=null;savePracticeDraft();render();
+ }
+}
+function advancePractice(){
+ const p=state.practice;
+ if(p.index+1===p.ids.length)state.practice=null;
+ else Object.assign(p,{index:p.index+1,startedAt:p.timed?Date.now():null,activeMs:0,revealed:false,working:'',feedback:null,resultId:null});
+ savePracticeDraft();
+}
+async function savePracticeResult(q,marks,minutes,confidence,working,advance=true){
+ const p=state.practice;
+ if(!q||!Number.isFinite(marks)||marks<0||marks>q.max||!Number.isFinite(minutes)||minutes<0)throw new Error('Check the practice marks and working time.');
+ p.resultId||=uid();
+ savePracticeDraft();
+ if(!get(p.resultId)){
+  const result={id:p.resultId,kind:'session',questionId:q.id,attemptId:q.attemptId||'',subject:q.subject,level:q.level,topic:q.topic,
+   marks,max:q.max,minutes,confidence,date:localDate(),createdAt:new Date().toISOString(),working,title:q.title};
+  const records=[result];
+  const prior=all('mistake').filter(m=>m.questionId===q.id&&!m.corrected);
+  if(prior.length){
+   records.push(...prior.map(m=>{
+    const next=nextReview(m,marks===q.max?'easy':'again');
+    next.reviewHistory.at(-1).working=working;
+    return next;
+   }));
+  }else if(marks<q.max){
+   const date=new Date();
+   date.setDate(date.getDate()+1);
+   records.push({id:uid(),kind:'mistake',questionId:q.id,attemptId:q.attemptId||'',subject:q.subject,level:q.level,question:q.title,
+    lost:q.max-marks,topic:q.topic,category:'Conceptual misunderstanding',prompt:q.prompt,original:working,correctAnswer:q.correctOption||q.answer,
+    retryDate:localDate(date),corrected:false,files:q.files||[],date:result.date,reviewHistory:[]});
+  }
+  await saveMany(records);
+ }
+ if(advance){advancePractice();render();notify('Practice result saved. Topic accuracy and review queue updated.');}
+ else pausePractice();
+}
+async function printBuilder(draft,markScheme){
+ const questions=draft.ids.map(questionById).filter(Boolean);
+ const view=window.open('','_blank');
+ if(!view)throw new Error('Allow the print window for this workspace.');
+ view.opener=null;
+ const attachments=markScheme?[]:await Promise.all(questions.map(async q=>Promise.all((q.files||[]).map(async f=>{
+  const blob=await fileBlob(f);
+  const url=URL.createObjectURL(blob);
+  view.addEventListener('pagehide',()=>URL.revokeObjectURL(url),{once:true});
+  return f.type.startsWith('image/')?'<img style="max-width:100%" src="'+esc(url)+'" alt="'+esc(f.name)+'">':
+   '<p><a href="'+esc(url)+'">Open '+esc(f.name)+'</a></p>';
+ }))));
+ view.document.title=(draft.title||'Custom exam')+(markScheme?' · Mark scheme':'');
+ view.document.body.innerHTML='<main style="max-width:46rem;margin:2rem auto;font:16px/1.55 system-ui">'+
+ '<h1>'+esc(view.document.title)+'</h1><p>'+questions.reduce((total,q)=>total+Number(q.max),0)+' marks</p><ol>'+
+ questions.map((q,index)=>'<li style="break-inside:avoid;margin:1.5rem 0"><strong>'+esc(q.reference||q.title)+'</strong> · '+q.max+
+  ' marks<p style="white-space:pre-wrap">'+esc(markScheme?(q.correctOption?'Answer '+q.correctOption+(q.answer?' · '+q.answer:''):q.answer):q.prompt)+'</p>'+(markScheme?questionLinks(q,true):questionLinks(q,false)+attachments[index].join(''))+
+  '<div style="height:5rem;border-bottom:1px solid"></div></li>').join('')+'</ol></main>';
+ view.focus();
+ await Promise.all([...view.document.images].map(image=>image.decode().catch(()=>{})));
+ view.print();
+}
+function startPractice(ids,timed=true,mode='mixed',test=null){
  if(!ids.length)return;
  if(state.practice){go('practice');notify('Finish or clear the current practice set before starting another.');return;}
- state.practice={ids:[...ids],index:0,startedAt:timed?Date.now():null,activeMs:0,timed,revealed:false,working:''};
+ state.practice={ids:[...ids],index:0,mode,test,startedAt:timed?Date.now():null,activeMs:0,timed,revealed:false,working:''};
  savePracticeDraft();
  go('practice');
 }
@@ -608,7 +966,7 @@ if(f.id==='wizard-form'){if(W.step===4)await saveAttempt();else await wizardNext
 else if(f.id==='modal-form')await modalSubmit(f);
 else if(f.id==='history-filters'){state.history=Object.fromEntries(new FormData(f));render();}
 else if(f.id==='analytics-filters'){const d=Object.fromEntries(new FormData(f));Object.assign(state,d);if(d.range!=='custom'){state.from='';state.to='';}render();}
-else if(f.id==='syllabus-settings'){const d=Object.fromEntries(new FormData(f)),old=all('settings')[0]||{id:uid(),kind:'settings',routes:{}};old.year=+d.year;state.year=+d.year;old.routes={...old.routes,...(d.mathRoute?{'9709':d.mathRoute}:{})};if(state.subject!=='all'&&d.route)old.routes[state.subject]=d.route;await save(old);render();notify('Syllabus year and routes saved.');}
+else if(f.id==='syllabus-settings'){const d=Object.fromEntries(new FormData(f)),old={...(all('settings')[0]||{id:settingsId(),kind:'settings',routes:{}})};old.year=+d.year;state.year=+d.year;old.routes={...old.routes,...(d.mathRoute?{'9709':d.mathRoute}:{})};if(state.subject!=='all'&&d.route)old.routes[state.subject]=d.route;await save(old);render();notify('Syllabus year and routes saved.');}
 else if(f.id==='bank-filters'){state.bank=Object.fromEntries(new FormData(f));render();}
 else if(f.id==='calculator'){calculate(f);}
 else if(f.id==='profile-form'){await submitProfile(f);}
@@ -616,31 +974,104 @@ else if(f.id==='paper-filters'){state.library=Object.fromEntries(new FormData(f)
 else if(f.id==='bookmark-filters'){state.bookmarkSearch=new FormData(f).get('search').trim();render();}
 else if(f.id==='mistake-filters'){state.mistakeFilters=Object.fromEntries(new FormData(f));render();}
 else if(f.id==='focused-study'){const d=Object.fromEntries(new FormData(f));const ids=all('question').filter(q=>q.subject===d.subject&&inScope(q)&&(!d.topic||q.topic===d.topic)).slice(0,+d.size).map(q=>q.id);if(!ids.length)throw new Error('No saved questions match this subject and topic. Add a question in the bank or choose a different topic.');startPractice(ids,d.timing==='timed');}
-else if(f.id==='self-mark'){const p=state.practice,q=get(p.ids[p.index]),d=Object.fromEntries(new FormData(f)),r={id:uid(),kind:'session',questionId:q.id,attemptId:q.attemptId||'',subject:q.subject,level:q.level,topic:q.topic,marks:+d.marks,max:q.max,minutes:+d.minutes,confidence:+d.confidence,date:localDate(),createdAt:new Date().toISOString(),working:$('#practice-working')?.value||p.working||'',title:q.title};if(r.marks<0||r.marks>r.max||r.minutes<0)throw new Error('Check the practice marks and working time.');const records=[r];if(r.marks<r.max)records.push({id:uid(),kind:'mistake',questionId:q.id,attemptId:q.attemptId||'',subject:q.subject,level:q.level,question:q.title,lost:r.max-r.marks,topic:q.topic,category:'Conceptual misunderstanding',prompt:q.prompt,original:r.working,correctAnswer:q.answer,explanation:'Review this self-marked practice question. Update the mistake category after checking.',remember:'',retryDate:localDate(new Date(Date.now()+86400000)),corrected:false,files:q.files||[],date:r.date,reviewHistory:[]});await saveMany(records);if(p.index<p.ids.length-1){p.index++;p.startedAt=p.timed===false?null:Date.now();p.activeMs=0;p.revealed=false;p.working='';}else state.practice=null;savePracticeDraft();render();notify('Practice result saved. Topic accuracy and review queue updated.');}
+else if(f.id==='self-mark'){
+ const p=state.practice,d=Object.fromEntries(new FormData(f));
+ await savePracticeResult(questionById(p.ids[p.index]),+d.marks,+d.minutes,+d.confidence,$('#practice-working')?.value||p.working||'');
+}
+else if(f.id==='mcq-start'){
+ const d=Object.fromEntries(new FormData(f));
+ const topics=new FormData(f).getAll('topics'),mode=state.mcqMode||'practice';
+ const pool=mcqQuestions().filter(q=>d.paper?q.paper===d.paper:!topics.length||topics.includes(q.topic));
+ const count=d.paper?pool.length:Number(d.count);
+ if(!Number.isInteger(count)||count<1||count>pool.length)throw new Error('Choose a count between 1 and '+pool.length+' for these filters.');
+ const limit=d.paper?75:Number(d.minutes);
+ startPractice(pool.slice(0,count).map(q=>q.id),false,'mcq',mode==='practice'?null:{deadline:Date.now()+limit*60000,answers:{}});
+}
+else if(f.id==='mcq-answer'){
+ const p=state.practice,q=questionById(p.ids[p.index]),existing=get(p.resultId),choice=existing?.working||new FormData(f).get('choice');
+ if(typeof choice!=='string'||!/^[A-D]$/.test(choice))throw new Error('Choose one answer.');
+ const result=choice===q.correctOption;
+ await savePracticeResult(q,result?1:0,p.timed?Number(practiceMinutes(p).toFixed(2)):0,result?4:2,choice,false);
+ p.feedback={choice,correct:q.correctOption};
+ savePracticeDraft();
+ render();
+}
+else if(f.id==='catalogue-filters'){state.catalogue={...state.catalogue,...Object.fromEntries(new FormData(f)),attempted:f.elements.attempted.checked};state.cataloguePage=1;render();}
+else if(f.id==='builder-filters'){state.builder=Object.fromEntries(new FormData(f));render();}
+else if(f.id==='builder-draw'){
+ const count=Number(new FormData(f).get('count')),draft=builderDraft();
+ const pool=matchingBuilderQuestions(viewContext(),availableQuestions()).filter(q=>!draft.ids.includes(q.id));
+ if(!Number.isInteger(count)||count<1||count>100||count>pool.length)throw new Error('There are '+pool.length+' matching questions left to add. Adjust the count or filters.');
+ for(let i=0;i<count;i++){
+  const index=i+Math.floor(Math.random()*(pool.length-i));
+  [pool[i],pool[index]]=[pool[index],pool[i]];
+ }
+ draft.ids.push(...pool.slice(0,count).map(q=>q.id));persistBuilder();render();notify(count+' questions added.');
+}
+else if(f.id==='builder-save'){
+ const draft=builderDraft(),title=String(new FormData(f).get('title')||'').trim();
+ if(!title||!draft.ids.length)throw new Error('Name the paper and add at least one question.');
+ const saved={id:draft.id||uid(),title,ids:[...draft.ids]};
+ await saveProfile({customPapers:[...customPapers().filter(p=>p.id!==saved.id),saved]});
+ state.builderDraft=saved;persistBuilder();render();notify('Custom paper saved.');
+}
+
 });});
-function calculate(form){const d=Object.fromEntries(new FormData(form)),subject=state.subject==='all'?defaultSubject():state.subject,route=d.route,components=ROUTES[subject][route],parts=components.map(c=>({component:c,marks:+d['score-'+c]}));const total=weightedTotal(subject,parts),maximum=weightedTotal(subject,components.map(c=>({component:c,marks:COMPONENTS[subject][c][1]}))),hypothetical=components.some(c=>d['type-'+c]==='future'),level=route.startsWith('AS:')?'AS':'A Level',t=all('threshold').find(t=>t.scope==='qualification'&&t.subject===subject&&t.level===level&&t.route===route&&t.optionCode?.toLowerCase()===d.optionCode.toLowerCase()&&t.series===d.series&&+t.year===+d.year&&Math.abs(t.max-maximum)<.001);if(parts.some(p=>p.marks<0||p.marks>COMPONENTS[subject][p.component][1]))throw new Error('A component mark exceeds its valid range.');const grades=level==='AS'?['a','b','c','d','e']:['A*','A','B','C','D','E'];const g=t?grades.find(g=>total>=t.values[g])||'U':null;$('#calculation-result').innerHTML=`<div class="notice"><h3>${hypothetical?'Hypothetical overall estimate':t?.official&&form.eligible.checked?'Calculated against official overall thresholds':'Overall estimate'}</h3><p>Weighted total: <strong>${fmt(total)} / ${fmt(maximum)}</strong></p><p>${g?`Threshold indication: <strong>${g}</strong> (${t.official?'official threshold table':'manual threshold estimate'}).`:'Grade boundary unavailable for this exact route, entry option, year and series.'}</p><p class="small">${!form.eligible.checked?'Carry-forward / entry eligibility has not been confirmed. ':''}${hypothetical?'Future marks are hypothetical. ':''}This calculator does not issue an official Cambridge result.</p></div>`;}
+function calculate(form){
+ const d=Object.fromEntries(new FormData(form)),subject=state.subject==='all'?defaultSubject():state.subject;
+ state.gradeInputs=d;
+ const components=ROUTES[subject][d.route];
+ const parts=components.map(component=>({
+  component,marks:d['score-'+component]===''?null:Number(d['score-'+component]),
+  max:COMPONENTS[subject][component][1],type:d['type-'+component]
+ }));
+ if(parts.some(p=>(p.type!=='future'&&p.marks===null)||(p.marks!==null&&(p.marks<0||p.marks>p.max))))
+  throw new Error('Enter a valid raw mark for each sat component and mock.');
+ const level=d.route.startsWith('AS:')?'AS':'A Level';
+ const maximum=weightedTotal(subject,parts.map(p=>({component:p.component,marks:p.max})));
+ const threshold=all('threshold').find(t=>t.scope==='qualification'&&t.subject===subject&&t.level===level&&t.route===d.route&&
+  t.optionCode?.toLowerCase()===d.optionCode.toLowerCase()&&t.series===d.series&&+t.year===+d.year&&Math.abs(t.max-maximum)<.001);
+ const manual=d.manualBoundary!==''?Number(d.manualBoundary):null;
+ if(manual!==null&&(!Number.isFinite(manual)||manual<0||manual>maximum))throw new Error('Enter a weighted boundary between 0 and '+fmt(maximum)+'.');
+ const boundary=manual??threshold?.values[level==='AS'?d.target.toLowerCase():d.target];
+ const forecast=weightedTotal(subject,parts.filter(p=>p.marks!==null));
+ const target=gradeTarget(subject,parts,boundary??0);
+ const outcome=boundary==null?'Add the exact qualification threshold or enter a manual target boundary.':
+  target.required===0?'Your sat components already reach this boundary.':
+  !target.reachable?'The selected boundary is above the marks available on the remaining components.':
+  'You need '+fmt(target.required)+' of the '+fmt(target.remaining)+' remaining weighted marks ('+pct(target.percentage)+').';
+ const evidence=manual!==null?'Manual boundary':threshold?.official?'Saved official threshold':'Saved estimated threshold';
+ const source=boundary==null?'':evidence+' for grade '+esc(d.target)+' · '+fmt(boundary)+'/'+fmt(maximum)+'.';
+ $('#calculation-result').innerHTML='<div class="notice"><h3>'+outcome+'</h3><p>Weighted marks from sat components: <strong>'+
+  fmt(target.secured)+' / '+fmt(maximum)+'</strong>.</p>'+(parts.some(p=>p.type!=='actual'&&p.marks!==null)?
+   '<p>Forecast with entered mock or future marks: '+fmt(forecast)+' / '+fmt(maximum)+'.</p>':'')+
+  (source?'<p>'+source+'</p>':'')+(!form.eligible.checked?'<p>Centre confirmation for entry and carry-forward is pending.</p>':'')+'</div>';
+}
 document.addEventListener('change',e=>{const el=e.target;run(async()=>{
-if(el.id==='notebook-grid'){window.revisionAppearance.set(window.revisionAppearance.theme,el.checked);}
+if(el.form?.id==='mcq-test-answer'&&el.checked&&state.practice?.test){state.practice.test.answers[state.practice.index]=el.value;savePracticeDraft();}
+else if(el.id==='notebook-grid'){window.revisionAppearance.set(window.revisionAppearance.theme,el.checked);}
 else if(el.closest('#focused-study')&&el.name==='subject'){state.focusSubject=el.value;const topic=el.form.elements.topic;topic.innerHTML=[['','All topics'],...topicOptions(el.value,false,state.level)].map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');}
 else if(el.id==='dashboard-component'){state.dashboardComponent=el.value;const y=scrollY;render();$('#dashboard-component')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});}
 else if(el.id==='paper-files')await handlePaperFiles([...el.files]);
 else if(el.dataset.fileRole!==undefined){captureWizard();W.files[+el.dataset.fileRole].role=el.value;persistDraft();}
 else if(el.dataset.selectQuestion){if(el.checked)state.selected.push(el.dataset.selectQuestion);else state.selected=state.selected.filter(id=>id!==el.dataset.selectQuestion);render();}
 else if(['mistake-files','threshold-files','question-files'].includes(el.id)){const role=el.id==='threshold-files'?'Grade thresholds':el.id==='mistake-files'?'Mistake image':'Question image';for(const f of el.files)dialogContext.files.push(await upload(f,role));$('#modal-attachments').innerHTML=dialogContext.files.map(f=>`<p>${esc(f.name)} · Stored</p>`).join('');}
-else if(el.id==='import-backup'&&el.files[0]){const file=el.files[0];if(file.size>150*1024*1024)throw new Error('This backup is too large for browser import. Split it before importing.');pendingImport=JSON.parse(await file.text());el.value='';confirmAction('Restore this backup?',`${pendingImport.records?.length||0} records and ${pendingImport.files?.length||0} files will be imported into your ${store.mode} workspace. Matching record IDs are updated.`,async()=>{const n=await importBackup(pendingImport);pendingImport=null;closeModal();render();notify(`${n} records restored with their attachments.`);},'Restore backup');}
+else if(el.id==='import-backup'&&el.files[0]){const file=el.files[0];if(file.size>150*1024*1024)throw new Error('This backup is too large for browser import. Split it before importing.');pendingImport=JSON.parse(await file.text());el.value='';confirmAction('Restore this backup?',`${pendingImport.records?.length||0} records and ${pendingImport.files?.length||0} files will be imported into your ${store.mode} workspace. ${store.mode==='cloud'?'Existing cloud records are preserved.':'Matching local IDs are updated.'}`,async()=>{const result=await importBackup(pendingImport);pendingImport=null;closeModal();render();notify(transferMessage(result,'restored'));},'Restore backup');}
 else if(el.closest('#wizard-form')){captureWizard();if(['scope','subject'].includes(el.name))render();}
+else if(el.form?.dataset.form==='exam'&&['subject','level','paper'].includes(el.name)){const data=new FormData(el.form);const fields=Object.fromEntries(data);fields.topicIds=data.getAll('examTopics');$('#exam-topic-options').innerHTML=examTopicOptions(fields);if(el.name==='level')el.form.elements.target.innerHTML=(el.value==='AS'?['a','b','c','d','e']:['A*','A','B','C','D','E']).map(g=>'<option>'+g+'</option>').join('');}
 else if(el.closest('#modal-form')&&['subject','level'].includes(el.name)){const topic=el.form.querySelector('[name="topic"]'),route=el.form.querySelector('[name="route"]');if(topic)topic.innerHTML=topicOptions(el.form.subject.value,true,el.form.level?.value||'all').map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');const target=el.form.querySelector('[name="target"]');if(target&&el.name==='level')target.innerHTML=(el.value==='AS'?['a','b','c','d','e']:['A*','A','B','C','D','E']).map(g=>`<option>${g}</option>`).join('');if(route&&el.name==='subject')route.innerHTML='<option value="">Choose exact route</option>'+Object.keys(ROUTES[el.value]).map(r=>`<option>${esc(r)}</option>`).join('');}
-else if(el.closest('#calculator')&&el.name==='route'){state.calcRoute=el.value;render();}
+else if(el.closest('#builder-filters')&&el.name==='subject'){state.builder={...Object.fromEntries(new FormData(el.form)),topic:''};render();$('#builder-filters [name=subject]')?.focus();}
+else if(el.closest('#calculator')&&el.name==='route'){state.calcRoute=el.value;state.gradeInputs=null;render();}
 else if(el.closest('#analytics-filters')&&el.name==='range'){state.range=el.value;render();}
 });});
-document.addEventListener('input',e=>{if(e.target.closest('#wizard-form')){captureWizard();if($('#live-score'))$('#live-score').innerHTML=scorePreview();if($('#question-summary')){$('#question-summary').textContent=questionSummary(W);$('#question-summary').className='notice '+(questionDiscrepancy(W)?'warning':'subtle');}for(const cell of document.querySelectorAll('[data-question-lost]')){const q=W.questions[+cell.dataset.questionLost];if(q)cell.textContent=fmt(q.max-q.marks);}}if(e.target.id==='practice-working'&&state.practice){state.practice.working=e.target.value;savePracticeDraft();}});
+document.addEventListener('input',e=>{if(e.target.form?.id==='builder-save'&&e.target.name==='title'){builderDraft().title=e.target.value;persistBuilder();}if(e.target.closest('#wizard-form')){captureWizard();if($('#live-score'))$('#live-score').innerHTML=scorePreview();if($('#question-summary')){$('#question-summary').textContent=questionSummary(W);$('#question-summary').className='notice '+(questionDiscrepancy(W)?'warning':'subtle');}for(const cell of document.querySelectorAll('[data-question-lost]')){const q=W.questions[+cell.dataset.questionLost];if(q)cell.textContent=fmt(q.max-q.marks);}}if(e.target.id==='practice-working'&&state.practice){state.practice.working=e.target.value;savePracticeDraft();}});
 document.addEventListener('dragover',e=>{if(e.target.closest('#dropzone')){e.preventDefault();$('#dropzone').classList.add('dragging');}});
 document.addEventListener('dragleave',e=>{if(e.target.closest('#dropzone'))$('#dropzone')?.classList.remove('dragging');});
 document.addEventListener('drop',e=>{if(e.target.closest('#dropzone')){e.preventDefault();run(()=>handlePaperFiles([...e.dataTransfer.files]));}});
 function pauseForVisibility(){if(W?.timer?.running){const t=W.timer;t.activeMs=timerValues(t).activeMs;t.running=false;t.autoPaused=true;persistDraft();if(state.route==='log')render();}}
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden){pauseForVisibility();pausePractice();}
- else if(state.route==='practice'&&state.practice?.timed!==false&&state.practice&&!state.practice.startedAt)state.practice.startedAt=Date.now();
+ else if(state.route==='practice'&&state.practice?.timed!==false&&state.practice&&!state.practice.startedAt&&!state.practice.feedback)state.practice.startedAt=Date.now();
 });
 window.addEventListener('pagehide',()=>{pauseForVisibility();pausePractice();});
 async function submitProfile(form){
@@ -690,7 +1121,7 @@ async function boot(){
  setWorkspacePreferences();
  const {route,id}=readRoute();
  state.route=route;
- state.detail=id;
+ state.detail=id||null;
  if(setupRequired()&&route==='home'){
   state.route='onboarding';
   history.replaceState(null,'','/dashboard#onboarding');
@@ -707,7 +1138,7 @@ function syncRoute(){
  if(state.route==='practice'&&route!=='practice')pausePractice();
  if(state.preview)URL.revokeObjectURL(state.preview);
  state.route=route;
- state.detail=id;
+ state.detail=id||null;
  state.menu=false;
  state.preview=null;
  render();
