@@ -7,7 +7,7 @@ import {store,uid,loadRecords,all,get,save,saveMany,removeMany,upload,openFile,f
 import {lineChart,bars,scatter,gradeBars,boundaryChart} from './charts.mjs';
 import {initPaperWalkthrough,bindPreviewTabs,accountView,publicShell} from './public-view.mjs';
 import {activityCalendar,eventRows,nextStudyTask,studyEvents,studyStreak} from './study-view.mjs';
-import {catalogQuestions,catalogueView,builderView,topicQuestionIds,resourceLinks,gradeTarget,shiftMonth,distributeTopics,calendarView,syllabusPlansView} from './revision-tools.mjs';
+import {catalogQuestions,paperCatalogue,catalogueView,builderView,matchingBuilderQuestions,topicQuestionIds,resourceLinks,gradeTarget,shiftMonth,distributeTopics,calendarView,syllabusPlansView} from './revision-tools.mjs';
 import {paperJourneyView} from './paper-journey.mjs';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -20,13 +20,14 @@ const workspaceKey=()=>`ct-draft-${store.mode}-${store.session?.user?.id||'local
 let W=null,activeTimer=null,busy=false;
 const groups = [
   ['Workspace',[['home','Dashboard','home'],['plan','Study plan','calendar'],['calendar','Study calendar','calendar'],['analytics','Analytics','chart']]],
-  ['Practice',[['papers','Past papers','folder'],['catalogue','Paper catalogue','file'],['builder','Exam builder','edit'],['mcq','MCQ practice','check'],['practice','Focused study','play'],['syllabus','Subjects & syllabus','check'],['bank','Question bank','book']]],
+  ['Practice',[['papers','Past papers','folder'],['saved-papers','Saved attempts','file'],['builder','Exam builder','edit'],['mcq','MCQ practice','check'],['practice','Focused study','play'],['syllabus','Subjects & syllabus','check'],['bank','Question bank','book']]],
   ['Review',[['history','History','clock'],['mistakes','Mistakes','edit'],['bookmarks','Bookmarks','flag'],['review','Review queue','repeat']]],
   ['Resources',[['exams','Examination planner','calendar'],['boundaries','Grade thresholds','flag'],['calculator','Grade targets','chart'],['syllabus-plan','Syllabus plans','book']]]
 ];
 const accountPaths = new Set(['/login','/signup','/forgot-password','/reset-password']);
 const routeNames = new Set([...groups.flatMap(([,items])=>items.map(([route])=>route)),'log','detail','settings','profile','onboarding']);
-const collapsedGroups = new Set(['Practice','Resources']);
+const collapsedGroups = new Set();
+routeNames.add('catalogue');
 let compact=false,accountMessage='';
 const profile=()=>all('settings')[0]||{};
 const settingsId=()=>store.mode==='cloud'?store.session.user.id:uid();
@@ -176,7 +177,7 @@ function render() {
  }
  if(state.subject!=='all'&&!activeSubjects().includes(state.subject))state.subject='all';
  if(state.route==='practice'&&state.practice?.timed!==false&&state.practice&&!state.practice.startedAt&&!state.practice.feedback)state.practice.startedAt=Date.now();
- const pages={home,papers,history:historyPage,log:wizard,detail:detailPage,mistakes:mistakesPage,review:reviewPage,analytics:analyticsPage,syllabus:syllabusPage,boundaries:boundariesPage,calculator:calculatorPage,exams:examsPage,bank:bankPage,catalogue:()=>catalogueView(viewContext()),builder:()=>builderView({...viewContext(),customPapers:customPapers()},availableQuestions(),builderDraft()),mcq:mcqPage,practice:practicePage,settings:settingsPage,profile:profilePage,onboarding:onboardingPage,plan:planPage,bookmarks:bookmarksPage,calendar:()=>calendarView({...viewContext(),events:events(),planned:planned(),plans:syllabusPlans().filter(inScope)}),'syllabus-plan':()=>syllabusPlansView(viewContext(),syllabusPlans().filter(inScope))};
+ const pages={home,papers,'saved-papers':()=>paperHub(libraryView(viewContext())),history:historyPage,log:wizard,detail:detailPage,mistakes:mistakesPage,review:reviewPage,analytics:analyticsPage,syllabus:syllabusPage,boundaries:boundariesPage,calculator:calculatorPage,exams:examsPage,bank:()=>paperHub(bankPage()),catalogue:papers,builder:()=>paperHub(builderView({...viewContext(),customPapers:customPapers()},availableQuestions(),builderDraft())),mcq:()=>paperHub(mcqPage()),practice:practicePage,settings:settingsPage,profile:profilePage,onboarding:onboardingPage,plan:planPage,bookmarks:bookmarksPage,calendar:()=>calendarView({...viewContext(),events:events(),planned:planned(),plans:syllabusPlans().filter(inScope)}),'syllabus-plan':()=>syllabusPlansView(viewContext(),syllabusPlans().filter(inScope))};
  trackWorkspaceTab();
  const tabScroll=$('.workspace-tabs')?.scrollLeft||0;
  $('#app').innerHTML=shell((pages[state.route]||home)());
@@ -225,7 +226,24 @@ function home(){
   planned:planned().filter(p=>!p.done).sort((a,b)=>a.date.localeCompare(b.date)),attempts,questions:scoped('question'),dueBookmarks});
  return overviewView({...c,next,activity,dueBookmarks,streak:studyStreak(activity)});
 }
-function papers(){return '<nav class="paper-tool-links" aria-label="Paper tools">'+link('Paper catalogue','catalogue')+link('Exam builder','builder')+link('MCQ practice','mcq')+'</nav>'+libraryView(viewContext());}
+function paperHub(content){
+ const current=state.route==='catalogue'?'papers':state.route;
+ const tools=[
+  ['papers','Find a paper','Question papers and mark schemes','file'],
+  ['bank','Topical questions','Find questions by syllabus topic','book'],
+  ['builder','Exam builder','Choose questions for a custom paper','edit'],
+  ['mcq','MCQ practice','Build a set or sit a real paper','check'],
+  ['saved-papers','Saved attempts','Your uploaded papers and results','folder']
+ ];
+ return '<nav class="paper-tool-links" aria-label="Paper tools">'+tools.map(([route,title,description,symbol])=>
+  '<button type="button" data-route="'+route+'" '+(current===route?'aria-current="page"':'')+'>'+
+  icon(symbol)+'<span><strong>'+title+'</strong><small>'+description+'</small></span></button>').join('')+'</nav>'+content;
+}
+function papers(){
+ return heading('Past papers','Find a Cambridge paper, build a custom exam or practise multiple choice.',button('Upload & log paper','log','primary'))+
+ paperHub(catalogueView(viewContext()));
+}
+
 function historyPage(){
  const h=state.history,type=h.type||'all';
  const papers=filteredHistory();
@@ -258,7 +276,7 @@ function newWizard(source=null,edit=false,navigate=true){const comp=source&&comp
 function persistDraft(){if(W)try{localStorage.setItem(workspaceKey(),JSON.stringify(W));}catch{notify('Draft could not be cached. Save this attempt before leaving.','error');}}
 function captureWizard(){if(!W)return;const f=$('#wizard-form');if(!f)return;const data=new FormData(f);for(const [k,v]of data){if(k.startsWith('q-'))continue;W[k]=v;}for(const c of f.querySelectorAll('input[type="checkbox"]'))W[c.name]=c.checked;W.questions=(W.questions||[]).map((q,i)=>({...q,number:data.get(`q-number-${i}`)??q.number,max:+(data.get(`q-max-${i}`)??q.max),marks:+(data.get(`q-marks-${i}`)??q.marks),topic:data.get(`q-topic-${i}`)??q.topic}));for(const key of ['marks','max','paperMax','minutes','elapsedMinutes','officialMinutes','difficulty','questionsAttempted','correct','partialCorrect','year'])if(W[key]!==''&&W[key]!=null)W[key]=+W[key];persistDraft();}
 function wizard(){if(!activeSubjects().length)return heading('Choose your subjects first.','Add a subject before logging a paper.')+empty('Your STEM workspace starts here.','Add a subject and its syllabus.','Add subject','new-subject');if(!W){try{W=JSON.parse(localStorage.getItem(workspaceKey())||'null');activeTimer=W?.timer||null;}catch{}if(!W)newWizard(null,false,false);}const steps=['Upload','Identify','Performance','Questions & mistakes','Save & analyse'];let content='';
-if(W.step===0)content=`<h2>Keep the paper with your progress.</h2><p>Add a question paper PDF, then attach the mark scheme, your answers or an examiner report.</p>${uploadZone()}<div id="upload-status" role="status"></div>${fileList(W.files,true)}<p class="small muted">PDF, PNG, JPEG or WebP · 20 MB per file · files are stored in ${store.mode==='cloud'?'your private Supabase bucket':'this browser’s database'}. Uploaded files are reusable across attempts.</p>`;
+if(W.step===0)content=`<h2>Keep the paper with your progress.</h2><p>Add a question paper PDF, then attach the mark scheme, your answers or an examiner report.</p>${uploadZone()}<div id="upload-status" role="status"></div>${W.questionUrl?'<div class="button-row">'+questionLinks(W)+'</div>':''}${fileList(W.files,true)}<p class="small muted">PDF, PNG, JPEG or WebP · 20 MB per file · files are stored in ${store.mode==='cloud'?'your private Supabase bucket':'this browser’s database'}. Uploaded files are reusable across attempts.</p>`;
 if(W.step===1)content=`<h2>Check the paper details.</h2><p>Filename recognition is a starting point. Confirm the paper’s cover before continuing.</p>${W.recognition?`<div class="notice">${esc(W.recognition)}</div>`:''}<div class="form-grid">${select('Subject','subject',subjectOptions(),W.subject,'required')}${select('Stage studied','level',['AS','A2'],W.level)}${input('Paper code (component + variant)','paper',W.paper,'text','pattern="[0-9]{2}" maxlength="2" required placeholder="12"')}${select('Examination series','series',Object.entries(SERIES),W.series)}${input('Examination year','year',W.year,'number','min="2000" max="2100" required')}${input('Official duration (minutes)','officialMinutes',W.officialMinutes,'number','min="1" placeholder="Confirm from cover"')}</div><div class="notice subtle">${COMPONENTS[W.subject]?.[W.paper?.[0]]?`Syllabus reference: ${component(W)[0]} · ${component(W)[1]} marks · ${component(W)[2]} minutes. `:''}Paper cover details take precedence. ${W.series==='m'?'Cambridge’s m filename code normally means February/March; s means May/June.':''}</div>`;
 if(W.step===2)content=`<div class="section-heading"><div><h2>Record your attempt.</h2><p>${paperCode(W)} · ${esc(component(W)?.[0])}</p></div>${badge(W.subject)}</div><section class="form-section"><h3>Score and paper</h3><div class="form-grid">${input('Date attempted','date',W.date,'date','required')}${select('Attempt coverage','scope',[['full','Full paper'],['partial','Partial paper']],W.scope)}${input('Marks achieved','marks',W.marks,'number','min="0" step="0.25" required')}${input(W.scope==='partial'?'Available marks in attempted questions':'Maximum paper marks','max',W.max,'number','min="0.25" step="0.25" required')}${W.scope==='partial'?input('Full-paper maximum marks','paperMax',W.paperMax,'number','min="1" required'):''}${input('Difficulty (1–10)','difficulty',W.difficulty,'number','min="1" max="10" required')}</div></section><section class="form-section"><h3>Time and conditions</h3>${timerPanel()}<div class="form-grid">${input('Active working time (minutes)','minutes',W.minutes,'number','min="0" step="0.01" required placeholder="94"')}${input('Elapsed time, including pauses (optional)','elapsedMinutes',W.elapsedMinutes,'number','min="0" step="0.01"')}</div><div class="check-row">${check('Timed attempt','timed',W.timed)}${check('Completed under examination conditions','examConditions',W.examConditions)}</div></section><section class="form-section"><h3>Question counts</h3><div class="form-grid">${input('Questions attempted','questionsAttempted',W.questionsAttempted,'number','min="0" step="1"')}${input('Fully correct questions','correct',W.correct,'number','min="0" step="1"')}${input('Partially correct questions','partialCorrect',W.partialCorrect,'number','min="0" step="1"')}</div></section><section class="form-section"><h3>Reflections</h3>${textarea('Topics I struggled with','struggled',W.struggled)}${textarea('Notes and reflections','notes',W.notes)}</section><div class="live-score" id="live-score">${scorePreview()}</div>`;
 if(W.step===3)content=`<div class="section-heading"><div><h2>Make the lost marks useful.</h2><p>Optional. Add question marks now, or come back to this attempt later.</p></div>${button(icon('plus')+' Add question','add-row')}</div>${questionEditor(W)}<div id="question-summary" class="notice ${questionDiscrepancy(W)?'warning':'subtle'}">${questionSummary(W)}</div><div class="section-heading"><h3>Mistakes to revisit</h3>${button(icon('plus')+' Log a mistake','new-mistake','','data-attempt="'+W.id+'"')}</div>${W.mistakes.length?W.mistakes.map(m=>`<div class="mistake-line"><div><strong>Q${esc(m.question)} · ${m.lost} marks lost</strong><small>${esc(topicName(m.topic))} · ${esc(m.category)}</small></div>${button('Edit','edit-draft-mistake','quiet','data-id="'+m.id+'"')}</div>`).join(''):'<p class="muted">No mistake notes yet. Your question marks and reflections are saved independently.</p>'}`;
@@ -417,11 +435,11 @@ function examsPage(){const exams=[...scoped('exam')].sort((a,b)=>a.datetime.loca
  studyFolio('Add your first examination','Enter the date and time confirmed by your centre. Each paper gets its own countdown.',
   button(icon('plus')+' Add examination','new-exam','primary'));
  return heading('Examination plan','See confirmed examination dates and the topics to work on next.',button(icon('plus')+' Add examination','new-exam','primary'))+filters()+(exams.length?`<div class="exam-timeline">${exams.map(e=>{const days=countdown(e.datetime).days,weak=TOPICS.filter(t=>t.subject===e.subject&&t.components.some(c=>String(c)===e.paper[0])).map(t=>({...t,...topicStats(t.id,all('attempt'),all('mistake'),all('session'))})).sort((a,b)=>b.lost-a.lost)[0];return `<article class="panel exam-card"><div class="exam-date"><strong>${new Date(e.datetime).getDate()}</strong><span>${new Date(e.datetime).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}</span></div><div>${badge(e.subject)}<h2>${SUBJECTS[e.subject].name} · Paper ${esc(e.paper)}</h2><p>${new Date(e.datetime).toLocaleString('en-GB')} · ${e.duration} min · ${e.level} · Target ${esc(e.target)}</p><p>${weak?.lost?`Prioritise ${weak.title}: ${weak.lost} marks lost in recorded attempts.`:days<=14?'Keep sessions short, timed and focused. Review corrections before another full paper.':'Build a baseline with a paper, then practise the topics where marks are lost.'}</p></div><div><div class="countdown" data-countdown="${esc(e.datetime)}">${countdownText(e.datetime)}</div>${button('Revision run-up','exam-run-up','quiet','data-id="'+e.id+'"')}<div class="button-row">${button('Edit','edit-exam','','data-id="'+e.id+'"')}${button(icon('trash'),'delete-record','icon-button','data-id="'+e.id+'" aria-label="Delete exam"')}</div></div></article>`;}).join('')}</div>`:studyFolio('No examinations for this selection','Choose a different subject or level to see your dates.',button('Add examination','new-exam','primary')));}
-function bankPage(){const b=state.bank,questions=scoped('question').filter(q=>(!b.search||[q.title,q.prompt,topicName(q.topic),q.reference].join(' ').toLowerCase().includes(b.search.toLowerCase()))&&(b.source==='all'||q.source===b.source)&&(b.difficulty==='all'||q.difficulty==b.difficulty));if(!all('question').length)return heading('Question bank','Keep the questions you want to practise again.')+
+function bankPage(){const b=state.bank,questions=availableQuestions().filter(inScope).filter(q=>(!b.search||[q.title,q.prompt,topicName(q.topic),q.reference].join(' ').toLowerCase().includes(b.search.toLowerCase()))&&(b.source==='all'||q.source===b.source)&&(b.difficulty==='all'||q.difficulty==b.difficulty));if(!availableQuestions().length)return heading('Question bank','Keep the questions you want to practise again.')+
  studyFolio('Save your first question','Add an original question or a reference from a past paper, then use it in focused study.',
   button(icon('plus')+' Add question','new-question','primary')+link('Focused study','practice'));
- return heading('Question bank','Find saved questions by paper, topic or difficulty.',button(icon('plus')+' Add question','new-question','primary'))+filters()+`<form id="bank-filters" class="bank-filters">${input('Search questions','search',b.search,'search','placeholder="Search topic, paper code or question…"')}${select('Source','source',[['all','All sources'],['original','Original practice'],['cambridge','Cambridge past paper']],b.source)}${select('Difficulty','difficulty',[['all','All difficulties'],...[1,2,3,4,5].map(n=>[n,n+'/5'])],b.difficulty)}<button class="btn">Search</button></form><div class="table-caption"><span>${questions.length} questions · difficulty is your revision estimate</span>${button(`Practise selected (${state.selected.length})`,'practice-selected','',state.selected.length?'':'disabled')}</div>`+(questions.length?`<div class="table-wrap"><table><thead><tr><th>Select</th><th>Question / source</th><th>Subject & topic</th><th>Challenge</th><th>Last score</th><th></th></tr></thead><tbody>${questions.map(q=>{const latest=all('session').filter(s=>s.questionId===q.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0];return `<tr><td><input type="checkbox" data-select-question="${q.id}" ${state.selected.includes(q.id)?'checked':''} aria-label="Select ${esc(q.title)}"></td><td><strong>${esc(q.title)}</strong><small>${q.level} · ${q.max} marks${q.reference?' · '+esc(q.reference):''}</small><span class="pill">${q.source==='cambridge'?'Cambridge past paper · user supplied':'Original practice'}</span></td><td>${badge(q.subject)}<small>${esc(topicName(q.topic))}</small></td><td>${q.difficulty}/5</td><td>${latest?`${latest.marks}/${latest.max}`:'Unattempted'}</td><td>${button('Open','open-question','quiet','data-id="'+q.id+'"')}${button('Bookmark','bookmark','quiet','data-id="'+q.id+'"')}</td></tr>`;}).join('')}</tbody></table></div>`:studyFolio('No matching questions','Try another paper code, topic, source or difficulty.',button('Add question','new-question','primary')));}
-function practicePage(){const p=state.practice;if(p){const q=questionById(p.ids[p.index]);if(!q)return empty('This question is no longer available.','Clear this unfinished set to choose another question.','Clear unfinished set','discard-practice');if(q.correctOption&&p.mode!=='written')return mcqQuestionPage(p,q);return heading('Try first. Then check your reasoning.',`Question ${p.index+1} of ${p.ids.length} · ${q.source==='original'?'Original practice':'Cambridge reference supplied by you'}`)+`<section class="panel practice-card">${badge(q.subject)}<h2>${esc(q.title)}</h2><p class="small muted">${esc(topicName(q.topic))} · ${q.max} marks · ${q.level}</p><p class="question-prompt preserve">${esc(q.prompt)}</p>${fileList(q.files)}<label class="field"><span>Your working (saved with this attempt)</span><textarea id="practice-working" rows="7">${esc(p.working||'')}</textarea></label><div class="split">${p.timed===false?'<span>Untimed practice</span>':`<span class="practice-clock" data-practice-time>${mins(practiceMinutes(p))}</span>`}${button(p.revealed?'Hide answer':'Reveal answer','reveal-answer')}</div><div class="button-row">${button('Bookmark question','bookmark','quiet',`data-id="${q.id}"`)}${button('Clear unfinished set','discard-practice','quiet')}</div>${p.revealed?`<div class="answer-block"><h3>Answer & marking notes</h3><p class="preserve">${esc(q.answer)}</p></div><form id="self-mark"><div class="form-grid">${input('Marks earned','marks','','number',`min="0" max="${q.max}" step="0.25" required`)}${input('Working time (minutes)','minutes',p.timed===false?'0':practiceMinutes(p).toFixed(2),'number','min="0" step="0.01" required')}${select('Confidence after checking','confidence',[1,2,3,4,5],3)}</div><button class="btn primary">Save practice result${p.index<p.ids.length-1?' & continue':''}</button></form>`:''}</section>`;}const sessions=scoped('session');return heading('Focused study','Practise a syllabus topic using your saved questions, then record marks and working time.')+filters()+focusedStudyForm()+`<section class="folio-section"><h2>Session history</h2>${sessions.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Question</th><th>Subject</th><th>Marks</th><th>Time</th></tr></thead><tbody>${[...sessions].reverse().map(s=>`<tr><td>${date(s.date)}</td><td>${esc(questionById(s.questionId)?.title||s.title||'Practice question')}</td><td>${badge(s.subject)}</td><td>${s.marks}/${s.max}</td><td>${mins(s.minutes)}</td></tr>`).join('')}</tbody></table></div>`:empty('Your next focused session starts here.','Add questions to the bank, select a set and begin.','Choose a set','bank')}</section>`;}
+ return heading('Question bank','Find saved questions by paper, topic or difficulty.',button(icon('plus')+' Add question','new-question','primary'))+filters()+`<form id="bank-filters" class="bank-filters">${input('Search questions','search',b.search,'search','placeholder="Search topic, paper code or question…"')}${select('Source','source',[['all','All sources'],['original','Original practice'],['cambridge','Cambridge past paper']],b.source)}${select('Difficulty','difficulty',[['all','All difficulties'],...[1,2,3,4,5].map(n=>[n,n+'/5'])],b.difficulty)}<button class="btn">Search</button></form><div class="table-caption"><span>${questions.length} questions · difficulty is your revision estimate</span>${button(`Practise selected (${state.selected.length})`,'practice-selected','',state.selected.length?'':'disabled')}</div>`+(questions.length?`<div class="table-wrap"><table><thead><tr><th>Select</th><th>Question / source</th><th>Subject & topic</th><th>Challenge</th><th>Last score</th><th></th></tr></thead><tbody>${questions.map(q=>{const latest=all('session').filter(s=>s.questionId===q.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0];return `<tr><td><input type="checkbox" data-select-question="${q.id}" ${state.selected.includes(q.id)?'checked':''} aria-label="Select ${esc(q.title)}"></td><td><strong>${esc(q.title)}</strong><small>${q.level} · ${q.max} marks${q.reference?' · '+esc(q.reference):''}</small><span class="pill">${q.source==='cambridge'?'Cambridge past paper · user supplied':'Original practice'}</span></td><td>${badge(q.subject)}<small>${esc(topicName(q.topic))}</small></td><td>${q.difficulty}/5</td><td>${latest?`${latest.marks}/${latest.max}`:'Unattempted'}</td><td>${button('Open','open-question','quiet','data-id="'+q.id+'"')}${get(q.id)?button('Bookmark','bookmark','quiet','data-id="'+q.id+'"'):''}</td></tr>`;}).join('')}</tbody></table></div>`:studyFolio('No matching questions','Try another paper code, topic, source or difficulty.',button('Add question','new-question','primary')));}
+function practicePage(){const p=state.practice;if(p){const q=questionById(p.ids[p.index]);if(!q)return empty('This question is no longer available.','Clear this unfinished set to choose another question.','Clear unfinished set','discard-practice');if(q.correctOption&&p.mode!=='written')return mcqQuestionPage(p,q);return heading('Try first. Then check your reasoning.',`Question ${p.index+1} of ${p.ids.length} · ${q.source==='original'?'Original practice':'Cambridge reference supplied by you'}`)+`<section class="panel practice-card">${badge(q.subject)}<h2>${esc(q.title)}</h2><p class="small muted">${esc(topicName(q.topic))} · ${q.max} marks · ${q.level}</p><p class="question-prompt preserve">${esc(q.prompt)}</p><div class="button-row">${questionLinks(q,p.revealed)}</div>${fileList(q.files)}<label class="field"><span>Your working (saved with this attempt)</span><textarea id="practice-working" rows="7">${esc(p.working||'')}</textarea></label><div class="split">${p.timed===false?'<span>Untimed practice</span>':`<span class="practice-clock" data-practice-time>${mins(practiceMinutes(p))}</span>`}${button(p.revealed?'Hide answer':'Reveal answer','reveal-answer')}</div><div class="button-row">${get(q.id)?button('Bookmark question','bookmark','quiet',`data-id="${q.id}"`):''}${button('Clear unfinished set','discard-practice','quiet')}</div>${p.revealed?`<div class="answer-block"><h3>Answer & marking notes</h3><p class="preserve">${esc(q.answer)}</p></div><form id="self-mark"><div class="form-grid">${input('Marks earned','marks','','number',`min="0" max="${q.max}" step="0.25" required`)}${input('Working time (minutes)','minutes',p.timed===false?'0':practiceMinutes(p).toFixed(2),'number','min="0" step="0.01" required')}${select('Confidence after checking','confidence',[1,2,3,4,5],3)}</div><button class="btn primary">Save practice result${p.index<p.ids.length-1?' & continue':''}</button></form>`:''}</section>`;}const sessions=scoped('session');return heading('Focused study','Practise a syllabus topic using your saved questions, then record marks and working time.')+filters()+focusedStudyForm()+`<section class="folio-section"><h2>Session history</h2>${sessions.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Question</th><th>Subject</th><th>Marks</th><th>Time</th></tr></thead><tbody>${[...sessions].reverse().map(s=>`<tr><td>${date(s.date)}</td><td>${esc(questionById(s.questionId)?.title||s.title||'Practice question')}</td><td>${badge(s.subject)}</td><td>${s.marks}/${s.max}</td><td>${mins(s.minutes)}</td></tr>`).join('')}</tbody></table></div>`:empty('Your next focused session starts here.','Add questions to the bank, select a set and begin.','Choose a set','bank')}</section>`;}
 async function saveProfile(values){
  const settings=profile();
  return save({...settings,id:settings.id||settingsId(),kind:'settings',...values});
@@ -460,7 +478,7 @@ function setWorkspacePreferences(){
  state.year=profile().year||2027;
  state.level=profile().qualification||'all';
  state.practice=readPracticeDraft();
- if(state.practice){
+ if(state.practice&&!state.practice.test){
   const p=state.practice,q=questionById(p.ids[p.index]),result=get(p.resultId);
   p.startedAt=null;
   if(result&&q?.correctOption)p.feedback={choice:result.working,correct:q.correctOption};
@@ -579,7 +597,7 @@ function questionModal(existing=null){const q=existing||{id:uid(),kind:'question
 function topicModal(id){const t=TOPICS.find(t=>t.id===id),p=all('topic').find(p=>p.topicId===id)||{id:uid(),kind:'topic',topicId:id,subject:t.subject,level:t.level,status:'Not started',confidence:0};dialogContext={record:p};const s=topicStats(id,all('attempt'),all('mistake'),all('session'));modal(esc(topicName(id)),`<p>${SUBJECTS[t.subject].name}${mathsComponent(t)?' · '+esc(mathsComponent(t)):''} · Paper ${t.components.join(' / ')} · ${t.level}</p><div class="form-grid">${select('Completion status','status',['Not started','Learning','Practising','Complete'],p.status)}${select('Self-reported confidence','confidence',[[0,'Not rated'],[1,'1 · Uncertain'],[2,'2 · Developing'],[3,'3 · Getting there'],[4,'4 · Confident'],[5,'5 · Very confident']],p.confidence)}</div><div class="notice subtle">Measured accuracy: ${pct(s.accuracy)} · ${s.attempted} attempts · ${s.lost} marks lost. Changing confidence does not change these results.</div>`,'topic','Save topic progress');}
 function retryModal(id){const m=get(id);if(!m)return;state.retry=id;state.revealed=false;modal(`Retry Q${esc(m.question)}`,`<p>${esc(topicName(m.topic))}</p><p>Try this question again before revealing the correction.</p><p class="preserve">${esc(m.prompt||get(m.questionId)?.prompt)||'Open the original paper and attempt the question shown below. Your previous working is hidden until you reveal the correction.'}</p>${questionLinks(questionById(m.questionId)||{},false)+(get(m.attemptId)?button('Open original paper','retry-paper','','data-id="'+m.attemptId+'"'):'')}${fileList(m.files)}<label class="field"><span>Your retry working</span><textarea id="retry-working" rows="6"></textarea></label><div id="retry-answer"></div>${button('Reveal correction','reveal-correction','primary')}`);}
 function showRetryAnswer(){const m=get(state.retry);if(!m)return;state.revealed=true;$('#retry-answer').innerHTML=`<div class="answer-block"><h3>Previous working</h3><p class="preserve">${esc(m.original)||'No previous working recorded.'}</p><h3>Correct working</h3><p class="preserve">${esc(m.correctAnswer)||'No correct working recorded yet.'}</p><h3>Remember next time</h3><p class="preserve">${esc(m.remember)}</p></div><p>How well did you recall it?</p><div class="button-row">${button('Again · 1 day','review-rating','','data-rating="again"')}${button('Good · next interval','review-rating','primary','data-rating="good"')}${button('Corrected','review-rating','','data-rating="easy"')}</div>`;}
-function updateTimerDisplay(){if(W?.timer){const v=timerValues(W.timer);if($('[data-timer-active]'))$('[data-timer-active]').textContent=timeText(v.activeMs);if($('[data-timer-elapsed]'))$('[data-timer-elapsed]').textContent='Elapsed '+timeText(v.elapsedMs);}for(const e of document.querySelectorAll('[data-countdown]'))e.textContent=countdownText(e.dataset.countdown);if(state.practice&&$('[data-practice-time]'))$('[data-practice-time]').textContent=mins(practiceMinutes(state.practice));}
+function updateTimerDisplay(){const mcqClock=$('[data-mcq-clock]'),p=state.practice;if(mcqClock&&p?.test&&!p.test.submitting){const remaining=Math.max(0,p.test.deadline-Date.now());mcqClock.textContent=timeText(Math.ceil(remaining/1000)*1000)+' remaining';if(!remaining&&!busy)run(()=>gradeMcqTest(p));}if(W?.timer){const v=timerValues(W.timer);if($('[data-timer-active]'))$('[data-timer-active]').textContent=timeText(v.activeMs);if($('[data-timer-elapsed]'))$('[data-timer-elapsed]').textContent='Elapsed '+timeText(v.elapsedMs);}for(const e of document.querySelectorAll('[data-countdown]'))e.textContent=countdownText(e.dataset.countdown);if(state.practice&&$('[data-practice-time]'))$('[data-practice-time]').textContent=mins(practiceMinutes(state.practice));}
 function transferMessage({saved,unchanged,conflicts},verb){
  return saved+' '+verb+', '+unchanged+' already present.'+(conflicts?' '+conflicts+' in Cloud conflicts.':'');
 }
@@ -648,6 +666,28 @@ if(a==='reload'){location.reload();return;}
 if(a==='public-theme'){window.revisionAppearance.set(document.documentElement.dataset.theme==='black'?'blue':'black');return;}
 if(a==='compact-menu'){compact=!compact;render();document.querySelector('[data-action="compact-menu"]')?.focus();return;}
 if(a==='activity-day'){state.activityDate=el.dataset.date;const y=scrollY;render();document.querySelector('[data-date="'+state.activityDate+'"]')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
+if(a==='catalogue-filter'||a==='catalogue-reset'||a==='catalogue-page'){
+ if(a==='catalogue-reset'){state.catalogue={};state.cataloguePage=1;}
+ else if(a==='catalogue-page')state.cataloguePage=Math.max(1,(state.cataloguePage||1)+Number(el.dataset.step));
+ else{
+  const form=$('#catalogue-filters');
+  state.catalogue={...state.catalogue,...Object.fromEntries(new FormData(form)),attempted:form.elements.attempted.checked,[el.dataset.field]:el.dataset.value};
+  state.cataloguePage=1;
+ }
+ render();return;
+}
+if(a==='catalogue-log'){
+ const paper=paperCatalogue.find(item=>paperCode(item)===el.dataset.paper);
+ if(!paper)return;
+ if(W||localStorage.getItem(workspaceKey())){
+  go('log');notify('Your existing draft is open. Finish it before starting a new paper.');return;
+ }
+ if(!activeSubjects().includes(paper.subject)){addSubjectModal();return;}
+ newWizard(null,false,false);
+ Object.assign(W,{subject:paper.subject,level:paper.level==='AS/A2'?(state.level==='A2'?'A2':'AS'):paper.level,
+  paper:paper.paper,series:paper.series,year:paper.year,questionUrl:paper.questionUrl,schemeUrl:paper.schemeUrl});
+ persistDraft();go('log');return;
+}
 if(a==='switch-workspace-tab'||a==='close-workspace-tab'){
  const index=Number(el.dataset.index),tab=state.tabs[index];
  if(!tab)return;
@@ -690,6 +730,20 @@ if(a==='mcq-mistakes'){
  const ids=[...new Set(scoped('mistake').filter(m=>!m.corrected&&questionById(m.questionId)?.correctOption).map(m=>m.questionId))];
  if(ids.length)startPractice(ids,false,'mcq');
  return;
+}
+if(a==='mcq-mode'){state.mcqMode=el.dataset.mode;render();return;}
+if(a==='mcq-test-question'){
+ const p=state.practice;if(!p?.test||p.test.graded)return;
+ const selected=$('#mcq-test-answer input[name=choice]:checked');
+ if(selected)p.test.answers[p.index]=selected.value;
+ p.index=Number(el.dataset.index);savePracticeDraft();render();return;
+}
+if(a==='mcq-test-finish'){
+ const p=state.practice;if(!p?.test)return;
+ if(p.test.graded){state.practice=null;savePracticeDraft();go('mcq');return;}
+ const selected=$('#mcq-test-answer input[name=choice]:checked');
+ if(selected)p.test.answers[p.index]=selected.value;
+ await gradeMcqTest(p);return;
 }
 if(a==='mcq-continue'){
  advancePractice();render();return;
@@ -780,21 +834,21 @@ function mcqPage(){
  const questions=mcqQuestions();
  const subjects=[...new Set(questions.map(q=>q.subject))];
  const topics=[...new Set(questions.map(q=>q.topic))];
+ const mode=state.mcqMode||'practice';
  const papers=[...new Set(questions.map(q=>q.paper).filter(Boolean))];
  const due=new Set(scoped('mistake').filter(m=>!m.corrected).filter(m=>questionById(m.questionId)?.correctOption).map(m=>m.questionId));
  const history=scoped('session').filter(item=>questionById(item.questionId)?.correctOption);
  return heading('Multiple-choice practice','Work from the original paper and check each answer as you go.',link('Question bank','bank'))+filters()+
   '<div class="resource-split"><section class="panel resource-panel"><h2>Start a set</h2><p>'+questions.length+' marked questions · '+subjects.map(code=>esc(SUBJECTS[code].name)).join(', ')+'</p>'+
-  (questions.length?'<form id="mcq-start" class="resource-filters">'+
-   select('Topic','topic',[['','All topics'],...topics.map(id=>[id,topicName(id)])])+
-   select('Full paper','paper',[['','Short set'],...papers])+
-   select('Short set length','count',[5,10,20],5)+select('Timer','timing',[['untimed','Untimed'],['timed','Track time']])+
+  (questions.length?'<div class="button-row">'+[['practice','Practice'],['test','Timed test'],['paper','Real paper']].map(([key,label])=>button(label,'mcq-mode',mode===key?'primary':'quiet','data-mode="'+key+'" aria-pressed="'+(mode===key)+'" '+(key==='paper'&&!papers.length?'disabled':''))).join('')+'</div><form id="mcq-start" class="resource-filters">'+
+   (mode==='paper'?select('Full paper','paper',papers):'<fieldset class="exam-topic-options"><legend>Topics (optional)</legend>'+topics.map(id=>'<label class="checkbox"><input type="checkbox" name="topics" value="'+esc(id)+'"> '+esc(topicName(id))+'</label>').join('')+'</fieldset>'+input('Number of questions','count',Math.min(10,questions.length),'number','min="1" max="'+questions.length+'" required')+(mode==='test'?input('Time limit (minutes)','minutes',20,'number','min="1" max="180" required'):''))+
    '<button class="btn primary">Start MCQ practice</button></form>':'<p>Save a question with an answer letter or choose Physics AS to use the linked paper.</p>')+
   '</section><section class="panel resource-panel"><h2>MCQ corrections</h2><p>'+due.size+' questions to retry.</p>'+
   button('Practise my mistakes','mcq-mistakes','quiet',due.size?'':'disabled')+
   '<h3>Recent answers</h3><ul class="resource-list">'+history.slice(-5).reverse().map(item=>'<li><div><strong>'+esc(item.title)+'</strong><small>'+esc(topicName(item.topic))+'</small></div><strong>'+item.marks+'/'+item.max+'</strong></li>').join('')+'</ul></section></div>';
 }
 function mcqQuestionPage(p,q){
+ if(p.test)return mcqTestPage(p,q);
  const result=p.feedback;
  return heading('Multiple-choice practice','Question '+(p.index+1)+' of '+p.ids.length+' · '+esc(q.reference||q.title))+
  '<section class="panel resource-panel"><h2>'+esc(q.title)+'</h2><p>'+esc(topicName(q.topic))+'</p>'+
@@ -806,6 +860,43 @@ function mcqQuestionPage(p,q){
   '</fieldset><button class="btn primary">Check answer</button></form>')+
  (p.timed?'<p class="small" data-practice-time>'+mins(practiceMinutes(p))+'</p>':'')+
  button('Clear unfinished set','discard-practice','quiet')+'</section>';
+}
+function mcqTestPage(p,q){
+ const test=p.test;
+ if(test.graded){
+  const score=p.ids.reduce((total,id,index)=>total+Number(questionById(id)?.correctOption===test.answers[index]),0);
+  return heading('MCQ test results',score+' / '+p.ids.length+' correct')+
+   '<section class="panel resource-panel"><ol class="resource-list">'+p.ids.map((id,index)=>{
+    const item=questionById(id);
+    return '<li><div><strong>'+esc(item?.reference||item?.title||'Question '+(index+1))+'</strong><small>Your answer '+(test.answers[index]||'—')+
+     ' · Correct '+esc(item?.correctOption||'—')+'</small></div><div class="button-row">'+questionLinks(item||{})+'</div></li>';
+   }).join('')+'</ol>'+button('Back to MCQ practice','mcq-test-finish','primary')+'</section>';
+ }
+ const remaining=Math.ceil(Math.max(0,test.deadline-Date.now())/1000);
+ return heading('MCQ test','Question '+(p.index+1)+' of '+p.ids.length)+
+  '<section class="panel resource-panel"><p data-mcq-clock>'+timeText(remaining*1000)+' remaining</p><div class="button-row">'+p.ids.map((id,index)=>
+   button(String(index+1),'mcq-test-question',p.index===index?'primary':'quiet','data-index="'+index+'" aria-label="Question '+(index+1)+(test.answers[index]?' answered':'')+'"')).join('')+
+  '</div><h2>'+esc(q.title)+'</h2><p>'+esc(q.prompt)+'</p><div class="button-row">'+questionLinks(q,false)+'</div>'+fileList(q.files)+
+  '<form id="mcq-test-answer"><fieldset class="mcq-answers" '+(test.submitting?'disabled':'')+'><legend>Choose your answer</legend>'+[...'ABCD'].map(letter=>
+   '<label><input type="radio" name="choice" value="'+letter+'" '+(test.answers[p.index]===letter?'checked':'')+'> '+letter+'</label>').join('')+
+  '</fieldset></form>'+button(test.submitting?'Retry submitting test':'Submit test','mcq-test-finish','primary')+button('Clear unfinished set','discard-practice','quiet')+'</section>';
+}
+async function gradeMcqTest(p){
+ const test=p.test;
+ test.submitting=true;
+ test.resultIds||=p.ids.map(()=>uid());
+ savePracticeDraft();
+ const index=p.index;
+ try{
+  for(let i=0;i<p.ids.length;i++){
+   p.index=i;p.resultId=test.resultIds[i];
+   const q=questionById(p.ids[i]),choice=test.answers[i]||'';
+   if(q)await savePracticeResult(q,Number(choice===q.correctOption),0,choice===q.correctOption?4:2,choice,false);
+  }
+  test.graded=true;
+ }finally{
+  p.index=index;p.resultId=null;savePracticeDraft();render();
+ }
 }
 function advancePractice(){
  const p=state.practice;
@@ -863,10 +954,10 @@ async function printBuilder(draft,markScheme){
  await Promise.all([...view.document.images].map(image=>image.decode().catch(()=>{})));
  view.print();
 }
-function startPractice(ids,timed=true,mode='mixed'){
+function startPractice(ids,timed=true,mode='mixed',test=null){
  if(!ids.length)return;
  if(state.practice){go('practice');notify('Finish or clear the current practice set before starting another.');return;}
- state.practice={ids:[...ids],index:0,mode,startedAt:timed?Date.now():null,activeMs:0,timed,revealed:false,working:''};
+ state.practice={ids:[...ids],index:0,mode,test,startedAt:timed?Date.now():null,activeMs:0,timed,revealed:false,working:''};
  savePracticeDraft();
  go('practice');
 }
@@ -889,10 +980,12 @@ else if(f.id==='self-mark'){
 }
 else if(f.id==='mcq-start'){
  const d=Object.fromEntries(new FormData(f));
- const pool=mcqQuestions().filter(q=>(d.paper?q.paper===d.paper:!d.topic||q.topic===d.topic));
- const ids=pool.slice(0,d.paper?pool.length:Number(d.count)).map(q=>q.id);
- if(!ids.length)throw new Error('No marked questions match this selection.');
- startPractice(ids,d.timing==='timed','mcq');
+ const topics=new FormData(f).getAll('topics'),mode=state.mcqMode||'practice';
+ const pool=mcqQuestions().filter(q=>d.paper?q.paper===d.paper:!topics.length||topics.includes(q.topic));
+ const count=d.paper?pool.length:Number(d.count);
+ if(!Number.isInteger(count)||count<1||count>pool.length)throw new Error('Choose a count between 1 and '+pool.length+' for these filters.');
+ const limit=d.paper?75:Number(d.minutes);
+ startPractice(pool.slice(0,count).map(q=>q.id),false,'mcq',mode==='practice'?null:{deadline:Date.now()+limit*60000,answers:{}});
 }
 else if(f.id==='mcq-answer'){
  const p=state.practice,q=questionById(p.ids[p.index]),existing=get(p.resultId),choice=existing?.working||new FormData(f).get('choice');
@@ -903,8 +996,18 @@ else if(f.id==='mcq-answer'){
  savePracticeDraft();
  render();
 }
-else if(f.id==='catalogue-filters'){state.catalogue=Object.fromEntries(new FormData(f));render();}
+else if(f.id==='catalogue-filters'){state.catalogue={...state.catalogue,...Object.fromEntries(new FormData(f)),attempted:f.elements.attempted.checked};state.cataloguePage=1;render();}
 else if(f.id==='builder-filters'){state.builder=Object.fromEntries(new FormData(f));render();}
+else if(f.id==='builder-draw'){
+ const count=Number(new FormData(f).get('count')),draft=builderDraft();
+ const pool=matchingBuilderQuestions(viewContext(),availableQuestions()).filter(q=>!draft.ids.includes(q.id));
+ if(!Number.isInteger(count)||count<1||count>100||count>pool.length)throw new Error('There are '+pool.length+' matching questions left to add. Adjust the count or filters.');
+ for(let i=0;i<count;i++){
+  const index=i+Math.floor(Math.random()*(pool.length-i));
+  [pool[i],pool[index]]=[pool[index],pool[i]];
+ }
+ draft.ids.push(...pool.slice(0,count).map(q=>q.id));persistBuilder();render();notify(count+' questions added.');
+}
 else if(f.id==='builder-save'){
  const draft=builderDraft(),title=String(new FormData(f).get('title')||'').trim();
  if(!title||!draft.ids.length)throw new Error('Name the paper and add at least one question.');
@@ -945,7 +1048,8 @@ function calculate(form){
   (source?'<p>'+source+'</p>':'')+(!form.eligible.checked?'<p>Centre confirmation for entry and carry-forward is pending.</p>':'')+'</div>';
 }
 document.addEventListener('change',e=>{const el=e.target;run(async()=>{
-if(el.id==='notebook-grid'){window.revisionAppearance.set(window.revisionAppearance.theme,el.checked);}
+if(el.form?.id==='mcq-test-answer'&&el.checked&&state.practice?.test){state.practice.test.answers[state.practice.index]=el.value;savePracticeDraft();}
+else if(el.id==='notebook-grid'){window.revisionAppearance.set(window.revisionAppearance.theme,el.checked);}
 else if(el.closest('#focused-study')&&el.name==='subject'){state.focusSubject=el.value;const topic=el.form.elements.topic;topic.innerHTML=[['','All topics'],...topicOptions(el.value,false,state.level)].map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');}
 else if(el.id==='dashboard-component'){state.dashboardComponent=el.value;const y=scrollY;render();$('#dashboard-component')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});}
 else if(el.id==='paper-files')await handlePaperFiles([...el.files]);

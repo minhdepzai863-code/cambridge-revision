@@ -35,7 +35,7 @@ The cloud compares each record version in the same transaction as the write or d
 
 ## Paper sources
 
-Paper catalogue links to a curated set of question papers and mark schemes and to Cambridge's subject collections. Exam builder uses the saved question bank and linked catalogue questions. The included 9702/12 May/June 2024 MCQ set uses the published mark scheme. Questions and diagrams from that set are read in the linked source PDF. A printable custom paper includes the saved prompts and references for linked questions.
+Paper catalogue links to 176 question paper and mark-scheme pairs for Cambridge Mathematics, Physics, and Computer Science and to Cambridge's subject collections. Exam builder uses the saved question bank and linked catalogue questions. The included 9702/12 May/June 2024 MCQ set uses the published mark scheme. Questions and diagrams from that set are read in the linked source PDF. A printable custom paper includes the saved prompts and references for linked questions.
 
 ## Setup and verification
 

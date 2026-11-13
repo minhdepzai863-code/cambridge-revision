@@ -25,7 +25,7 @@ function validateRecord(r){
   if(r.kind==='threshold'&&(!['component','qualification'].includes(r.scope)||!object(r.values)||validateThreshold(r)))throw Error('The backup contains invalid thresholds or source links.');
   if(r.kind==='exam'&&(!/^\d{2}$/.test(r.paper)||!COMPONENTS[r.subject]?.[r.paper[0]]||!numeric(r.duration,1)||!Number.isFinite(Date.parse(r.datetime))))throw Error('The backup contains an invalid examination date or component.');
   if(r.kind==='settings'){
-    if(r.customPapers!==undefined&&(!Array.isArray(r.customPapers)||r.customPapers.some(p=>!object(p)||!isRecordId(p.id)||!textWithin(p.title,120)||!Array.isArray(p.ids)||p.ids.some(id=>!isRecordId(id)&&!/^9702-s24-12-q(?:[1-9]|[1-3][0-9]|40)$/.test(id)))))throw Error('The backup contains an invalid custom paper.');
+    if(r.customPapers!==undefined&&(!Array.isArray(r.customPapers)||r.customPapers.some(p=>!object(p)||!isRecordId(p.id)||!textWithin(p.title,120)||!Array.isArray(p.ids)||p.ids.some(id=>!isRecordId(id)&&!/^(?:9702-s24-12-q(?:[1-9]|[1-3][0-9]|40)|9709-s24-11-q[1-6])$/.test(id)))))throw Error('The backup contains an invalid custom paper.');
     if(r.syllabusPlans!==undefined&&(!Array.isArray(r.syllabusPlans)||r.syllabusPlans.some(p=>!object(p)||!isRecordId(p.id)||!Object.hasOwn(SUBJECTS,p.subject)||!['AS','A2'].includes(p.level)||!day(p.finish))))throw Error('The backup contains an invalid syllabus plan.');
     if(r.subjects!==undefined&&(!Array.isArray(r.subjects)||r.subjects.some(s=>!Object.hasOwn(SUBJECTS,s))))throw Error('The backup contains an invalid subject selection.');
     if(r.year!==undefined&&![2026,2027].includes(+r.year))throw Error('The backup contains an unsupported syllabus year.');

@@ -144,7 +144,7 @@ test('mobile menu closes with Escape, returns focus and navigates without page o
  await page.keyboard.press('Escape');
  assert.equal(await toggle.evaluate(el=>el===document.activeElement),true);
  await toggle.click();
- await menu.getByText('Practice',{exact:true}).click();
+
  await menu.getByRole('button',{name:'Past papers'}).click();
  await page.waitForURL('**/workspace#papers');
  assert.equal(await menu.count(),0);
@@ -311,4 +311,39 @@ test('copy resumes after an interruption and keeps a subsequently edited cloud r
  assert.equal(remote.get(ids[0]).payload.duration,120);
  await copy();
  await page.getByText('0 copied, 1 already present. 1 in Cloud conflicts.').waitFor();
+});
+
+
+test('Past papers opens the catalogue, filters paired PDFs, and keeps saved attempts accessible',async t=>{
+ const page=await localPage(t);
+ await page.goto(origin+'/workspace#papers');
+ await page.getByRole('heading',{name:'Find a paper',exact:true}).waitFor();
+ await page.getByLabel('Search papers').fill('9709/12/F/M/25');
+ await page.getByRole('button',{name:'Filter papers'}).click();
+ const row=page.getByRole('row').filter({hasText:'9709/12/F/M/25'});
+ await row.getByRole('link',{name:'Question paper 9709/12/F/M/25'}).waitFor();
+ assert.match(await row.getByRole('link',{name:'Mark scheme 9709/12/F/M/25'}).getAttribute('href'),/9709_m25_ms_12\.pdf$/);
+ await page.getByRole('navigation',{name:'Paper tools'}).getByRole('button',{name:/Saved attempts/}).click();
+ await page.waitForURL('**/workspace#saved-papers');
+ await page.getByRole('navigation',{name:'Open workspace tabs'}).getByRole('button',{name:'Past papers',exact:true}).click();
+ await row.getByRole('button',{name:'Log 9709/12/F/M/25'}).click();
+ await page.waitForURL('**/workspace#log');
+ await page.getByRole('link',{name:'Mark scheme',exact:true}).waitFor();
+});
+
+test('timed MCQ tests keep choices through reload and reveal answers only after submission',async t=>{
+ const page=await localPage(t);
+ await page.goto(origin+'/workspace#mcq');
+ await page.getByRole('button',{name:'Timed test',exact:true}).click();
+ await page.getByLabel('Number of questions').fill('2');
+ await page.getByRole('button',{name:'Start MCQ practice'}).click();
+ await page.getByRole('radio',{name:'C',exact:true}).check();
+ await page.getByRole('button',{name:'Question 2',exact:true}).click();
+ await page.getByRole('radio',{name:'D',exact:true}).check();
+ await page.reload();
+ assert.equal(await page.getByRole('radio',{name:'D',exact:true}).isChecked(),true);
+ assert.equal(await page.getByRole('link',{name:'Mark scheme',exact:true}).count(),0);
+ await page.getByRole('button',{name:'Submit test',exact:true}).click();
+ await page.getByRole('heading',{name:'MCQ test results'}).waitFor();
+ await page.getByText('2 / 2 correct').waitFor();
 });

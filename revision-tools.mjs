@@ -5,14 +5,23 @@ const archive='https://pastpapers.papacambridge.com/directories/CAIE/CAIE-pastpa
 const official='https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-international-as-and-a-level-';
 const slugs={'9709':'mathematics','9702':'physics','9618':'computer-science','9231':'mathematics-further','9701':'chemistry','9700':'biology'};
 export const officialPapers=subject=>official+slugs[subject]+'-'+subject+'/past-papers/';
-export const paperCatalogue=[
- ['9709','11'],['9709','12'],['9702','12'],['9702','22'],['9618','12'],['9618','22']
-].map(([subject,paper])=>{
- const id=subject+'_s24_', info=COMPONENTS[subject][paper[0]];
- return {subject,paper,series:'s',year:2024,level:'AS',label:info[0],max:info[1],
+const paperIndex=[["9702",2025,"m","12 22 33 42 52"],
+ ["9702",2025,"s","11 12 13 14 21 22 23 24 31 32 33 34 35 37 38 41 42 43 44 51 52 53 54"],
+ ["9702",2024,"s","11 12 13 21 22 23 31 32 33 34 35 41 42 43 51 52 53"],
+ ["9709",2025,"m","12 22 32 42 52 62"],
+ ["9709",2025,"s","11 12 13 15 21 22 23 25 31 32 33 35 41 42 43 45 51 52 53 55 61 62 63 65"],
+ ["9709",2024,"s","11 12 13 21 22 23 31 32 33 41 42 43 51 52 53 61 62 63"],
+ ["9618",2024,"s","11 12 13 21 22 23 31 32 33 41 42 43"],
+ ["9618",2025,"s","11 12 13 21 22 23 31 32 33 41 42 43"],
+ ["9618",2025,"w","11 12 13 21 22 23 31 32 33 41 42 43"],
+ ["9702",2025,"w","11 12 13 14 21 22 23 24 31 33 34 35 36 37 38 41 42 43 44 51 52 53 54"],
+ ["9709",2025,"w","11 12 13 15 21 22 23 25 31 32 33 35 41 42 43 45 51 52 53 55 61 62 63 65"]];
+export const paperCatalogue=paperIndex.flatMap(([subject,year,series,components])=>components.split(' ').map(paper=>{
+ const id=subject+'_'+series+String(year).slice(-2)+'_',info=COMPONENTS[subject][paper[0]];
+ return {subject,paper,series,year,level:info[3],label:info[0],max:info[1],
   questionUrl:archive+id+'qp_'+paper+'.pdf',schemeUrl:archive+id+'ms_'+paper+'.pdf'};
-});
-const physicsPaper=paperCatalogue.find(paper=>paper.subject==='9702'&&paper.paper==='12');
+}));
+const physicsPaper=paperCatalogue.find(paper=>paper.subject==='9702'&&paper.paper==='12'&&paper.year===2024&&paper.series==='s');
 // May/June 2024 9702/12. Each entry points to the original question and the published key.
 const physicsTopics=[
  '1.4','1.3','2.1','2.1','2.1','2.1','3.3','3.3','3.3','3.3',
@@ -22,13 +31,31 @@ const physicsTopics=[
 ];
 const physicsPages=[3,3,3,3,4,4,5,5,5,6,6,7,7,7,8,8,8,9,9,10,10,11,11,12,12,12,12,13,13,13,14,14,14,14,15,15,15,16,16,16];
 const physicsKey=['CDADBB','CACABC','DCDABC','CDCDBB','CADDAC','DCBADA','BDCC'].join('');
-export const catalogQuestions=physicsTopics.map((topic,index)=>({
+const physicsQuestions=physicsTopics.map((topic,index)=>({
  id:'9702-s24-12-q'+(index+1),kind:'question',subject:'9702',level:'AS',source:'cambridge',
  reference:paperCode(physicsPaper)+' Q'+(index+1),title:'Question '+(index+1),topic:'9702:'+topic,max:1,
  prompt:'Open the question paper at page '+physicsPages[index]+' and work through question '+(index+1)+'.',
  questionUrl:physicsPaper.questionUrl+'#page='+physicsPages[index],
  schemeUrl:physicsPaper.schemeUrl+'#page='+(index<28?2:3),correctOption:physicsKey[index],paper:paperCode(physicsPaper)
 }));
+
+// Written questions are linked to the relevant pages of both original documents.
+const writtenQuestions=[
+ ['9709','11','1','1.1','Completing the square and solving a quartic',5,2,6],
+ ['9709','11','2','1.2','Transformations of a sine graph',5,3,7],
+ ['9709','11','3','1.6','Binomial coefficients',5,4,7],
+ ['9709','11','4','1.7','Estimating a gradient from a table',3,5,8],
+ ['9709','11','5','1.5','Trigonometric identity and equation',6,6,9],
+ ['9709','11','6','1.2','Inverse function and its graph',8,7,9],
+].map(([subject,component,number,topic,title,max,qp,ms])=>{
+ const paper=paperCatalogue.find(p=>p.subject===subject&&p.paper===component&&p.year===2024&&p.series==='s');
+ return {id:subject+'-s24-'+component+'-q'+number,kind:'question',subject,level:'AS',source:'cambridge',
+  reference:paperCode(paper)+' Q'+number,title,topic:subject+':'+topic,max,
+  prompt:'Use the linked question paper to complete question '+number+'.',
+  answer:'Check your working against the published mark scheme.',
+  questionUrl:paper.questionUrl+'#page='+qp,schemeUrl:paper.schemeUrl+'#page='+ms};
+});
+export const catalogQuestions=[...physicsQuestions,...writtenQuestions];
 
 export function topicQuestionIds(questions,mistakes,topic,today=localDate()){
  const due=new Set(mistakes.filter(m=>!m.corrected&&(!m.retryDate||m.retryDate<=today)).map(m=>m.questionId));
@@ -81,39 +108,77 @@ export function resourceLinks(q){
 }
 
 export function catalogueView(c){
- const {state,esc,input,select,button,heading,link,activeSubjects}=c;
- const filters=state.catalogue||{},subjects=activeSubjects();
- const papers=paperCatalogue.filter(p=>subjects.includes(p.subject)&&(!filters.subject||p.subject===filters.subject)&&
-  (!filters.search||[paperCode(p),p.label,SUBJECTS[p.subject].name,SERIES[p.series],p.year].join(' ').toLowerCase().includes(filters.search.toLowerCase())));
- const links=p=>resourceLinks(p).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('');
- return heading('Find a past paper','Open the question paper and mark scheme for the same component.',link('Saved attempts','papers'))+
-  '<section class="panel resource-panel"><form id="catalogue-filters" class="resource-filters">'+
-  input('Search papers','search',filters.search,'search','placeholder="9702 or 9709/11"')+
-  select('Subject','subject',[['','All subjects'],...subjects.map(code=>[code,SUBJECTS[code].name+' ('+code+')'])],filters.subject)+
-  '<button class="btn">Filter papers</button></form>'+
-  '<div class="table-wrap"><table><thead><tr><th>Paper</th><th>Series</th><th>Marks</th><th>Files</th></tr></thead><tbody>'+
-  papers.map(p=>'<tr><td><strong>'+esc(paperCode(p))+'</strong><small>'+esc(SUBJECTS[p.subject].name+' · '+p.label)+'</small></td><td>'+SERIES[p.series]+' '+p.year+'</td><td>'+p.max+'</td><td>'+links(p)+'</td></tr>').join('')+
-  '</tbody></table></div>'+(papers.length?'':'<p>No papers match these filters.</p>')+'</section>'+
+ const {state,esc,input,select,button,all,pct}=c;
+ const filters=state.catalogue||{};
+ const subjects=Object.keys(SUBJECTS);
+ const attempts=new Map();
+ for(const attempt of all('attempt')){
+  const code=paperCode(attempt);
+  if(!attempts.has(code))attempts.set(code,[]);
+  attempts.get(code).push(attempt);
+ }
+ const search=(filters.search||'').trim().toLowerCase();
+ const papers=paperCatalogue.filter(p=>{
+  const code=paperCode(p);
+  return (!filters.subject||p.subject===filters.subject)&&(!filters.year||String(p.year)===filters.year)&&
+   (!filters.series||p.series===filters.series)&&(!filters.part||p.paper[0]===filters.part)&&
+   (!filters.variant||p.paper[1]===filters.variant)&&(!filters.stage||p.level===filters.stage||p.level==='AS/A2')&&
+   (!filters.attempted||attempts.has(code))&&
+   (!search||[code,p.label,SUBJECTS[p.subject].name,SERIES[p.series],p.year].join(' ').toLowerCase().includes(search));
+ }).sort((a,b)=>(filters.sort==='oldest'?1:-1)*(a.year-b.year||a.series.localeCompare(b.series))||a.subject.localeCompare(b.subject)||a.paper.localeCompare(b.paper));
+ const size=25, pageCount=Math.max(1,Math.ceil(papers.length/size)),page=Math.min(state.cataloguePage||1,pageCount);
+ const options=(label,items)=>[['',label],...items];
+ const chips=(label,field,items)=>'<fieldset class="catalogue-chips"><legend>'+label+'</legend><div>'+
+  [['','All'],...items].map(([value,text])=>button(esc(text),'catalogue-filter','quiet',
+   'data-field="'+field+'" data-value="'+value+'" aria-pressed="'+((filters[field]||'')===String(value))+'"')).join('')+
+  '</div></fieldset>';
+ return '<section class="panel resource-panel"><h2>Find a paper</h2><form id="catalogue-filters" class="resource-filters">'+
+  input('Search papers','search',filters.search,'search','placeholder="9702, 9709/11 or Pure Mathematics"')+
+  select('Subject','subject',options('All subjects',subjects.map(code=>[code,SUBJECTS[code].name+' ('+code+')'])),filters.subject)+
+  select('Stage','stage',options('AS + A2',['AS','A2']),filters.stage)+
+  select('Sort by','sort',[['newest','Newest paper first'],['oldest','Oldest paper first']],filters.sort)+
+  '<label class="checkbox"><input type="checkbox" name="attempted" '+(filters.attempted?'checked':'')+'> Attempted only</label>'+
+  '<button class="btn">Filter papers</button>'+button('Clear filters','catalogue-reset','quiet')+'</form>'+
+  chips('Year','year',[...new Set(paperCatalogue.map(p=>p.year))].sort((a,b)=>b-a).map(y=>[y,y]))+
+  chips('Season','series',[['m','F/M'],['s','M/J'],['w','O/N']])+
+  chips('Paper','part',[1,2,3,4,5,6].map(n=>[n,'P'+n]))+
+  chips('Variant','variant',[1,2,3,4,5,6,7,8].map(n=>[n,'V'+n]))+
+  '<div class="section-heading"><p>'+(papers.length?'Showing '+((page-1)*size+1)+'–'+Math.min(page*size,papers.length)+' of '+papers.length+' papers':'No papers match these filters.')+'</p>'+
+  '<div class="button-row">'+button('Previous','catalogue-page','quiet','data-step="-1" '+(page<=1?'disabled':''))+
+  button('Next','catalogue-page','quiet','data-step="1" '+(page>=pageCount?'disabled':''))+'</div></div>'+
+  '<div class="table-wrap"><table><thead><tr><th>Paper</th><th>Stage</th><th>Marks</th><th>Attempts</th><th>Best full score</th><th>Files</th><th></th></tr></thead><tbody>'+
+  papers.slice((page-1)*size,page*size).map(p=>{
+   const code=paperCode(p),logged=attempts.get(code)||[],scores=logged.filter(a=>a.scope!=='partial'&&Number(a.max)>0).map(a=>100*a.marks/a.max);
+   const links=resourceLinks(p).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener" aria-label="'+label+' '+code+'">'+(label==='Question paper'?'QP':'MS')+'</a>').join(' ');
+   return '<tr><td><strong>'+esc(code)+'</strong><small>'+esc(SUBJECTS[p.subject].name+' · '+p.label+' · '+SERIES[p.series]+' '+p.year)+'</small></td>'+
+    '<td>'+p.level+'</td><td>'+p.max+'</td><td>'+logged.length+'</td><td>'+(scores.length?pct(Math.max(...scores)):'—')+
+    '</td><td><div class="catalogue-files">'+links+'</div></td><td>'+button('Log','catalogue-log','quiet','data-paper="'+esc(code)+'" aria-label="Log '+code+'"')+'</td></tr>';
+  }).join('')+'</tbody></table></div></section>'+
   '<section class="panel resource-panel"><h2>Official Cambridge paper collections</h2><div class="button-row">'+subjects.map(code=>'<a class="btn quiet" href="'+officialPapers(code)+'" target="_blank" rel="noopener">'+esc(SUBJECTS[code].name)+'</a>').join('')+'</div></section>';
+}
+
+export function matchingBuilderQuestions(c,questions){
+ const {state,topicName}=c,filter=state.builder||{};
+ const search=(filter.search||'').trim().toLowerCase();
+ return questions.filter(q=>(!filter.topic||q.topic===filter.topic)&&(!filter.subject||q.subject===filter.subject)&&
+  (!search||[q.title,q.prompt,q.reference,topicName(q.topic)].join(' ').toLowerCase().includes(search)));
 }
 
 export function builderView(c,questions,draft){
  const {state,esc,input,select,button,heading,topicName}=c, filter=state.builder||{};
  const selected=draft.ids.map(id=>questions.find(q=>q.id===id)).filter(Boolean);
- const search=(filter.search||'').trim().toLowerCase();
- const matches=questions.filter(q=>(!filter.topic||q.topic===filter.topic)&&(!filter.subject||q.subject===filter.subject)&&
-  (!search||[q.title,q.prompt,q.reference,topicName(q.topic)].join(' ').toLowerCase().includes(search)));
+ const matches=matchingBuilderQuestions(c,questions);
  const rows=matches.map(q=>{
   const included=draft.ids.includes(q.id);
   return '<li><div><strong>'+esc(q.title)+'</strong><small>'+esc(q.reference||SUBJECTS[q.subject].name)+' · '+esc(topicName(q.topic))+' · '+q.max+' marks</small></div>'+
-   button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
+   '<details class="builder-preview"><summary>Preview question</summary><p class="preserve">'+esc(q.prompt)+'</p><div class="button-row">'+resourceLinks(q).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('')+'</div></details>'+button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
  }).join('');
  return heading('Exam builder','Build and sit a paper using questions from your bank and the linked Cambridge catalogue.')+
   '<div class="resource-split"><section class="panel resource-panel"><h2>Choose questions</h2><form class="resource-filters" id="builder-filters">'+
   input('Search questions','search',filter.search,'search')+
   select('Subject','subject',[['','All subjects'],...c.activeSubjects().map(code=>[code,SUBJECTS[code].name])],filter.subject)+
   select('Topic','topic',[['','All topics'],...TOPICS.filter(t=>questions.some(q=>q.topic===t.id)&&(!filter.subject||t.subject===filter.subject)).map(t=>[t.id,SUBJECTS[t.subject].name+' · '+t.title])],filter.topic)+
-  '<button class="btn">Filter questions</button></form><ul class="resource-list">'+rows+'</ul>'+(rows?'':'<p>No matching questions. Add questions to your bank or change the filters.</p>')+
+  '<button class="btn">Filter questions</button></form><form id="builder-draw" class="resource-filters">'+input('Number of questions','count',5,'number','min="1" max="100" required')+'<button class="btn" '+(matches.length?'':'disabled')+'>Draw from matching questions</button></form><ul class="resource-list">'+rows+'</ul>'+(rows?'':'<p>No matching questions. Add questions to your bank or change the filters.</p>')+
   '</section><section class="panel resource-panel"><h2>Your paper</h2><p>'+selected.length+' questions · '+selected.reduce((n,q)=>n+Number(q.max),0)+' marks</p>'+
   '<form id="builder-save" class="resource-filters">'+input('Paper title','title',draft.title,'text','required maxlength="120"')+
   '<button class="btn" '+(selected.length?'':'disabled')+'>Save paper</button></form><ol class="resource-list">'+selected.map((q,index)=>
