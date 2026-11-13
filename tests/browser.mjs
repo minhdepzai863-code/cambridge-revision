@@ -334,6 +334,9 @@ test('Past papers opens the catalogue, filters paired PDFs, and keeps saved atte
 test('timed MCQ tests keep choices through reload and reveal answers only after submission',async t=>{
  const page=await localPage(t);
  await page.goto(origin+'/workspace#mcq');
+ await page.locator('#mcq-filters [name=subject]').selectOption('9702');
+ await page.locator('#mcq-filters [name=stage]').selectOption('AS');
+ assert.match(await page.locator('#main').innerText(),/selectable MCQs in Physics AS/);
  await page.getByRole('button',{name:'Timed test',exact:true}).click();
  await page.getByLabel('Number of questions').fill('2');
  await page.getByRole('button',{name:'Start MCQ practice'}).click();
@@ -346,4 +349,37 @@ test('timed MCQ tests keep choices through reload and reveal answers only after 
  await page.getByRole('button',{name:'Submit test',exact:true}).click();
  await page.getByRole('heading',{name:'MCQ test results'}).waitFor();
  await page.getByText('2 / 2 correct').waitFor();
+});
+
+
+test('Topical uses chapter filters and shows original questions and schemes before adding to a mock',async t=>{
+ const page=await localPage(t);
+ await page.goto(origin+'/workspace#bank');
+ await page.getByRole('heading',{name:'Topical questions'}).waitFor();
+ await page.locator('#topical-filters [name=chapter]').selectOption('2');
+ await page.getByRole('img',{name:/Original question for 9702/}).first().waitFor();
+ assert.equal(await page.locator('.source-question').first().evaluate(img=>img.complete&&img.naturalWidth>0),true);
+ await page.getByRole('button',{name:'Show mark scheme',exact:true}).click();
+ await page.getByRole('img',{name:/Mark scheme for 9702/}).first().waitFor();
+ await page.getByRole('button',{name:'Add to exam',exact:true}).click();
+ await page.getByRole('navigation',{name:'Paper tools'}).getByRole('button',{name:/Exam builder/}).click();
+ await page.getByRole('button',{name:'Remove question 1'}).waitFor();
+});
+
+
+test('catalogue opens Computer Science questions with subject-specific topics and all source pages',async t=>{
+ const page=await localPage(t);
+ await page.goto(origin+'/workspace#papers');
+ await page.getByLabel('Search papers').fill('9618/12/M/J/24');
+ await page.getByRole('button',{name:'Filter papers'}).click();
+ await page.getByRole('button',{name:'Questions for 9618/12/M/J/24'}).click();
+ await page.getByRole('heading',{name:'Topical questions'}).waitFor();
+ assert.equal(await page.locator('#topical-filters [name=subject]').inputValue(),'9618');
+ await page.locator('#topical-filters [name=search]').fill('');
+ await page.locator('#topical-filters [name=chapter]').selectOption('8');
+ const preview=page.locator('.topical-preview');
+ await preview.getByRole('heading',{name:'Relational database design'}).waitFor();
+ assert.equal(await preview.getByRole('img',{name:/Original question/}).count(),2);
+ await preview.getByRole('button',{name:'Show mark scheme'}).click();
+ await preview.getByRole('img',{name:/Mark scheme/}).waitFor();
 });

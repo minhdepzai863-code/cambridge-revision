@@ -47,6 +47,10 @@ const writtenQuestions=[
  ['9709','11','4','1.7','Estimating a gradient from a table',3,5,8],
  ['9709','11','5','1.5','Trigonometric identity and equation',6,6,9],
  ['9709','11','6','1.2','Inverse function and its graph',8,7,9],
+ ['9618','12','1','3.2','Logic gates and circuit design',6,2,3],
+ ['9618','12','4','8.1','Relational database design',11,7,7],
+ ['9618','12','6','5.1','Operating system management',4,13,9],
+ ['9618','12','7','1.1','Binary and hexadecimal representation',6,14,10],
 ].map(([subject,component,number,topic,title,max,qp,ms])=>{
  const paper=paperCatalogue.find(p=>p.subject===subject&&p.paper===component&&p.year===2024&&p.series==='s');
  return {id:subject+'-s24-'+component+'-q'+number,kind:'question',subject,level:'AS',source:'cambridge',
@@ -133,6 +137,8 @@ export function catalogueView(c){
    'data-field="'+field+'" data-value="'+value+'" aria-pressed="'+((filters[field]||'')===String(value))+'"')).join('')+
   '</div></fieldset>';
  return '<section class="panel resource-panel"><h2>Find a paper</h2><form id="catalogue-filters" class="resource-filters">'+
+  select('Exam board','board',[['cambridge','Cambridge International']],'cambridge')+
+  select('Qualification','qualification',[['alevel','AS & A Level']],'alevel')+
   input('Search papers','search',filters.search,'search','placeholder="9702, 9709/11 or Pure Mathematics"')+
   select('Subject','subject',options('All subjects',subjects.map(code=>[code,SUBJECTS[code].name+' ('+code+')'])),filters.subject)+
   select('Stage','stage',options('AS + A2',['AS','A2']),filters.stage)+
@@ -152,7 +158,7 @@ export function catalogueView(c){
    const links=resourceLinks(p).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener" aria-label="'+label+' '+code+'">'+(label==='Question paper'?'QP':'MS')+'</a>').join(' ');
    return '<tr><td><strong>'+esc(code)+'</strong><small>'+esc(SUBJECTS[p.subject].name+' · '+p.label+' · '+SERIES[p.series]+' '+p.year)+'</small></td>'+
     '<td>'+p.level+'</td><td>'+p.max+'</td><td>'+logged.length+'</td><td>'+(scores.length?pct(Math.max(...scores)):'—')+
-    '</td><td><div class="catalogue-files">'+links+'</div></td><td>'+button('Log','catalogue-log','quiet','data-paper="'+esc(code)+'" aria-label="Log '+code+'"')+'</td></tr>';
+    '</td><td><div class="catalogue-files">'+links+'</div></td><td>'+ (catalogQuestions.some(q=>q.reference.startsWith(code+' Q'))?button('Questions','catalogue-questions','quiet','data-paper="'+esc(code)+'" data-syllabus="'+p.subject+'" aria-label="Questions for '+esc(code)+'"'):'')+button('Log','catalogue-log','quiet','data-paper="'+esc(code)+'" aria-label="Log '+code+'"')+'</td></tr>';
   }).join('')+'</tbody></table></div></section>'+
   '<section class="panel resource-panel"><h2>Official Cambridge paper collections</h2><div class="button-row">'+subjects.map(code=>'<a class="btn quiet" href="'+officialPapers(code)+'" target="_blank" rel="noopener">'+esc(SUBJECTS[code].name)+'</a>').join('')+'</div></section>';
 }
@@ -171,7 +177,7 @@ export function builderView(c,questions,draft){
  const rows=matches.map(q=>{
   const included=draft.ids.includes(q.id);
   return '<li><div><strong>'+esc(q.title)+'</strong><small>'+esc(q.reference||SUBJECTS[q.subject].name)+' · '+esc(topicName(q.topic))+' · '+q.max+' marks</small></div>'+
-   '<details class="builder-preview"><summary>Preview question</summary><p class="preserve">'+esc(q.prompt)+'</p><div class="button-row">'+resourceLinks(q).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('')+'</div></details>'+button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
+   '<details class="builder-preview"><summary>Preview question</summary><p class="preserve">'+esc(q.prompt)+'</p>'+c.sourcePreview(q,false,esc)+'<details><summary>Show mark scheme</summary>'+(c.sourcePreview(q,true,esc)||'<p>'+esc(q.answer||q.correctOption||'See the source mark scheme.')+'</p>')+'</details><div class="button-row">'+resourceLinks(q).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('')+'</div></details>'+button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
  }).join('');
  return heading('Exam builder','Build and sit a paper using questions from your bank and the linked Cambridge catalogue.')+
   '<div class="resource-split"><section class="panel resource-panel"><h2>Choose questions</h2><form class="resource-filters" id="builder-filters">'+
