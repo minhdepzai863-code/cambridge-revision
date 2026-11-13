@@ -347,3 +347,18 @@ test('timed MCQ tests keep choices through reload and reveal answers only after 
  await page.getByRole('heading',{name:'MCQ test results'}).waitFor();
  await page.getByText('2 / 2 correct').waitFor();
 });
+
+
+test('Topical uses chapter filters and shows original questions and schemes before adding to a mock',async t=>{
+ const page=await localPage(t);
+ await page.goto(origin+'/workspace#bank');
+ await page.getByRole('heading',{name:'Topical questions'}).waitFor();
+ await page.locator('#topical-filters [name=chapter]').selectOption('2');
+ await page.getByRole('img',{name:/Original question for 9702/}).first().waitFor();
+ assert.equal(await page.locator('.source-question').first().evaluate(img=>img.complete&&img.naturalWidth>0),true);
+ await page.getByRole('button',{name:'Show mark scheme',exact:true}).click();
+ await page.getByRole('img',{name:/Mark scheme for 9702/}).first().waitFor();
+ await page.getByRole('button',{name:'Add to exam',exact:true}).click();
+ await page.getByRole('navigation',{name:'Paper tools'}).getByRole('button',{name:/Exam builder/}).click();
+ await page.getByRole('button',{name:'Remove question 1'}).waitFor();
+});

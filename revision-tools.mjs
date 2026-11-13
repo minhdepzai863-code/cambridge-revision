@@ -171,7 +171,7 @@ export function builderView(c,questions,draft){
  const rows=matches.map(q=>{
   const included=draft.ids.includes(q.id);
   return '<li><div><strong>'+esc(q.title)+'</strong><small>'+esc(q.reference||SUBJECTS[q.subject].name)+' · '+esc(topicName(q.topic))+' · '+q.max+' marks</small></div>'+
-   '<details class="builder-preview"><summary>Preview question</summary><p class="preserve">'+esc(q.prompt)+'</p><div class="button-row">'+resourceLinks(q).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('')+'</div></details>'+button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
+   '<details class="builder-preview"><summary>Preview question</summary><p class="preserve">'+esc(q.prompt)+'</p>'+c.sourcePreview(q,false,esc)+'<div class="button-row">'+resourceLinks(q).map(([label,href])=>'<a class="btn quiet" href="'+esc(href)+'" target="_blank" rel="noopener">'+label+'</a>').join('')+'</div></details>'+button(included?'Added':'Add question','builder-add','quiet','data-id="'+q.id+'" '+(included?'disabled':''))+'</li>';
  }).join('');
  return heading('Exam builder','Build and sit a paper using questions from your bank and the linked Cambridge catalogue.')+
   '<div class="resource-split"><section class="panel resource-panel"><h2>Choose questions</h2><form class="resource-filters" id="builder-filters">'+
