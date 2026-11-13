@@ -70,7 +70,7 @@ function examDocket(c, exam, examCount) {
 }
 
 function revisionFocus(c, mistakes, due, weak) {
- const {esc,link,pct,dueBookmarks}=c;
+ const {esc,link,pct,dueBookmarks,button}=c;
  const dueCount=due.length+dueBookmarks;
  const dueParts=[due.length?amount(due.length,'correction'):'',dueBookmarks?amount(dueBookmarks,'saved question'):''].filter(Boolean);
  return `<aside class="desk-focus" aria-labelledby="desk-focus-title">
@@ -82,7 +82,7 @@ function revisionFocus(c, mistakes, due, weak) {
   </div>
   <div class="desk-weak">
    <h3>Topics costing marks</h3>
-   ${weak.length?`<ol class="desk-topic-list">${weak.map(t=>`<li><div><strong>${esc(t.title)}</strong><small>${esc(SUBJECTS[t.subject].name)} <span>§ ${esc(t.code)}</span></small></div><div><strong>${t.lost} lost</strong><small>${pct(t.accuracy)} accuracy</small></div></li>`).join('')}</ol>`:'<p>Tag question marks with syllabus topics to see where you’re losing marks.</p>'}
+   ${weak.length?`<ol class="desk-topic-list">${weak.map(t=>`<li><div><strong>${esc(t.title)}</strong><small>${esc(SUBJECTS[t.subject].name)} <span>§ ${esc(t.code)}</span></small></div><div><strong>${t.lost} lost</strong><small>${pct(t.accuracy)} accuracy</small></div>${button('Practise this topic','practise-topic','quiet','data-topic="'+t.id+'"')}</li>`).join('')}</ol>`:'<p>Tag question marks with syllabus topics to see where you’re losing marks.</p>'}
    ${weak.length?link('Topic analysis','analytics'):link('Browse syllabus','syllabus')}
   </div>
  </aside>`;

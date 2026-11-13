@@ -4,7 +4,7 @@ import {resolve, extname, sep} from 'node:path';
 import {gzip} from 'node:zlib';
 import {promisify} from 'node:util';
 
-const root = resolve(process.cwd());
+const root = resolve(process.argv[2] || process.cwd());
 const port = Number(process.env.PORT || 4173);
 const appRoutes = new Set(['/','/login','/signup','/forgot-password','/reset-password','/dashboard','/workspace']);
 const types = {
